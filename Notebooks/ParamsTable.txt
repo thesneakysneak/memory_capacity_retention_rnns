@@ -1,0 +1,86 @@
+    +-----------------------------+----------------------------------------------------------------------+
+    | case_type                   | Two cases exist.                                                     |
+    |                             | 1 Unique results per sequence.                                       |
+    |                             | e.g. pattern [0,1,1], [0,1,0] -> [0,1,1]                             |
+    |                             | and random input [0,1,0], [0,1,0] -> [0,1,0]                         |
+    |                             | but may never be [0,1,1]                                             |
+    |                             |                                                                      |
+    |                             | 2 Multiple sequences however the same output will                    |
+    |                             | be the result of random patterns                                     |
+    |                             | e.g. pattern [0,1,1], [0,1,0] -> [0,1,1]                             |
+    |                             | and random input [0,1,0], [0,1,0] -> [0,1,1]                         |
+    +-----------------------------+----------------------------------------------------------------------+
+    | num_input                   | Number of input neurons e.g. [0, 0, 0] would be 3                    |
+    +-----------------------------+----------------------------------------------------------------------+
+    | num_output                  | Number of output neurons e.g. [0, 0, 0] would be 3                   |
+    +-----------------------------+----------------------------------------------------------------------+
+    | num_patterns_to_recall      | Number of unique patterns that are required to be recalled           |
+    |                             | by the NN                                                            |
+    +-----------------------------+----------------------------------------------------------------------+
+    | num_patterns_total          | Total Number of patterns presented to the network                    |
+    +-----------------------------+----------------------------------------------------------------------+
+    | sequence_length             | Specifies the sequence length of the patterns to be recalled         |
+    |                             | e.g. if num_input is 3 and sequence length is 4, one sequence        |
+    |                             | would be [0,1,1], [0,1,0], [1,1,1], [1,1,1]                          |
+    +-----------------------------+----------------------------------------------------------------------+
+    | sparsity_length             | Specifies the number of random sequences would be                    |
+    |                             | encountered before a pattern will be presented.                      |
+    |                             |                                                                      |
+    |                             | If patterns are of sequence length 2 and input of length 1           |
+    |                             | with sparsity 2 a typical data set would have the following pattern: |
+    |                             | [p],[p],[r],[r],[r],[r],[p],[p],[r],[r],[r],[r],[p],[p]              |
+    +-----------------------------+----------------------------------------------------------------------+
+    | sparsity_erratic            | Flag specifying if sparsity is erratic or uniform. If                |
+    |                             | it is uniform, the sequence would have patterns                      |
+    |                             | separated with a fixed sparsity.                                     |
+    |                             |                                                                      |
+    |                             | If it is set to erratic, then the sequence will contain              |
+    |                             | patterns separated with different levels of sparsity from 0          |
+    |                             | up to sparsity length.                                               |
+    +-----------------------------+----------------------------------------------------------------------+
+    | random_seed                 | Seed used to initialise the generation of the sequence.              |
+    +-----------------------------+----------------------------------------------------------------------+
+    | binary_input                | Flag specifying if input is binary or real                           |
+    +-----------------------------+----------------------------------------------------------------------+
+    | run_count                   | Counter specifying the run count of a specific                       |
+    |                             | experiment (each will be run 30 times)                               |
+    +-----------------------------+----------------------------------------------------------------------+
+    | error_when_stopped          | Float indicating the error at which training converged               |
+    +-----------------------------+----------------------------------------------------------------------+
+    | input_set                   | Input set used to during experiment. Contains the patterns that      |
+    |                             | should be learned as well.                                           |
+    +-----------------------------+----------------------------------------------------------------------+
+    | output_set                  | Output set used to during experiment. Contains the patterns that     |
+    |                             | should be learned as well.                                           |
+    +-----------------------------+----------------------------------------------------------------------+
+    | pattern_input_set           | Input set of patterns to be learned                                  |
+    +-----------------------------+----------------------------------------------------------------------+
+    | pattern_output_set          | Output set of patterns to be learned                                 |
+    +-----------------------------+----------------------------------------------------------------------+
+    |                             |                                                                      |
+    +-----------------------------+----------------------------------------------------------------------+
+    | NETWORK SPECIFIC PARAMETERS |                                                                      |
+    +-----------------------------+----------------------------------------------------------------------+
+    | num_hidden_layers           | Number of hidden layers                                              |
+    +-----------------------------+----------------------------------------------------------------------+
+    | num_network_parameters      | Number of network parameters. Networks with the                      |
+    |                             | same amount of weights can be compared                               |
+    +-----------------------------+----------------------------------------------------------------------+
+    | network_type                | Specifies the type of the network e.g. Elman RNN                     |
+    +-----------------------------+----------------------------------------------------------------------+
+    | training_algorithm          | The training algorithm used to train the                             |
+    |                             | network e.g. Adam, SGD, RPROP                                        |
+    +-----------------------------+----------------------------------------------------------------------+
+    | batch_size                  | Batch size used during training                                      |
+    +-----------------------------+----------------------------------------------------------------------+
+    | activation_function         | Activation function used inside of the nodes.                        |
+    |                             | e.g. sigmoid, tanh, relu                                             |
+    +-----------------------------+----------------------------------------------------------------------+
+    | nodes_per_layer             | Array of size num_hidden_layers. Each element                        |
+    |                             | corresponds to the number of hidden nodes in                         |
+    |                             | each layer                                                           |
+    +-----------------------------+----------------------------------------------------------------------+
+    | full_network                | Network dump as in checkpoint file format                            |
+    +-----------------------------+----------------------------------------------------------------------+
+    |                             |                                                                      |
+    +-----------------------------+----------------------------------------------------------------------+
