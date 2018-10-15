@@ -1,5 +1,6 @@
 import scipy
 import random
+import numpy as np
 
 import pandas as pd
 from matplotlib import pyplot
@@ -43,6 +44,14 @@ def generate_bit_patterns(bit_length=3):
         unique_input_patterns.append(single_input)
     return unique_input_patterns
 
+def all_unique_patterns(input_set, length):
+    length = len(input_set)
+    array = []
+    for k in range(length):
+        for i in input_set:
+            for j in input_set:
+                array.append(i)
+
 
 def generate_set(input_length=3, sequence_length=3, num_patterns=3):
     """
@@ -65,12 +74,13 @@ def generate_set(input_length=3, sequence_length=3, num_patterns=3):
 
     :return: patterns_to_identify, random_patterns, all_available_patterns
     """
-    possible_inputs = generate_bit_patterns(input_length)
-    all_available_patterns = list(itertools.combinations(possible_inputs, sequence_length))
-    index_of_set = random.sample(range(0, len(all_available_patterns)), num_patterns)
-    patterns_to_identify = [all_available_patterns[i] for i in index_of_set]
-    random_patterns = [x for x in all_available_patterns if x not in patterns_to_identify]
-    return patterns_to_identify, random_patterns, all_available_patterns
+    possible_patterns = generate_bit_patterns(input_length)
+
+    all_sequences = list(itertools.product(possible_patterns, repeat=sequence_length))
+    index_of_set = random.sample(range(0, len(all_sequences)), num_patterns)
+    sequences_to_identify = [all_sequences[i] for i in index_of_set]
+    random_patterns = [x for x in all_sequences if x not in sequences_to_identify]
+    return all_sequences, random_patterns, sequences_to_identify
 
 
 def create_equal_spaced_patterns(patterns_to_identify, corresponding_output, random_patterns, random_output,
@@ -149,4 +159,16 @@ def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_p
         # __print_lists__(train_list, train_out, pattern_output_set)
 
     return train_list, train_out, input_set, output_set, pattern_input_set, pattern_output_set
+
+def example():
+    all_sequences, random_patterns, sequences_to_identify = generate_set(input_length=1, sequence_length=3, num_patterns=1)
+
+def tests():
+    # Generate first experiment
+    expected = np.array([
+                         [[0]], [[0]],
+                         [[0]], [[1]],
+                         [[1]], [[0]],
+                         [[1]], [[1]],
+    ])
 
