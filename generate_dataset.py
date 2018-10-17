@@ -80,7 +80,7 @@ def generate_set(input_length=3, sequence_length=3, num_patterns=3):
     index_of_set = random.sample(range(0, len(all_sequences)), num_patterns)
     sequences_to_identify = [all_sequences[i] for i in index_of_set]
     random_patterns = [x for x in all_sequences if x not in sequences_to_identify]
-    return all_sequences, random_patterns, sequences_to_identify
+    return np.array(all_sequences), np.array(random_patterns), np.array(sequences_to_identify)
 
 
 def create_equal_spaced_patterns(patterns_to_identify, corresponding_output, random_patterns, random_output,
@@ -139,7 +139,14 @@ def create_equal_spaced_patterns(patterns_to_identify, corresponding_output, ran
                 rand_index_out = random.randint(0, len(random_output) - 1)
                 train_out.append(random_output[rand_index_out])
         counter += 1
-    return train_list, train_out
+
+    train_list = np.array(train_list)
+    train_list = train_list.reshape(train_list.shape[0], sequence_length, train_list.shape[1])
+
+    train_out = np.array(train_out)
+    train_out = train_out.reshape(train_out.shape[0], sequence_length, train_out.shape[1])
+
+    return train_list,train_out
 
 
 def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_patterns=3, sequence_length=2,
