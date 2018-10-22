@@ -52,8 +52,8 @@ testX = numpy.reshape(testX, (testX.shape[0], testX.shape[1], 1))
 # create and fit the LSTM network
 model = Sequential()
 model.add(LSTM(4, input_shape=(look_back, 1)))
-model.add(Dense(1))
-model.compile(loss='mean_squared_error', optimizer='adam')
+model.add(Dense(4))
+model.compile( loss='binary_crossentropy', metrics=['accuracy'], optimizer='adam')
 model.fit(trainX, trainY, epochs=100, batch_size=1, verbose=2)
 
 # make predictions
