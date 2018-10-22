@@ -13,6 +13,10 @@ import itertools
 
 import save_result
 
+from numpy import array
+from numpy import argmax
+from keras.utils import to_categorical
+
 def __print_lists__(train_list, train_out, corresponding_output):
     """
     Used for debugging
@@ -84,7 +88,7 @@ def generate_set(input_length=3, sequence_length=3, num_patterns=3):
 
 
 def create_equal_spaced_patterns(patterns_to_identify, corresponding_output, random_patterns, random_output,
-                                 sparsity_spacing=5):
+                                 sparsity_spacing=5, total_input_length=100):
     """
     Generates a sequence in which the patterns to be identified are separated using the same sparsity.
     E.g.
@@ -122,37 +126,51 @@ def create_equal_spaced_patterns(patterns_to_identify, corresponding_output, ran
     pattern_count = 0
     counter = 1
     sequence_length = len(patterns_to_identify[0])
-    while pattern_count < len(patterns_to_identify):
+    num_r_output = len(random_output)
+    num_available_patterns = len(patterns_to_identify)
+    while counter <= total_input_length:
+        if pattern_count >= num_available_patterns:
+            pattern_count = 0
         if counter % (sparsity_spacing + 1) == 0:
-            for x in patterns_to_identify[pattern_count]:
-                train_list.append(x)
+            train_list.append(patterns_to_identify[pattern_count])
             for x in range(sequence_length - 1):
-                rand_index_out = random.randint(0, len(random_output) - 1)
+                rand_index_out = random.randint(0, num_r_output - 1)
                 train_out.append(random_output[rand_index_out])
             train_out.append(corresponding_output[pattern_count])
             pattern_count += 1
         else:
             rand_index_in = random.randint(0, len(random_patterns) - 1)
-            for x in random_patterns[rand_index_in]:
-                train_list.append(x)
+            print("random_patterns", rand_index_in)
+            train_list.append(random_patterns[rand_index_in])
             for x in range(sequence_length):
-                rand_index_out = random.randint(0, len(random_output) - 1)
+                rand_index_out = random.randint(0, num_r_output - 1)
+                print("random_output", rand_index_out)
                 train_out.append(random_output[rand_index_out])
         counter += 1
 
     train_list = np.array(train_list)
-    train_list = train_list.reshape(train_list.shape[0], sequence_length, train_list.shape[1])
 
     train_out = np.array(train_out)
-    train_out = train_out.reshape(train_out.shape[0], sequence_length, train_out.shape[1])
+    train_out = train_out.reshape(train_list.shape[0], sequence_length, train_out.shape[2])
 
     return train_list,train_out
 
+def generate_one_hot_output(num_patterns):
+    # define example
+    data = [x for x in range(num_patterns)]
+    data = array(data)
+    print(data)
+    # one hot encode
+    encoded = to_categorical(data)
+    print(encoded)
+    # invert encoding
+    inverted = argmax(encoded[0])
+    print(inverted)
 
 def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_patterns=3, sequence_length=2,
                        sparsity_length=1):
     pattern_input_set, random_patterns, input_set = generate_set(num_input_nodes, sequence_length, num_patterns)
-    pattern_output_set, random_output, output_set = generate_set(num_output_nodes, 1, num_patterns)
+    pattern_output_set, random_output, output_set = generate_set(num_output_nodes, sequence_length, num_patterns)
 
     if case_type == 1:
         train_list, train_out = create_equal_spaced_patterns(pattern_input_set, pattern_output_set, random_patterns,
@@ -168,7 +186,18 @@ def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_p
     return train_list, train_out, input_set, output_set, pattern_input_set, pattern_output_set
 
 def example():
-    all_sequences, random_patterns, sequences_to_identify = generate_set(input_length=1, sequence_length=3, num_patterns=1)
+    case_type = 1
+    num_input_nodes = 3
+    num_output_nodes = 3
+    num_patterns = 3
+    sequence_length = 2
+    sparsity_length = 1
+    pattern_input_set, random_patterns, input_set = generate_set(num_input_nodes, sequence_length, num_patterns)
+    pattern_output_set, random_output, output_set = generate_set(num_output_nodes, 1, num_patterns)
+
+    train_list, train_out = create_equal_spaced_patterns(input_set, output_set, random_patterns, random_output, sparsity_length)
+
+    train_list.shape, train_out.shape
 
 def tests():
     # Generate first experiment
@@ -178,4 +207,3 @@ def tests():
                          [[1]], [[0]],
                          [[1]], [[1]],
     ])
-

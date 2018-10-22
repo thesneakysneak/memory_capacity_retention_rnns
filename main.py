@@ -48,3 +48,7 @@ def main():
     activation_function = "tanh"
     architecture = [num_input_nodes, 2, num_output_nodes]
     batch_size = 10
+    gd.example()
+
+if __name__ == "__main__":
+    main()

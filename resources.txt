@@ -1,0 +1,2 @@
+https://machinelearningmastery.com/time-series-prediction-lstm-recurrent-neural-networks-python-keras/
+https://github.com/thushv89/datacamp_tutorials
