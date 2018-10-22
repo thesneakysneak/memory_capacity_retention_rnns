@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot
 from statsmodels.graphics.tsaplots import plot_acf
-
+import random
 import random
 from datetime import datetime
 
@@ -133,45 +133,40 @@ def create_equal_spaced_patterns(patterns_to_identify, corresponding_output, ran
             pattern_count = 0
         if counter % (sparsity_spacing + 1) == 0:
             train_list.append(patterns_to_identify[pattern_count])
-            for x in range(sequence_length - 1):
-                rand_index_out = random.randint(0, num_r_output - 1)
-                train_out.append(random_output[rand_index_out])
             train_out.append(corresponding_output[pattern_count])
             pattern_count += 1
         else:
             rand_index_in = random.randint(0, len(random_patterns) - 1)
             print("random_patterns", rand_index_in)
             train_list.append(random_patterns[rand_index_in])
-            for x in range(sequence_length):
-                rand_index_out = random.randint(0, num_r_output - 1)
-                print("random_output", rand_index_out)
-                train_out.append(random_output[rand_index_out])
+            rand_index_out = random.randint(0, num_r_output - 1)
+            print("random_output", rand_index_out)
+            train_out.append(random_output[rand_index_out])
         counter += 1
 
     train_list = np.array(train_list)
 
     train_out = np.array(train_out)
-    train_out = train_out.reshape(train_list.shape[0], sequence_length, train_out.shape[2])
-
+    train_out = train_out.reshape(train_out.shape[0], train_out.shape[2])
     return train_list,train_out
 
 def generate_one_hot_output(num_patterns):
     # define example
     data = [x for x in range(num_patterns)]
     data = array(data)
-    print(data)
     # one hot encode
     encoded = to_categorical(data)
-    print(encoded)
-    # invert encoding
-    inverted = argmax(encoded[0])
-    print(inverted)
+    return encoded
 
 def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_patterns=3, sequence_length=2,
                        sparsity_length=1):
     pattern_input_set, random_patterns, input_set = generate_set(num_input_nodes, sequence_length, num_patterns)
-    pattern_output_set, random_output, output_set = generate_set(num_output_nodes, sequence_length, num_patterns)
-
+    # pattern_output_set, random_output, output_set = generate_set(num_output_nodes, sequence_length, num_patterns)
+    output = generate_one_hot_output(num_patterns+1)
+    output = random.sample(list(output), len(output))
+    pattern_output_set = output
+    random_patterns = [output.pop(0)]
+    output_set = output
     if case_type == 1:
         train_list, train_out = create_equal_spaced_patterns(pattern_input_set, pattern_output_set, random_patterns,
                                                              random_output, sparsity_length)
@@ -187,8 +182,8 @@ def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_p
 
 def example():
     case_type = 1
-    num_input_nodes = 3
-    num_output_nodes = 3
+    num_input_nodes = 1
+    num_output_nodes = 4
     num_patterns = 3
     sequence_length = 2
     sparsity_length = 1
