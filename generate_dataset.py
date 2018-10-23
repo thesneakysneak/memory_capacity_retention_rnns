@@ -1,8 +1,25 @@
 import scipy
 import random
 import numpy as np
+from  sklearn.metrics import precision_recall_fscore_support
 
+from sklearn.metrics import confusion_matrix
+
+# LSTM for international airline passengers problem with time step regression framing
+import numpy
+import matplotlib.pyplot as plt
+from keras.wrappers.scikit_learn import KerasClassifier
+from pandas import read_csv
+import math
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import roc_curve
 import pandas as pd
+from keras import Sequential
 from matplotlib import pyplot
 from statsmodels.graphics.tsaplots import plot_acf
 import random
@@ -180,6 +197,17 @@ def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_p
 
     return train_list, train_out, input_set, output_set, pattern_input_set, pattern_output_set
 
+
+
+def determine_score(predicted, test):
+    p_categories = [np.argmax(x) for x in predicted]
+    t_categories = [np.argmax(x) for x in test]
+
+    conf_mat = confusion_matrix(t_categories, p_categories)
+    precision, recall, fbeta_score, beta = precision_recall_fscore_support(t_categories, p_categories, average="micro")
+
+    return precision, recall, fbeta_score, conf_mat
+
 def example():
     case_type = 1
     num_input_nodes = 1
@@ -193,6 +221,21 @@ def example():
     train_list, train_out = create_equal_spaced_patterns(input_set, output_set, random_patterns, random_output, sparsity_length)
 
     train_list.shape, train_out.shape
+
+    # create and fit the LSTM network
+    model = Sequential()
+    model.add(LSTM(4, input_shape=(sequence_length, 1)))
+    model.add(Dense(4, activation='softmax'))
+    model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
+    # model.fit(train_list, train_out, epochs=100, batch_size=1, verbose=2)
+
+    stimator = KerasClassifier(build_fn=model, epochs=model, batch_size=5, verbose=0)
+
+    # make predictions
+    trainPredict = model.predict(train_list).ravel()
+    trainPredict
+
+
 
 def tests():
     # Generate first experiment
