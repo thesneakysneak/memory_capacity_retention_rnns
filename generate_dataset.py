@@ -224,12 +224,15 @@ def example():
 
     # create and fit the LSTM network
     model = Sequential()
-    model.add(LSTM(4, input_shape=(sequence_length, 1)))
+    model.add(LSTM(100, input_shape=(sequence_length, 1), return_sequences=True))
+    model.add(LSTM(20,return_sequences=True))
+    model.add(LSTM(10))
     model.add(Dense(4, activation='softmax'))
-    model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
-    # model.fit(train_list, train_out, epochs=100, batch_size=1, verbose=2)
+    model.compile(loss='binary_crossentropy', metrics=['accuracy'], optimizer='adam')
 
-    stimator = KerasClassifier(build_fn=model, epochs=model, batch_size=5, verbose=0)
+    model.fit(train_list, train_out, epochs=1000, batch_size=10, verbose=2)
+
+    # stimator = KerasClassifier(build_fn=model, epochs=200, batch_size=5, verbose=0)
 
     # make predictions
     trainPredict = model.predict(train_list).ravel()

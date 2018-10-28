@@ -27,7 +27,7 @@ def create_dataset(dataset, look_back=1):
 numpy.random.seed(7)
 
 # load the dataset
-dataframe = read_csv('example_code/international-airline-passengers.csv', usecols=[1], engine='python', skipfooter=3)
+dataframe = read_csv('scratch_space/international-airline-passengers.csv', usecols=[1], engine='python', skipfooter=3)
 dataset = dataframe.values
 dataset = dataset.astype('float32')
 
@@ -54,7 +54,7 @@ model = Sequential()
 model.add(LSTM(4, input_shape=(look_back, 1)))
 model.add(Dense(4))
 model.compile( loss='binary_crossentropy', metrics=['accuracy'], optimizer='adam')
-model.fit(trainX, trainY, epochs=100, batch_size=1, verbose=2)
+model.fit(trainX, trainY, epochs=10, batch_size=1, verbose=2)
 
 # make predictions
 trainPredict = model.predict(trainX)
