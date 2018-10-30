@@ -99,6 +99,7 @@ def test():
     architecture = []
     import random
     for i in range(100):
+        architecture = []
         num_layers = random.randint(1, 5)
         timesteps = random.randint(1, 300)
         batch_size = random.randint(1, 30)
@@ -126,4 +127,6 @@ earlystop = EarlyStopping(monitor='loss',  # loss
                           min_delta=0.05,
                           mode='auto')
 reset_state = ResetState()
-test()
+
+if __name__ == "main":
+    test()
