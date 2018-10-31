@@ -3,13 +3,14 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 import logging
 
 import keras
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, precision_recall_fscore_support, confusion_matrix
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
 from keras.layers import GRU
 from keras.layers import SimpleRNN
 
+import numpy as np
 
 class ResetState(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
@@ -120,6 +121,16 @@ def test():
                           activation_function=activation_functions[activation_index])
         print(model.summary())
 
+def determine_score(predicted, test, f_only=True):
+    p_categories = [np.argmax(x) for x in predicted]
+    t_categories = [np.argmax(x) for x in test]
+
+    conf_mat = confusion_matrix(t_categories, p_categories)
+    precision, recall, fbeta_score, beta = precision_recall_fscore_support(t_categories, p_categories, average="micro")
+
+    if f_only:
+        return fbeta_score
+    return precision, recall, fbeta_score, conf_mat
 
 earlystop = EarlyStopping(monitor='loss',  # loss
                           patience=10,

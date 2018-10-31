@@ -199,15 +199,6 @@ def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_p
 
 
 
-def determine_score(predicted, test):
-    p_categories = [np.argmax(x) for x in predicted]
-    t_categories = [np.argmax(x) for x in test]
-
-    conf_mat = confusion_matrix(t_categories, p_categories)
-    precision, recall, fbeta_score, beta = precision_recall_fscore_support(t_categories, p_categories, average="micro")
-
-    return precision, recall, fbeta_score, conf_mat
-
 def example():
     case_type = 1
     num_input_nodes = 1
