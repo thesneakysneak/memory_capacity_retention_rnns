@@ -9,6 +9,7 @@ from hyperas import optim
 from hyperas.distributions import choice, uniform
 
 import generate_dataset as gd
+import recurrent_models
 import recurrent_models as mds
 
 
@@ -74,7 +75,12 @@ class ResetState(keras.callbacks.Callback):
 
         return
 
-def search_architecture(num_input, num_out, get_model, x_train, y_train):
+def search_architecture(num_input, num_out,
+                        x_train, y_train,
+                        batch_size=10,
+                        timesteps=3,
+                        network_type="lstm",
+                        activation_function='tanh'):
 
     for depth in range(1, num_input * 3):
         for l5 in range(depth):
@@ -83,7 +89,15 @@ def search_architecture(num_input, num_out, get_model, x_train, y_train):
                     for l2 in range(depth):
                         for l1 in range(1, depth):
                             # Stop if accuracy == 1
-                            pass
+
+                            architecture = [num_input, l1, l2, l3, l4, l5, num_out]
+                            architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
+
+                            recurrent_models.get_model(architecture=architecture,
+                                                      batch_size=batch_size,
+                                                      timesteps=timesteps,
+                                                      network_type=network_type,
+                                                      activation_function=activation_function)
 # def get_lstm(x_train, y_train, x_test, y_test):
 
 #     batch_size = 1

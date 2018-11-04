@@ -148,7 +148,7 @@ def get_lstm(x_train, y_train, x_test, y_test):
     print('Best validation acc of epoch:', validation_acc)
     return {'loss': -validation_acc, 'status': STATUS_OK, 'model': model}
 
-def get_model_(architecture=[2, 1, 1, 1],
+def get_model(architecture=[2, 1, 1, 1],
               batch_size=10, timesteps=3,
               network_type="lstm",
               activation_function='tanh'):
