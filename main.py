@@ -74,8 +74,18 @@ class ResetState(keras.callbacks.Callback):
 
         return
 
+def search_architecture(num_input, num_out, get_model, x_train, y_train):
 
+    for depth in range(1, num_input * 3):
+        for l5 in range(depth):
+            for l4 in range(depth):
+                for l3 in range(depth):
+                    for l2 in range(depth):
+                        for l1 in range(1, depth):
+                            # Stop if accuracy == 1
+                            pass
 # def get_lstm(x_train, y_train, x_test, y_test):
+
 #     batch_size = 1
 #     timesteps = 1
 #     activation_function = "tanh"
@@ -183,12 +193,12 @@ def investigate_number_of_patterns():
                             "softsign", "hard_sigmoid", "linear"]
     network_type = ["lstm", "gru", "elman_rnn", "jordan_rnn"]
     # Variable we are investigating
-    num_patterns = [x for x in range(2, 3)]
+    num_patterns = [x for x in range(5, 10)]
 
     # constants
     sequence_length = 1
     sparsity_length = 0
-    num_input_nodes = num_patterns[0]
+
     import recurrent_models
     from recurrent_models import get_lstm
     from recurrent_models import data
@@ -208,7 +218,7 @@ def investigate_number_of_patterns():
 
 
         get_lstm.num_input = num_input_nodes
-        get_lstm.batch_size = 10
+        get_lstm.batch_size = 1
         get_lstm.timesteps = 1
         get_lstm.activation_function = "tanh"
         get_lstm.network_type = "lstm"
@@ -222,9 +232,10 @@ def investigate_number_of_patterns():
         best_run, best_model = optim.minimize(model=get_lstm,
                                               data=data,
                                               algo=tpe.suggest,
-                                              max_evals=10,
+                                              max_evals=2,
                                               trials=Trials(), verbose=0)
         print(best_run, best_model.summary())
+        keras.backend.clear_session()
 
 
 def run_experiments():

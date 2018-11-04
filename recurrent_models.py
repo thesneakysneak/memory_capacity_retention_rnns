@@ -93,16 +93,16 @@ def get_lstm(x_train, y_train, x_test, y_test):
 
     if network_type == "lstm":
         model.add(LSTM(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                       stateful=True,  return_sequences=return_sequences, activation=activation_function))
+                       stateful=True,  return_sequences=return_sequences, activation=activation_function, name="layer1"))
     elif network_type == "gru":
         model.add(GRU(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                      stateful=True, return_sequences=return_sequences, activation=activation_function))
+                      stateful=True, return_sequences=return_sequences, activation=activation_function, name="layer1"))
     elif network_type == "elman_rnn":
         model.add(SimpleRNN(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                      stateful=True, return_sequences=return_sequences, activation=activation_function))
+                      stateful=True, return_sequences=return_sequences, activation=activation_function, name="layer1"))
     elif network_type == "jordan_rnn":
         model.add(SimpleRNN(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                      stateful=True, return_sequences=return_sequences, activation=activation_function))
+                      stateful=True, return_sequences=return_sequences, activation=activation_function, name="layer1"))
 
 
     # Hidden layer how many ever
@@ -113,15 +113,15 @@ def get_lstm(x_train, y_train, x_test, y_test):
 
         # print(h, return_sequences)
         if network_type == "lstm":
-            model.add(LSTM(architecture[h], return_sequences=return_sequences, activation=activation_function))
+            model.add(LSTM(architecture[h], return_sequences=return_sequences, activation=activation_function, name="layer"+str(h+1)))
         elif network_type == "gru":
-            model.add(GRU(architecture[h], return_sequences=return_sequences, activation=activation_function))
+            model.add(GRU(architecture[h], return_sequences=return_sequences, activation=activation_function, name="layer"+str(h+1)))
         elif network_type == "elman_rnn":
-            model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function))
+            model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function, name="layer"+str(h+1)))
         elif network_type == "jordan_rnn":
-            model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function))
+            model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function, name="layer"+str(h+1)))
 
-    model.add(Dense(get_lstm.num_output+1, activation="softmax"))
+    model.add(Dense(get_lstm.num_output+1, activation="softmax", name="out_layer"))
 
     model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
 
@@ -159,18 +159,18 @@ def get_model_(architecture=[2, 1, 1, 1],
         return_sequences = True
     if network_type == "lstm":
         model.add(LSTM(architecture[1], batch_input_shape=(batch_size, timesteps, architecture[0]),
-                       stateful=True, unroll=True, return_sequences=return_sequences))
+                       stateful=True, unroll=True, return_sequences=return_sequences, activation_function=activation_function, name="layer1"))
     elif network_type == "gru":
         model.add(GRU(architecture[1], batch_input_shape=(batch_size, timesteps, architecture[0]),
-                      stateful=True, unroll=True, return_sequences=return_sequences))
+                      stateful=True, unroll=True, return_sequences=return_sequences, activation_function=activation_function, name="layer1"))
     elif network_type == "elman_rnn":
         model.add(
             SimpleRNN(architecture[1], batch_input_shape=(batch_size, timesteps, architecture[0]),
-                      stateful=True, unroll=True, return_sequences=return_sequences))
+                      stateful=True, unroll=True, return_sequences=return_sequences, activation_function=activation_function, name="layer1"))
     elif network_type == "jordan_rnn":
         model.add(
             SimpleRNN(architecture[1], batch_input_shape=(batch_size, timesteps, architecture[0]),
-                      stateful=True, unroll=True, return_sequences=return_sequences))
+                      stateful=True, unroll=True, return_sequences=return_sequences, activation_function=activation_function, name="layer1"))
 
     # Hidden layer how many ever
     for h in range(2, len(architecture) - 1):
@@ -180,14 +180,14 @@ def get_model_(architecture=[2, 1, 1, 1],
         if h < len(architecture) - 2:
             return_sequences = True
         if network_type == "lstm":
-            model.add(LSTM(architecture[h], return_sequences=return_sequences))
+            model.add(LSTM(architecture[h], return_sequences=return_sequences, activation_function=activation_function, name="layer"+str(h+1)))
 
         elif network_type == "gru":
-            model.add(GRU(architecture[h], return_sequences=return_sequences))
+            model.add(GRU(architecture[h], return_sequences=return_sequences, activation_function=activation_function, name="layer"+str(h+1)))
         elif network_type == "elman_rnn":
-            model.add(SimpleRNN(architecture[h], return_sequences=return_sequences))
+            model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation_function=activation_function, name="layer"+str(h+1)))
 
-    model.add(Dense(architecture[-1], activation="softmax"))
+    model.add(Dense(architecture[-1], activation="softmax", name="output_layer"))
     return model
 
 
