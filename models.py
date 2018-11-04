@@ -10,7 +10,20 @@ from keras.layers import LSTM
 from keras.layers import GRU
 from keras.layers import SimpleRNN
 
+from __future__ import print_function
 import numpy as np
+
+from hyperopt import Trials, STATUS_OK, tpe
+from keras.datasets import mnist
+from keras.layers.core import Dense, Dropout, Activation
+from keras.models import Sequential
+from keras.utils import np_utils
+
+from hyperas import optim
+from hyperas.distributions import choice, uniform
+
+import numpy as np
+
 
 class ResetState(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
@@ -35,6 +48,73 @@ class ResetState(keras.callbacks.Callback):
         #         if acc == 1.0:
 
         return
+
+
+def get_lstm(x_train, y_train, x_test, y_test):
+    batch_size = get_lstm.batch_size
+    timesteps = get_lstm.timesteps
+    activation_function = get_lstm.activation_function
+
+    architecture = [{{choice([i for i in range(0, get_lstm.num_input * 3)])}}] + \
+                   [{{choice([i for i in range(0, get_lstm.num_input * 3)])}}] + \
+                   [{{choice([i for i in range(0, get_lstm.num_input * 3)])}}] + \
+                   [{{choice([i for i in range(0, get_lstm.num_input * 3)])}}] + \
+                   [{{choice([i for i in range(0, get_lstm.num_input * 3)])}}]
+
+    architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
+    if not architecture:
+        architecture = [get_lstm.num_input] # Cannot be empty
+
+    model = Sequential()
+
+    return_sequences = False
+    if len(architecture) > 1:
+        return_sequences = True
+    model.add(LSTM(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
+                   stateful=True, unroll=True, return_sequences=return_sequences, activation=activation_function))
+    # Hidden layer how many ever
+    for h in range(1, len(architecture)):
+
+        return_sequences = False
+        if h < len(architecture) - 1:
+            return_sequences = True
+        print(h, return_sequences)
+        model.add(LSTM(architecture[h], return_sequences=return_sequences, activation=activation_function))
+
+    model.add(Dense(get_lstm.num_output, activation="softmax"))
+
+    model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
+
+    callbacks = [
+        earlystop,
+        reset_state
+    ]
+
+    # We can set shuffle to true by definition of the training set
+    model.fit(x_train, y_train, epochs=10, batch_size=batch_size, verbose=1, shuffle=True, callbacks=callbacks)
+
+    score, acc = model.evaluate(x_test, y_test, verbose=0)
+
+    print('Test accuracy:', acc)
+    return {'loss': -acc, 'status': STATUS_OK, 'model': model}
+
+
+def get_jordan(x_train, y_train, x_test, y_test):
+    model = Sequential()
+    return
+
+
+def get_elman(x_train, y_train, x_test, y_test):
+    model = Sequential()
+    return
+
+
+def get_gru(x_train, y_train, x_test, y_test):
+    model = Sequential()
+    model.add(LSTM({{choice([i for i in range(2, 100)])}},
+                   batch_input_shape=(get_gru.batch_size, get_gru.timesteps, get_gru.input_size),
+                   stateful=True, unroll=True, return_sequences=return_sequences))
+    return
 
 
 def get_model(architecture=[2, 1, 1, 1],
@@ -62,11 +142,11 @@ def get_model(architecture=[2, 1, 1, 1],
                       stateful=True, unroll=True, return_sequences=return_sequences))
 
     # Hidden layer how many ever
-    for h in range(2, len(architecture)-1):
+    for h in range(2, len(architecture) - 1):
         print(h)
 
         return_sequences = False
-        if h < len(architecture)-2:
+        if h < len(architecture) - 2:
             return_sequences = True
         if network_type == "lstm":
             model.add(LSTM(architecture[h], return_sequences=return_sequences))
@@ -109,9 +189,9 @@ def test():
         for i in range(num_layers):
             nodes_in_layer = random.randint(3, 1000)
             architecture.append(nodes_in_layer)
-        print("architecture",architecture,
-              "batch_size",batch_size,
-              "timesteps",timesteps,
+        print("architecture", architecture,
+              "batch_size", batch_size,
+              "timesteps", timesteps,
               "network_type", network_types[nn_index],
               "activation_function", activation_functions[activation_index])
         model = get_model(architecture=architecture,
@@ -120,6 +200,7 @@ def test():
                           network_type=network_types[nn_index],
                           activation_function=activation_functions[activation_index])
         print(model.summary())
+
 
 def determine_score(predicted, test, f_only=True):
     p_categories = [np.argmax(x) for x in predicted]
@@ -131,6 +212,7 @@ def determine_score(predicted, test, f_only=True):
     if f_only:
         return fbeta_score
     return precision, recall, fbeta_score, conf_mat
+
 
 earlystop = EarlyStopping(monitor='loss',  # loss
                           patience=10,

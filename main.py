@@ -67,16 +67,8 @@ def investigate_number_of_patterns():
                                   num_patterns=2**num_input_nodes,
                                   sequence_length=sequence_length,
                                   sparsity_length=sparsity_length)
-        database_functions.insert_dataset(timesteps=1,
-                                          sparsity=sparsity_length,
-                                          num_input=num_input_nodes,
-                                          num_patterns=2**num_input_nodes,
-                                          train_input=train_input,
-                                          train_target=train_out,
-                                          input_set=input_set,
-                                          output_set=output_set,
-                                          pattern_input_set=pattern_input_set,
-                                          pattern_output_set=pattern_output_set)
+
+
 
 def run_experiments():
     """

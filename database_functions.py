@@ -64,6 +64,6 @@ def insert_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2,
 def get_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2):
     df = pd.read_sql_query('select * from datasets where timesteps={} and sparsity={} and num_input={} and num_patterns={}'\
                            .format(timesteps, sparsity, num_input,num_patterns), con=engine)
-    return df
+
 
 
