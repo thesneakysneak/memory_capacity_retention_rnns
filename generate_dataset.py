@@ -28,7 +28,7 @@ from datetime import datetime
 
 import itertools
 
-import save_result
+import database_functions
 
 from numpy import array
 from numpy import argmax
@@ -98,9 +98,11 @@ def generate_set(input_length=3, sequence_length=3, num_patterns=3):
     possible_patterns = generate_bit_patterns(input_length)
 
     all_sequences = list(itertools.product(possible_patterns, repeat=sequence_length))
+    print("     all_sequences", len(all_sequences))
     index_of_set = random.sample(range(0, len(all_sequences)), num_patterns)
     sequences_to_identify = [all_sequences[i] for i in index_of_set]
     random_patterns = [x for x in all_sequences if x not in sequences_to_identify]
+    print("     random_patterns", len(random_patterns))
     return np.array(all_sequences), np.array(random_patterns), np.array(sequences_to_identify)
 
 
@@ -145,10 +147,12 @@ def create_equal_spaced_patterns(patterns_to_identify, corresponding_output, ran
     sequence_length = len(patterns_to_identify[0])
     num_r_output = len(random_output)
     num_available_patterns = len(patterns_to_identify)
+    # print("len(patterns_to_identify)", len(patterns_to_identify))
     while counter <= total_input_length:
         if pattern_count >= num_available_patterns:
             pattern_count = 0
         if counter % (sparsity_spacing + 1) == 0:
+            print(pattern_count, "/", num_available_patterns, "sequence_length", sequence_length)
             train_list.append(patterns_to_identify[pattern_count])
             train_out.append(corresponding_output[pattern_count])
             pattern_count += 1
@@ -164,7 +168,10 @@ def create_equal_spaced_patterns(patterns_to_identify, corresponding_output, ran
     train_list = np.array(train_list)
 
     train_out = np.array(train_out)
-    train_out = train_out.reshape(train_out.shape[0], train_out.shape[2])
+
+    # print(train_out)
+    # print(train_list)
+    # train_out = train_out.reshape(train_out.shape[0], train_out.shape[2])
     return train_list,train_out
 
 def generate_one_hot_output(num_patterns):
@@ -177,16 +184,17 @@ def generate_one_hot_output(num_patterns):
 
 def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_patterns=3, sequence_length=2,
                        sparsity_length=1):
+    print("Generating set")
     pattern_input_set, random_patterns, input_set = generate_set(num_input_nodes, sequence_length, num_patterns)
     # pattern_output_set, random_output, output_set = generate_set(num_output_nodes, sequence_length, num_patterns)
     output = generate_one_hot_output(num_patterns+1)
     output = random.sample(list(output), len(output))
     pattern_output_set = output
-    random_patterns = [output.pop(0)]
+    random_output_patterns = [output.pop(0)]
     output_set = output
     if case_type == 1:
         train_list, train_out = create_equal_spaced_patterns(pattern_input_set, pattern_output_set, random_patterns,
-                                                             random_output, sparsity_length)
+                                                             random_output_patterns, sparsity_length, 1000)
     elif case_type == 2:
         train_list, train_out = create_equal_spaced_patterns(pattern_input_set, pattern_output_set, random_patterns,
                                                              output_set, sparsity_length)
