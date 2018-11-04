@@ -54,6 +54,8 @@ def get_lstm(x_train, y_train, x_test, y_test):
     batch_size = get_lstm.batch_size
     timesteps = get_lstm.timesteps
     activation_function = get_lstm.activation_function
+    network_type = get_lstm.network_type
+
 
     architecture = [{{choice([i for i in range(0, get_lstm.num_input * 3)])}}] + \
                    [{{choice([i for i in range(0, get_lstm.num_input * 3)])}}] + \
@@ -70,16 +72,34 @@ def get_lstm(x_train, y_train, x_test, y_test):
     return_sequences = False
     if len(architecture) > 1:
         return_sequences = True
-    model.add(LSTM(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                   stateful=True, unroll=True, return_sequences=return_sequences, activation=activation_function))
+
+    if network_type == "lstm":
+        model.add(LSTM(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
+                       stateful=True, unroll=True, return_sequences=return_sequences, activation=activation_function))
+    elif network_type == "gru":
+        model.add(GRU(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
+                      stateful=True, unroll=True, return_sequences=return_sequences, activation=activation_function))
+    elif network_type == "elman_rnn":
+        model.add(SimpleRNN(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
+                      stateful=True, unroll=True, return_sequences=return_sequences, activation=activation_function))
+    elif network_type == "jordan_rnn":
+        model.add(SimpleRNN(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
+                      stateful=True, unroll=True, return_sequences=return_sequences, activation=activation_function))
+
+
     # Hidden layer how many ever
     for h in range(1, len(architecture)):
-
         return_sequences = False
         if h < len(architecture) - 1:
             return_sequences = True
-        print(h, return_sequences)
-        model.add(LSTM(architecture[h], return_sequences=return_sequences, activation=activation_function))
+
+        # print(h, return_sequences)
+        if network_type == "lstm":
+            model.add(LSTM(architecture[h], return_sequences=return_sequences, activation=activation_function))
+        elif network_type == "gru":
+            model.add(GRU(architecture[h], return_sequences=return_sequences, activation=activation_function))
+        elif network_type == "elman_rnn":
+            model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function))
 
     model.add(Dense(get_lstm.num_output, activation="softmax"))
 
@@ -97,24 +117,6 @@ def get_lstm(x_train, y_train, x_test, y_test):
 
     print('Test accuracy:', acc)
     return {'loss': -acc, 'status': STATUS_OK, 'model': model}
-
-
-def get_jordan(x_train, y_train, x_test, y_test):
-    model = Sequential()
-    return
-
-
-def get_elman(x_train, y_train, x_test, y_test):
-    model = Sequential()
-    return
-
-
-def get_gru(x_train, y_train, x_test, y_test):
-    model = Sequential()
-    model.add(LSTM({{choice([i for i in range(2, 100)])}},
-                   batch_input_shape=(get_gru.batch_size, get_gru.timesteps, get_gru.input_size),
-                   stateful=True, unroll=True, return_sequences=return_sequences))
-    return
 
 
 def get_model(architecture=[2, 1, 1, 1],
