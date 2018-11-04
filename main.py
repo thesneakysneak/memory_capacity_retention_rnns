@@ -222,7 +222,7 @@ def investigate_number_of_patterns():
         best_run, best_model = optim.minimize(model=get_lstm,
                                               data=data,
                                               algo=tpe.suggest,
-                                              max_evals=1,
+                                              max_evals=10,
                                               trials=Trials(), verbose=0)
         print(best_run, best_model.summary())
 

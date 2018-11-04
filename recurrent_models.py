@@ -28,6 +28,7 @@ y_train = []
 x_test= []
 y_test = []
 
+
 class ResetState(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
         pass
@@ -74,11 +75,11 @@ def get_lstm(x_train, y_train, x_test, y_test):
     network_type = get_lstm.network_type
 
     # Freaking weird serialization
-    a = {{choice([i for i in range(0, get_lstm.num_input * 3)])}}
-    b = {{choice([i for i in range(0, get_lstm.num_input * 3)])}}
-    c = {{choice([i for i in range(0, get_lstm.num_input * 3)])}}
-    d = {{choice([i for i in range(0, get_lstm.num_input * 3)])}}
-    e = {{choice([i for i in range(0, get_lstm.num_input * 3)])}}
+    a = {{choice([i for i in range(0, get_lstm.num_input * 3)] + [0 for i in range(0, get_lstm.num_input * 3)])}}
+    b = {{choice([i for i in range(0, get_lstm.num_input * 3)]+ [0 for i in range(0, get_lstm.num_input * 3)])}}
+    c = {{choice([i for i in range(0, get_lstm.num_input * 3)]+ [0 for i in range(0, get_lstm.num_input * 3)])}}
+    d = {{choice([i for i in range(0, get_lstm.num_input * 3)]+ [0 for i in range(0, get_lstm.num_input * 3)])}}
+    e = {{choice([i for i in range(0, get_lstm.num_input * 3)]+ [0 for i in range(0, get_lstm.num_input * 3)])}}
 
     architecture = [a, b, c, d, e]
     architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
@@ -124,8 +125,8 @@ def get_lstm(x_train, y_train, x_test, y_test):
 
     model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
 
-    earlystop = recurrent_models.EarlyStopping(monitor='loss',  # loss
-                              patience=10,
+    earlystop = recurrent_models.EarlyStopping(monitor='acc',  # loss
+                              patience=20,
                               verbose=1,
                               min_delta=0.05,
                               mode='auto')
@@ -137,7 +138,7 @@ def get_lstm(x_train, y_train, x_test, y_test):
     ]
 
     # We can set shuffle to true by definition of the training set
-    result = model.fit(x_train, y_train, epochs=10, batch_size=batch_size, verbose=2, shuffle=True, callbacks=callbacks)
+    result = model.fit(x_train, y_train, epochs=1000, batch_size=batch_size, verbose=2, shuffle=True, callbacks=callbacks)
     #
     # score, acc = model.evaluate(x_test, y_test, verbose=0)
     # #
