@@ -81,11 +81,14 @@ def get_lstm(x_train, y_train, x_test, y_test):
     e = {{choice([i for i in range(0, get_lstm.num_input * 3)])}}
 
     architecture = [a, b, c, d, e]
-    model = Sequential()
+    architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
 
     return_sequences = False
     if len(architecture) > 1:
         return_sequences = True
+
+    model = Sequential()
+
 
     if network_type == "lstm":
         model.add(LSTM(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
