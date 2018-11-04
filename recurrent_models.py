@@ -10,7 +10,6 @@ from keras.layers import LSTM
 from keras.layers import GRU
 from keras.layers import SimpleRNN
 
-from __future__ import print_function
 import numpy as np
 
 from hyperopt import Trials, STATUS_OK, tpe
@@ -57,16 +56,8 @@ def get_lstm(x_train, y_train, x_test, y_test):
     network_type = get_lstm.network_type
 
 
-    architecture = [{{choice([i for i in range(0, get_lstm.num_input * 3)])}}] + \
-                   [{{choice([i for i in range(0, get_lstm.num_input * 3)])}}] + \
-                   [{{choice([i for i in range(0, get_lstm.num_input * 3)])}}] + \
-                   [{{choice([i for i in range(0, get_lstm.num_input * 3)])}}] + \
-                   [{{choice([i for i in range(0, get_lstm.num_input * 3)])}}]
-
-    architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
-    if not architecture:
-        architecture = [get_lstm.num_input] # Cannot be empty
-
+    architecture = {{choice([i for i in range(1, get_lstm.num_input * 3)])}}
+    architecture = [architecture ]
     model = Sequential()
 
     return_sequences = False
@@ -100,6 +91,8 @@ def get_lstm(x_train, y_train, x_test, y_test):
             model.add(GRU(architecture[h], return_sequences=return_sequences, activation=activation_function))
         elif network_type == "elman_rnn":
             model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function))
+        elif network_type == "jordan_rnn":
+            model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function))
 
     model.add(Dense(get_lstm.num_output, activation="softmax"))
 
@@ -111,15 +104,17 @@ def get_lstm(x_train, y_train, x_test, y_test):
     ]
 
     # We can set shuffle to true by definition of the training set
-    model.fit(x_train, y_train, epochs=10, batch_size=batch_size, verbose=1, shuffle=True, callbacks=callbacks)
-
+    result = model.fit(x_train, y_train, epochs=10, batch_size=batch_size, verbose=2, shuffle=True, callbacks=callbacks)
+    #
     score, acc = model.evaluate(x_test, y_test, verbose=0)
-
+    #
     print('Test accuracy:', acc)
     return {'loss': -acc, 'status': STATUS_OK, 'model': model}
+    # validation_acc = np.amax(result.history['val_acc'])
+    # print('Best validation acc of epoch:', validation_acc)
+    # return {'loss': -validation_acc, 'status': STATUS_OK, 'model': model}
 
-
-def get_model(architecture=[2, 1, 1, 1],
+def get_model_(architecture=[2, 1, 1, 1],
               batch_size=10, timesteps=3,
               network_type="lstm",
               activation_function='tanh'):

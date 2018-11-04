@@ -1,5 +1,16 @@
+from hyperas import optim
+from hyperopt import Trials, STATUS_OK, tpe
+from keras.datasets import mnist
+from keras.layers.core import Dense, Dropout, Activation
+from keras.models import Sequential
+from keras.utils import np_utils
+
+from hyperas import optim
+from hyperas.distributions import choice, uniform
+
 import generate_dataset as gd
-import models as mds
+import recurrent_models as mds
+
 
 import random
 from datetime import datetime
@@ -44,11 +55,15 @@ def single_experiment(engine,
     model = mds.train_model(train_input, train_out, model, training_alg=training_alg, batch_size=batch_size)
     return model.history.history["acc"][0]
 
+# Place holder
+def data():
+    return data.X_train,data.y_train,data.X_test,data.y_test
 
 def investigate_number_of_patterns():
     activation_functions = ["tanh", "sigmoid", "elu",
                             "relu", "exponential", "softplus",
                             "softsign", "hard_sigmoid", "linear"]
+    network_type = ["lstm", "gru", "elman_rnn", "jordan_rnn"]
     # Variable we are investigating
     num_patterns = [x for x in range(2, 15)]
 
@@ -68,6 +83,25 @@ def investigate_number_of_patterns():
                                   sequence_length=sequence_length,
                                   sparsity_length=sparsity_length)
 
+        data.X_train = train_input
+        data.y_train = train_out
+        data.X_test = train_input
+        data.y_test = train_out
+        import recurrent_models
+        g = recurrent_models.get_lstm
+        g.num_input = num_input_nodes
+        g.batch_size = 10
+        g.timesteps = 1
+        g.activation_function = "tanh"
+        g.network_type = "lstm"
+        g.num_output = 2**num_input_nodes
+
+        best_run, best_model = optim.minimize(model=g,
+                                              data=data,
+                                              algo=tpe.suggest,
+                                              max_evals=5,
+                                              trials=Trials(), verbose=0)
+        print(best_model)
 
 
 def run_experiments():
