@@ -23,6 +23,125 @@ import database_functions
 
 # https://machinelearningmastery.com/timedistributed-layer-for-long-short-term-memory-networks-in-python/
 
+from keras.callbacks import Callback
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+import logging
+
+import keras
+from sklearn.metrics import roc_auc_score, precision_recall_fscore_support, confusion_matrix
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
+from keras.layers import GRU
+from keras.layers import SimpleRNN
+
+import numpy as np
+
+from hyperopt import Trials, STATUS_OK, tpe
+from keras.datasets import mnist
+from keras.layers.core import Dense, Dropout, Activation
+from keras.models import Sequential
+from keras.utils import np_utils
+
+from hyperas import optim
+from hyperas.distributions import choice, uniform
+
+import numpy as np
+
+
+
+class ResetState(keras.callbacks.Callback):
+    def on_train_begin(self, logs={}):
+        pass
+
+    def on_train_end(self, logs={}):
+        pass
+
+    def on_epoch_begin(self, epoch, logs={}):
+        pass
+
+    def on_epoch_end(self, epoch, logs={}):
+        pass
+
+    def on_batch_begin(self, batch, logs={}):
+        pass
+
+    def on_batch_end(self, batch, logs={}):
+        self.model.reset_states()
+        # #         print("reset model state", logs)
+        #         acc = logs.get("acc")
+        #         if acc == 1.0:
+
+        return
+
+
+# def get_lstm(x_train, y_train, x_test, y_test):
+#     batch_size = 1
+#     timesteps = 1
+#     activation_function = "tanh"
+#     network_type = "lstm"
+#     num_input = get_lstm.num_input
+#
+#     architecture = {{ choice([1, 2, 3, 4]) }}
+#     architecture = [architecture ]
+#     model = Sequential()
+#
+#     return_sequences = False
+#     if len(architecture) > 1:
+#         return_sequences = True
+#
+#     if network_type == "lstm":
+#         model.add(LSTM(architecture[0], batch_input_shape=(batch_size, timesteps, num_input),
+#                        stateful=True, return_sequences=return_sequences, activation=activation_function))
+#     elif network_type == "gru":
+#         model.add(GRU(architecture[0], batch_input_shape=(batch_size, timesteps, num_input),
+#                       stateful=True, return_sequences=return_sequences, activation=activation_function))
+#     elif network_type == "elman_rnn":
+#         model.add(SimpleRNN(architecture[0], batch_input_shape=(batch_size, timesteps, num_input),
+#                       stateful=True, return_sequences=return_sequences, activation=activation_function))
+#     elif network_type == "jordan_rnn":
+#         model.add(SimpleRNN(architecture[0], batch_input_shape=(batch_size, timesteps, num_input),
+#                       stateful=True, return_sequences=return_sequences, activation=activation_function))
+#
+#
+#     # Hidden layer how many ever
+#     for h in range(1, len(architecture)):
+#         return_sequences = False
+#         if h < len(architecture) - 1:
+#             return_sequences = True
+#
+#         # print(h, return_sequences)
+#         if network_type == "lstm":
+#             model.add(LSTM(architecture[h], return_sequences=return_sequences, activation=activation_function))
+#         elif network_type == "gru":
+#             model.add(GRU(architecture[h], return_sequences=return_sequences, activation=activation_function))
+#         elif network_type == "elman_rnn":
+#             model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function))
+#         elif network_type == "jordan_rnn":
+#             model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function))
+#
+#     model.add(Dense(5, activation="softmax"))
+#
+#     import recurrent_models
+#     callbacks = [
+#         recurrent_models.earlystop,
+#         recurrent_models.reset_state
+#     ]
+#
+#     model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
+#
+#     # We can set shuffle to true by definition of the training set
+#     result = model.fit(x_train, y_train, epochs=3, batch_size=1, verbose=2, shuffle=True, callbacks=callbacks)
+#     #
+#     # score, acc = model.evaluate(x_test, y_test, verbose=0)
+#     #
+#     # print('Test accuracy:', acc)
+#     # return {'loss': -acc, 'status': STATUS_OK, 'model': model}
+#     validation_acc = np.amax(result.history['acc'])
+#     print('Best validation acc of epoch:', validation_acc)
+#     return {'loss': -validation_acc, 'status': STATUS_OK, 'model': model}
+#
+
 
 def single_experiment(engine,
                       case_type,
@@ -55,9 +174,8 @@ def single_experiment(engine,
     model = mds.train_model(train_input, train_out, model, training_alg=training_alg, batch_size=batch_size)
     return model.history.history["acc"][0]
 
-# Place holder
-def data():
-    return data.X_train,data.y_train,data.X_test,data.y_test
+
+
 
 def investigate_number_of_patterns():
     activation_functions = ["tanh", "sigmoid", "elu",
@@ -65,11 +183,16 @@ def investigate_number_of_patterns():
                             "softsign", "hard_sigmoid", "linear"]
     network_type = ["lstm", "gru", "elman_rnn", "jordan_rnn"]
     # Variable we are investigating
-    num_patterns = [x for x in range(2, 15)]
+    num_patterns = [x for x in range(2, 3)]
 
     # constants
     sequence_length = 1
     sparsity_length = 0
+    num_input_nodes = num_patterns[0]
+    import recurrent_models
+    from recurrent_models import get_lstm
+    from recurrent_models import data
+
     for i in num_patterns:
         num_input_nodes = i
         print("     num_input_nodes ", i, "output_nodes", 2**num_input_nodes, "num_patterns", 2**num_input_nodes)
@@ -83,25 +206,25 @@ def investigate_number_of_patterns():
                                   sequence_length=sequence_length,
                                   sparsity_length=sparsity_length)
 
-        data.X_train = train_input
-        data.y_train = train_out
-        data.X_test = train_input
-        data.y_test = train_out
-        import recurrent_models
-        g = recurrent_models.get_lstm
-        g.num_input = num_input_nodes
-        g.batch_size = 10
-        g.timesteps = 1
-        g.activation_function = "tanh"
-        g.network_type = "lstm"
-        g.num_output = 2**num_input_nodes
 
-        best_run, best_model = optim.minimize(model=g,
+        get_lstm.num_input = num_input_nodes
+        get_lstm.batch_size = 10
+        get_lstm.timesteps = 1
+        get_lstm.activation_function = "tanh"
+        get_lstm.network_type = "lstm"
+        get_lstm.num_output = 2**num_input_nodes
+
+        data.x_train = train_input
+        data.y_train = train_out
+        data.x_test = train_input
+        data.y_test = train_out
+
+        best_run, best_model = optim.minimize(model=get_lstm,
                                               data=data,
                                               algo=tpe.suggest,
-                                              max_evals=5,
+                                              max_evals=1,
                                               trials=Trials(), verbose=0)
-        print(best_model)
+        print(best_run, best_model.summary())
 
 
 def run_experiments():

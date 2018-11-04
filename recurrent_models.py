@@ -22,7 +22,11 @@ from hyperas import optim
 from hyperas.distributions import choice, uniform
 
 import numpy as np
-
+global x_train, y_train, x_test, y_test
+x_train  = []
+y_train = []
+x_test= []
+y_test = []
 
 class ResetState(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
@@ -48,16 +52,35 @@ class ResetState(keras.callbacks.Callback):
 
         return
 
+# Place holder
+def data():
+    from recurrent_models import data
+    import recurrent_models
+    x_train = data.x_train
+    y_train = data.y_train
+    x_test = data.x_train
+    y_test = data.y_train
+    return x_train, y_train, x_test, y_test
+
 
 def get_lstm(x_train, y_train, x_test, y_test):
+    from recurrent_models import get_lstm
+    from recurrent_models import ResetState
+    from recurrent_models import EarlyStopping
+    import recurrent_models
     batch_size = get_lstm.batch_size
     timesteps = get_lstm.timesteps
     activation_function = get_lstm.activation_function
     network_type = get_lstm.network_type
 
+    # Freaking weird serialization
+    a = {{choice([i for i in range(0, get_lstm.num_input * 3)])}}
+    b = {{choice([i for i in range(0, get_lstm.num_input * 3)])}}
+    c = {{choice([i for i in range(0, get_lstm.num_input * 3)])}}
+    d = {{choice([i for i in range(0, get_lstm.num_input * 3)])}}
+    e = {{choice([i for i in range(0, get_lstm.num_input * 3)])}}
 
-    architecture = {{choice([i for i in range(1, get_lstm.num_input * 3)])}}
-    architecture = [architecture ]
+    architecture = [a, b, c, d, e]
     model = Sequential()
 
     return_sequences = False
@@ -66,16 +89,16 @@ def get_lstm(x_train, y_train, x_test, y_test):
 
     if network_type == "lstm":
         model.add(LSTM(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                       stateful=True, unroll=True, return_sequences=return_sequences, activation=activation_function))
+                       stateful=True,  return_sequences=return_sequences, activation=activation_function))
     elif network_type == "gru":
         model.add(GRU(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                      stateful=True, unroll=True, return_sequences=return_sequences, activation=activation_function))
+                      stateful=True, return_sequences=return_sequences, activation=activation_function))
     elif network_type == "elman_rnn":
         model.add(SimpleRNN(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                      stateful=True, unroll=True, return_sequences=return_sequences, activation=activation_function))
+                      stateful=True, return_sequences=return_sequences, activation=activation_function))
     elif network_type == "jordan_rnn":
         model.add(SimpleRNN(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                      stateful=True, unroll=True, return_sequences=return_sequences, activation=activation_function))
+                      stateful=True, return_sequences=return_sequences, activation=activation_function))
 
 
     # Hidden layer how many ever
@@ -94,9 +117,16 @@ def get_lstm(x_train, y_train, x_test, y_test):
         elif network_type == "jordan_rnn":
             model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function))
 
-    model.add(Dense(get_lstm.num_output, activation="softmax"))
+    model.add(Dense(get_lstm.num_output+1, activation="softmax"))
 
     model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
+
+    earlystop = recurrent_models.EarlyStopping(monitor='loss',  # loss
+                              patience=10,
+                              verbose=1,
+                              min_delta=0.05,
+                              mode='auto')
+    reset_state = recurrent_models.ResetState()
 
     callbacks = [
         earlystop,
@@ -106,13 +136,13 @@ def get_lstm(x_train, y_train, x_test, y_test):
     # We can set shuffle to true by definition of the training set
     result = model.fit(x_train, y_train, epochs=10, batch_size=batch_size, verbose=2, shuffle=True, callbacks=callbacks)
     #
-    score, acc = model.evaluate(x_test, y_test, verbose=0)
-    #
-    print('Test accuracy:', acc)
-    return {'loss': -acc, 'status': STATUS_OK, 'model': model}
-    # validation_acc = np.amax(result.history['val_acc'])
-    # print('Best validation acc of epoch:', validation_acc)
-    # return {'loss': -validation_acc, 'status': STATUS_OK, 'model': model}
+    # score, acc = model.evaluate(x_test, y_test, verbose=0)
+    # #
+    # print('Test accuracy:', acc)
+    # return {'loss': -acc, 'status': STATUS_OK, 'model': model}
+    validation_acc = np.amax(result.history['acc'])
+    print('Best validation acc of epoch:', validation_acc)
+    return {'loss': -validation_acc, 'status': STATUS_OK, 'model': model}
 
 def get_model_(architecture=[2, 1, 1, 1],
               batch_size=10, timesteps=3,
