@@ -12,7 +12,6 @@ import generate_dataset as gd
 import recurrent_models
 import recurrent_models as mds
 
-
 import random
 from datetime import datetime
 
@@ -50,7 +49,6 @@ from hyperas.distributions import choice, uniform
 import numpy as np
 
 
-
 class ResetState(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
         pass
@@ -75,29 +73,62 @@ class ResetState(keras.callbacks.Callback):
 
         return
 
-def search_architecture(num_input, num_out,
-                        x_train, y_train,
+
+def search_architecture(num_input,
+                        num_out,
+                        x_train,
+                        y_train,
                         batch_size=10,
                         timesteps=3,
                         network_type="lstm",
                         activation_function='tanh'):
-
-    for depth in range(1, num_input * 3):
+    model = None
+    for depth in range(num_input * 3):
         for l5 in range(depth):
             for l4 in range(depth):
                 for l3 in range(depth):
                     for l2 in range(depth):
-                        for l1 in range(1, depth):
-                            # Stop if accuracy == 1
+                        if depth > int(np.ceil(num_input/2)):
+                            for l1 in range(int(np.ceil(num_input / 2)), depth):
+                                # Stop if accuracy == 1
 
-                            architecture = [num_input, l1, l2, l3, l4, l5, num_out]
-                            architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
+                                architecture = [num_input, l1, l2, l3, l4, l5, num_out]
+                                print("architecture", architecture)
+                                architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
 
-                            recurrent_models.get_model(architecture=architecture,
-                                                      batch_size=batch_size,
-                                                      timesteps=timesteps,
-                                                      network_type=network_type,
-                                                      activation_function=activation_function)
+                                model = recurrent_models.get_model(architecture=architecture,
+                                                                   batch_size=batch_size,
+                                                                   timesteps=timesteps,
+                                                                   network_type=network_type,
+                                                                   activation_function=activation_function)
+                                model, result = recurrent_models.train_model(x_train, y_train, model, "adam",
+                                                                             batch_size)
+                                validation_acc = np.amax(result.history['acc'])
+                                if validation_acc >= 1.0:
+                                    print('Best validation acc of epoch:', validation_acc, "architecture", architecture)
+                                    return model
+                        else:
+                            for l1 in range(1, int(np.ceil(num_input/2))):
+                                # Stop if accuracy == 1
+
+                                architecture = [num_input, l1, l2, l3, l4, l5, num_out]
+                                print("architecture", architecture)
+                                architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
+
+                                model = recurrent_models.get_model(architecture=architecture,
+                                                                   batch_size=batch_size,
+                                                                   timesteps=timesteps,
+                                                                   network_type=network_type,
+                                                                   activation_function=activation_function)
+                                model, result = recurrent_models.train_model(x_train, y_train, model, "adam", batch_size)
+                                validation_acc = np.amax(result.history['acc'])
+                                if validation_acc >= 1.0:
+                                    print('Best validation acc of epoch:', validation_acc, "architecture", architecture)
+                                    return model
+
+    return model
+
+
 # def get_lstm(x_train, y_train, x_test, y_test):
 
 #     batch_size = 1
@@ -199,8 +230,6 @@ def single_experiment(engine,
     return model.history.history["acc"][0]
 
 
-
-
 def investigate_number_of_patterns():
     activation_functions = ["tanh", "sigmoid", "elu",
                             "relu", "exponential", "softplus",
@@ -219,36 +248,26 @@ def investigate_number_of_patterns():
 
     for i in num_patterns:
         num_input_nodes = i
-        print("     num_input_nodes ", i, "output_nodes", 2**num_input_nodes, "num_patterns", 2**num_input_nodes)
+        print("     num_input_nodes ", i, "output_nodes", 2 ** num_input_nodes, "num_patterns", 2 ** num_input_nodes)
 
         # masters_user, password, experiment1_num_patterns
         train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
             gd.get_experiment_set(case_type=1,
                                   num_input_nodes=num_input_nodes,
-                                  num_output_nodes=2**num_input_nodes,
-                                  num_patterns=2**num_input_nodes,
+                                  num_output_nodes=2 ** num_input_nodes,
+                                  num_patterns=2 ** num_input_nodes,
                                   sequence_length=sequence_length,
                                   sparsity_length=sparsity_length)
 
-
-        get_lstm.num_input = num_input_nodes
-        get_lstm.batch_size = 1
-        get_lstm.timesteps = 1
-        get_lstm.activation_function = "tanh"
-        get_lstm.network_type = "lstm"
-        get_lstm.num_output = 2**num_input_nodes
-
-        data.x_train = train_input
-        data.y_train = train_out
-        data.x_test = train_input
-        data.y_test = train_out
-
-        best_run, best_model = optim.minimize(model=get_lstm,
-                                              data=data,
-                                              algo=tpe.suggest,
-                                              max_evals=2,
-                                              trials=Trials(), verbose=0)
-        print(best_run, best_model.summary())
+        best_model = search_architecture(num_input_nodes,
+                                         2 ** num_input_nodes,
+                                         train_input,
+                                         train_out,
+                                         batch_size=10,
+                                         timesteps=1,
+                                         network_type="lstm",
+                                         activation_function='tanh')
+        print(best_model.summary())
         keras.backend.clear_session()
 
 
@@ -268,7 +287,8 @@ def run_experiments():
     pattern_input_set, random_patterns, input_set = gd.generate_set(num_input_nodes, sequence_length, num_patterns)
     pattern_output_set, random_output, output_set = gd.generate_set(num_output_nodes, 1, num_patterns)
 
-    train_list, train_out = gd.create_equal_spaced_patterns(input_set, output_set, random_patterns, random_output, sparsity_length)
+    train_list, train_out = gd.create_equal_spaced_patterns(input_set, output_set, random_patterns, random_output,
+                                                            sparsity_length)
 
     # Test the effect of increasing number of patterns
 
@@ -279,6 +299,7 @@ def run_experiments():
     # Test the effect of increasing number of time steps
 
     return
+
 
 def main():
     case_type = 1
@@ -299,6 +320,7 @@ def main():
     batch_size = 10
     # gd.example()
     investigate_number_of_patterns()
+
 
 if __name__ == "__main__":
     main()
