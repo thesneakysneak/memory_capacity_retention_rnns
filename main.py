@@ -287,6 +287,30 @@ def run_experiments():
 
     return
 
+def test_generate_dataset():
+    timesteps = [x for x in range(1, 10)]
+
+    for i in timesteps:
+        num_input_nodes = 1
+        sequence_length = i
+
+        num_output_nodes = (2**num_input_nodes)**sequence_length
+        num_patterns = (2**num_input_nodes)**sequence_length
+        sparsity_length = 0
+
+
+        # generate set
+        train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
+            gd.get_experiment_set(case_type=1,
+                                  num_input_nodes=num_input_nodes,
+                                  num_output_nodes=num_output_nodes,
+                                  num_patterns=num_patterns,
+                                  sequence_length=sequence_length,
+                                  sparsity_length=sparsity_length)
+        print("train_input", train_input)
+        print("train_input", len(train_input))
+        print("train_out", train_out)
+        print("train_input", len(train_out))
 
 def main():
     case_type = 1
@@ -306,8 +330,8 @@ def main():
     architecture = [num_input_nodes, 2, num_output_nodes]
     batch_size = 10
     # gd.example()
-    investigate_number_of_patterns()
-
+    # investigate_number_of_patterns()
+    test_generate_dataset()
 
 if __name__ == "__main__":
     main()

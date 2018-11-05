@@ -148,6 +148,9 @@ def create_equal_spaced_patterns(patterns_to_identify, corresponding_output, ran
     num_r_output = len(random_output)
     num_available_patterns = len(patterns_to_identify)
     # print("len(patterns_to_identify)", len(patterns_to_identify))
+    if sequence_length == 4:
+        print("Jasdasd")
+
     while counter <= total_input_length:
         if pattern_count >= num_available_patterns:
             pattern_count = 0
