@@ -188,25 +188,25 @@ def generate_one_hot_output(num_patterns):
 def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_patterns=3, sequence_length=2,
                        sparsity_length=1):
     print("Generating set")
-    pattern_input_set, random_patterns, input_set = generate_set(num_input_nodes, sequence_length, num_patterns)
+    all_sequences, random_patterns, input_set = generate_set(num_input_nodes, sequence_length, num_patterns)
     # pattern_output_set, random_output, output_set = generate_set(num_output_nodes, sequence_length, num_patterns)
     output = generate_one_hot_output(num_patterns+1)
     output = random.sample(list(output), len(output))
-    pattern_output_set = output
+    output_set = output
     random_output_patterns = [output.pop(0)]
     output_set = output
     if case_type == 1:
-        train_list, train_out = create_equal_spaced_patterns(pattern_input_set, pattern_output_set, random_patterns,
+        train_list, train_out = create_equal_spaced_patterns(input_set, output_set, random_patterns,
                                                              random_output_patterns, sparsity_length, 1000)
     elif case_type == 2:
-        train_list, train_out = create_equal_spaced_patterns(pattern_input_set, pattern_output_set, random_patterns,
+        train_list, train_out = create_equal_spaced_patterns(input_set, output_set, random_patterns,
                                                              output_set, sparsity_length)
     else:
         print("Case ", case_type, "not supported")
         return
         # __print_lists__(train_list, train_out, pattern_output_set)
 
-    return train_list, train_out, input_set, output_set, pattern_input_set, pattern_output_set
+    return train_list, train_out, input_set, output_set, random_patterns, random_output_patterns
 
 
 
