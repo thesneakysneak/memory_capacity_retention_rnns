@@ -307,10 +307,10 @@ def test_generate_dataset():
                                   num_patterns=num_patterns,
                                   sequence_length=sequence_length,
                                   sparsity_length=sparsity_length)
-        # print("train_input", train_input)
-        # print("train_input", len(train_input))
-        # print("train_out", train_out)
-        # print("train_input", len(train_out))
+    print("train_input", train_input.shape)
+    print("train_input", len(train_input))
+    print("train_out", train_out.shape)
+    print("train_input", len(train_out))
 
 def main():
     case_type = 1

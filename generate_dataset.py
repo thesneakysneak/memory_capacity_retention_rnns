@@ -190,11 +190,19 @@ def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_p
     print("Generating set")
     all_sequences, random_patterns, input_set = generate_set(num_input_nodes, sequence_length, num_patterns)
     # pattern_output_set, random_output, output_set = generate_set(num_output_nodes, sequence_length, num_patterns)
-    output = generate_one_hot_output(num_patterns+1)
-    output = random.sample(list(output), len(output))
-    output_set = output
-    random_output_patterns = [output.pop(0)]
-    output_set = output
+    if sparsity_length == 0:
+        output = generate_one_hot_output(num_patterns)
+        output = random.sample(list(output), len(output))
+        output_set = output
+        random_output_patterns = []
+        output_set = output
+    else:
+        output = generate_one_hot_output(num_patterns+1)
+        output = random.sample(list(output), len(output))
+        output_set = output
+        random_output_patterns = [output.pop(0)]
+        output_set = output
+
     if case_type == 1:
         train_list, train_out = create_equal_spaced_patterns(input_set, output_set, random_patterns,
                                                              random_output_patterns, sparsity_length, 1000)
