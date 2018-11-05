@@ -88,43 +88,30 @@ def search_architecture(num_input,
             for l4 in range(depth):
                 for l3 in range(depth):
                     for l2 in range(depth):
+                        upper_bound = depth
+                        lower_bound = 1
                         if depth > int(np.ceil(num_input/2)):
-                            for l1 in range(int(np.ceil(num_input / 2)), depth):
-                                # Stop if accuracy == 1
+                            upper_bound = int(np.ceil(num_input/2))
 
-                                architecture = [num_input, l1, l2, l3, l4, l5, num_out]
-                                print("architecture", architecture)
-                                architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
+                        for l1 in range(lower_bound, upper_bound):
+                            # Stop if accuracy == 1
 
-                                model = recurrent_models.get_model(architecture=architecture,
-                                                                   batch_size=batch_size,
-                                                                   timesteps=timesteps,
-                                                                   network_type=network_type,
-                                                                   activation_function=activation_function)
-                                model, result = recurrent_models.train_model(x_train, y_train, model, "adam",
-                                                                             batch_size)
-                                validation_acc = np.amax(result.history['acc'])
-                                if validation_acc >= 1.0:
-                                    print('Best validation acc of epoch:', validation_acc, "architecture", architecture)
-                                    return model
-                        else:
-                            for l1 in range(1, int(np.ceil(num_input/2))):
-                                # Stop if accuracy == 1
+                            architecture = [num_input, l1, l2, l3, l4, l5, num_out]
+                            print("architecture", architecture)
+                            architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
 
-                                architecture = [num_input, l1, l2, l3, l4, l5, num_out]
-                                print("architecture", architecture)
-                                architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
+                            model = recurrent_models.get_model(architecture=architecture,
+                                                               batch_size=batch_size,
+                                                               timesteps=timesteps,
+                                                               network_type=network_type,
+                                                               activation_function=activation_function)
+                            model, result = recurrent_models.train_model(x_train, y_train, model, "adam",
+                                                                         batch_size)
+                            validation_acc = np.amax(result.history['acc'])
+                            if validation_acc >= 1.0:
+                                print('Best validation acc of epoch:', validation_acc, "architecture", architecture)
+                                return model
 
-                                model = recurrent_models.get_model(architecture=architecture,
-                                                                   batch_size=batch_size,
-                                                                   timesteps=timesteps,
-                                                                   network_type=network_type,
-                                                                   activation_function=activation_function)
-                                model, result = recurrent_models.train_model(x_train, y_train, model, "adam", batch_size)
-                                validation_acc = np.amax(result.history['acc'])
-                                if validation_acc >= 1.0:
-                                    print('Best validation acc of epoch:', validation_acc, "architecture", architecture)
-                                    return model
 
     return model
 
