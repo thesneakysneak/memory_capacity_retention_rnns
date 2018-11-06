@@ -290,6 +290,9 @@ def run_experiments():
 def test_generate_dataset():
     timesteps = [x for x in range(1, 10)]
 
+    print("========================================================================================")
+    print("========================================================================================")
+    # Keep input size and num patterns constant. Increase timesteps
     for i in timesteps:
         num_input_nodes = 1
         sequence_length = i
@@ -307,6 +310,78 @@ def test_generate_dataset():
                                   num_patterns=num_patterns,
                                   sequence_length=sequence_length,
                                   sparsity_length=sparsity_length)
+
+
+    print("========================================================================================")
+    print("========================================================================================")
+    # Keep timesteps constant. Increase input size
+    input_size = [x for x in range(1, 10)]
+
+    for i in input_size:
+        num_input_nodes = i
+        sequence_length = 2
+
+        # num_output_nodes = (2**num_input_nodes)**sequence_length
+        # num_patterns = (2**num_input_nodes)**sequence_length
+        sparsity_length = 0
+        num_patterns = 2
+        num_output_nodes = num_patterns
+        # generate set
+        train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
+            gd.get_experiment_set(case_type=1,
+                                  num_input_nodes=num_input_nodes,
+                                  num_output_nodes=num_output_nodes,
+                                  num_patterns=num_patterns,
+                                  sequence_length=sequence_length,
+                                  sparsity_length=sparsity_length)
+
+
+    # Keep input size and timesteps constant, increase num patterns
+    print("========================================================================================")
+    print("========================================================================================")
+
+
+    for i in [x for x in range(2, 10)]:
+        num_input_nodes = 10
+        sequence_length = 1
+
+        # num_output_nodes = (2**num_input_nodes)**sequence_length
+        # num_patterns = (2**num_input_nodes)**sequence_length
+        sparsity_length = 0
+        num_patterns = i
+        num_output_nodes = num_patterns
+        # generate set
+        train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
+            gd.get_experiment_set(case_type=1,
+                                  num_input_nodes=num_input_nodes,
+                                  num_output_nodes=num_output_nodes,
+                                  num_patterns=num_patterns,
+                                  sequence_length=sequence_length,
+                                  sparsity_length=sparsity_length)
+
+
+    # Keep input size,  num patterns and timesteps constant, increase sparsity
+    print("========================================================================================")
+    print("========================================================================================")
+
+    for i in [x for x in range(2, 10)]:
+        num_input_nodes = 10
+        sequence_length = 1
+
+        # num_output_nodes = (2**num_input_nodes)**sequence_length
+        # num_patterns = (2**num_input_nodes)**sequence_length
+        sparsity_length = i
+        num_patterns = 3
+        num_output_nodes = num_patterns
+        # generate set
+        train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
+            gd.get_experiment_set(case_type=1,
+                                  num_input_nodes=num_input_nodes,
+                                  num_output_nodes=num_output_nodes,
+                                  num_patterns=num_patterns,
+                                  sequence_length=sequence_length,
+                                  sparsity_length=sparsity_length)
+
     print("train_input", train_input.shape)
     print("train_input", len(train_input))
     print("train_out", train_out.shape)
