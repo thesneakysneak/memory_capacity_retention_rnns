@@ -268,14 +268,11 @@ def run_experiments():
     case_type = 1
     num_input_nodes = 1
     num_output_nodes = 4
-    num_patterns = 3
-    sequence_length = 2
-    sparsity_length = 1
-    pattern_input_set, random_patterns, input_set = gd.generate_set(num_input_nodes, sequence_length, num_patterns)
-    pattern_output_set, random_output, output_set = gd.generate_set(num_output_nodes, 1, num_patterns)
+    num_patterns = 1
+    timesteps = 1
+    sparsity_length = 0
 
-    train_list, train_out = gd.create_equal_spaced_patterns(input_set, output_set, random_patterns, random_output,
-                                                            sparsity_length)
+
 
     # Test the effect of increasing number of patterns
 
@@ -386,6 +383,31 @@ def test_generate_dataset():
     print("train_input", len(train_input))
     print("train_out", train_out.shape)
     print("train_input", len(train_out))
+
+def test_loop():
+    case_type = 1
+    num_input_nodes = 1
+    num_output_nodes = 4
+    num_patterns = 1
+    timesteps = 1
+    sparsity_length = 0
+
+    activation_functions = ["tanh", "sigmoid", "elu",
+                            "relu", "exponential", "softplus",
+                            "softsign", "hard_sigmoid", "linear"]
+    network_types = ["lstm", "gru", "elman_rnn", "jordan_rnn"]
+
+    # Variable we are investigating
+    for num_input_nodes in range(1, 10):
+        for timesteps in range(1, 10):
+            num_available_patterns = (2**num_input_nodes)**timesteps
+            for num_patterns in range(1, num_available_patterns ):
+                for sparsity_length in range(0, 100):
+                    for network_type in network_types:
+                        for activation_function in activation_functions:
+                            for run in range(30):
+                                df = database_functions.get_dataset(num_input_nodes, )
+
 
 def main():
     case_type = 1
