@@ -345,7 +345,12 @@ def test_loop():
                     for sparsity_length in range(1, 100):
                         for network_type in network_types:
                             for activation_function in activation_functions:
-
+                                print("=======================================================")
+                                print("=====                                              ====")
+                                print("=====                                              ====")
+                                print("=====                                              ====")
+                                print("=====                                              ====")
+                                print("=======================================================")
                                 print("run", run, "activation function", activation_function,
                                       "network", network_type, "sparsity", sparsity_length,
                                       "num_patterns", num_patterns, "timesteps", timesteps)
