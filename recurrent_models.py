@@ -189,7 +189,7 @@ def get_model(architecture=[2, 1, 1, 1],
         elif network_type == "elman_rnn":
             model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function, name="layer"+str(h+1)))
 
-    model.add(Dense(architecture[-1]+1, activation="softmax", name="output_layer"))
+    model.add(Dense(architecture[-1], activation="softmax", name="output_layer"))
     return model
 
 

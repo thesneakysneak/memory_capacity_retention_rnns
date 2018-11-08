@@ -9,26 +9,26 @@ Base = declarative_base()
 engine = create_engine('postgresql://masters_user:password@localhost:5432/masters_experiments')
 
 
-def insert_experiment(case_type,
-                      num_input,
-                      num_output,
-                      num_patterns_to_recall,
-                      num_patterns_total,
-                      timesteps,
-                      sparsity_length,
-                      random_seed,
-                      run_count,
-                      error_when_stopped,
-                      num_correctly_identified,
-                      input_set,
-                      output_set,
-                      architecture,
-                      num_network_parameters,
-                      network_type,
-                      training_algorithm,
-                      batch_size,
-                      activation_function,
-                      full_network):
+def insert_experiment(case_type=1,
+                      num_input=0,
+                      num_output=0,
+                      num_patterns_to_recall=0,
+                      num_patterns_total=0,
+                      timesteps=0,
+                      sparsity_length=0,
+                      random_seed=0,
+                      run_count=0,
+                      error_when_stopped=0.0,
+                      num_correctly_identified=0,
+                      input_set=0,
+                      output_set=0,
+                      architecture=[0,0,0,0,0],
+                      num_network_parameters=0,
+                      network_type="lstm",
+                      training_algorithm="adam",
+                      batch_size=10,
+                      activation_function="tanh",
+                      full_network=""):
     df = pd.DataFrame()
     df["case_type"] = case_type
     df["num_input"] = num_input
@@ -49,8 +49,8 @@ def insert_experiment(case_type,
     df["training_algorithm"] = training_algorithm
     df["batch_size"] = batch_size
     df["activation_function"] = activation_function
-    df["full_network"] = full_network
-    df.to_sql('experiments', engine, index=False)
+    df["full_network"] = str(full_network)
+    df.to_sql('experiments', engine, index=False, if_exists='append')
 
 
 def insert_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2,
@@ -76,10 +76,10 @@ def insert_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2,
 
 def get_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2, network_type="lstm", activation_function="tanh",
                 run=1):
-    df = pd.read_sql_query("select * from datasets where timesteps=" + str(timesteps)
-                           + " and sparsity=" + str(sparsity)
+    df = pd.read_sql_query("select * from experiments where timesteps=" + str(timesteps)
+                           + " and sparsity_length=" + str(sparsity)
                            + " and num_input=" + str(num_input)
-                           + " and num_patterns=" + str(num_patterns)
+                           + " and num_patterns_total=" + str(num_patterns)
                            + " and network_type='" + network_type + "'"
                            + " and activation_function='" + str(activation_function) + "'"
                            + " and run=" + str(run),

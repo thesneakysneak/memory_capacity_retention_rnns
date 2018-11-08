@@ -82,16 +82,18 @@ def search_architecture(num_input,
                         timesteps=3,
                         network_type="lstm",
                         activation_function='tanh'):
+    architecture = []
     model = None
+    result = {"history" : {"acc" : 0}}
     for depth in range(num_input * 3):
         for l5 in range(depth):
             for l4 in range(depth):
                 for l3 in range(depth):
                     for l2 in range(depth):
-                        upper_bound = depth
+                        upper_bound = depth + 1
                         lower_bound = 1
                         if depth > int(np.ceil(num_input/2)):
-                            upper_bound = int(np.ceil(num_input/2))
+                            upper_bound = int(np.ceil(num_input/2)) + 1
 
                         for l1 in range(lower_bound, upper_bound):
                             # Stop if accuracy == 1
@@ -108,81 +110,15 @@ def search_architecture(num_input,
                             model, result = recurrent_models.train_model(x_train, y_train, model, "adam",
                                                                          batch_size)
                             validation_acc = np.amax(result.history['acc'])
-                            if validation_acc >= 1.0:
+                            y_predicted = model.predict(x_train, batch_size=batch_size)
+                            f_score = recurrent_models.determine_score(y_train, y_predicted, f_only=True)
+                            if f_score >= 1.0:
                                 print('Best validation acc of epoch:', validation_acc, "architecture", architecture)
-                                return model
+                                return model, result, architecture
 
 
-    return model
+    return model, result, architecture
 
-
-# def get_lstm(x_train, y_train, x_test, y_test):
-
-#     batch_size = 1
-#     timesteps = 1
-#     activation_function = "tanh"
-#     network_type = "lstm"
-#     num_input = get_lstm.num_input
-#
-#     architecture = {{ choice([1, 2, 3, 4]) }}
-#     architecture = [architecture ]
-#     model = Sequential()
-#
-#     return_sequences = False
-#     if len(architecture) > 1:
-#         return_sequences = True
-#
-#     if network_type == "lstm":
-#         model.add(LSTM(architecture[0], batch_input_shape=(batch_size, timesteps, num_input),
-#                        stateful=True, return_sequences=return_sequences, activation=activation_function))
-#     elif network_type == "gru":
-#         model.add(GRU(architecture[0], batch_input_shape=(batch_size, timesteps, num_input),
-#                       stateful=True, return_sequences=return_sequences, activation=activation_function))
-#     elif network_type == "elman_rnn":
-#         model.add(SimpleRNN(architecture[0], batch_input_shape=(batch_size, timesteps, num_input),
-#                       stateful=True, return_sequences=return_sequences, activation=activation_function))
-#     elif network_type == "jordan_rnn":
-#         model.add(SimpleRNN(architecture[0], batch_input_shape=(batch_size, timesteps, num_input),
-#                       stateful=True, return_sequences=return_sequences, activation=activation_function))
-#
-#
-#     # Hidden layer how many ever
-#     for h in range(1, len(architecture)):
-#         return_sequences = False
-#         if h < len(architecture) - 1:
-#             return_sequences = True
-#
-#         # print(h, return_sequences)
-#         if network_type == "lstm":
-#             model.add(LSTM(architecture[h], return_sequences=return_sequences, activation=activation_function))
-#         elif network_type == "gru":
-#             model.add(GRU(architecture[h], return_sequences=return_sequences, activation=activation_function))
-#         elif network_type == "elman_rnn":
-#             model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function))
-#         elif network_type == "jordan_rnn":
-#             model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function))
-#
-#     model.add(Dense(5, activation="softmax"))
-#
-#     import recurrent_models
-#     callbacks = [
-#         recurrent_models.earlystop,
-#         recurrent_models.reset_state
-#     ]
-#
-#     model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
-#
-#     # We can set shuffle to true by definition of the training set
-#     result = model.fit(x_train, y_train, epochs=3, batch_size=1, verbose=2, shuffle=True, callbacks=callbacks)
-#     #
-#     # score, acc = model.evaluate(x_test, y_test, verbose=0)
-#     #
-#     # print('Test accuracy:', acc)
-#     # return {'loss': -acc, 'status': STATUS_OK, 'model': model}
-#     validation_acc = np.amax(result.history['acc'])
-#     print('Best validation acc of epoch:', validation_acc)
-#     return {'loss': -validation_acc, 'status': STATUS_OK, 'model': model}
-#
 
 
 def single_experiment(engine,
@@ -392,22 +328,78 @@ def test_loop():
     timesteps = 1
     sparsity_length = 0
 
-    activation_functions = ["tanh", "sigmoid", "elu",
-                            "relu", "exponential", "softplus",
-                            "softsign", "hard_sigmoid", "linear"]
-    network_types = ["lstm", "gru", "elman_rnn", "jordan_rnn"]
+    activation_functions = ["softmax",
+                            "elu", "selu", "softplus",
+                            "softsign", "tanh", "sigmoid",
+                            "hard_sigmoid",
+                            "relu",
+                              "linear"]
+    network_types = ["lstm", "gru", "elman_rnn", ] # "jordan_rnn"
 
     # Variable we are investigating
     for num_input_nodes in range(1, 10):
         for timesteps in range(1, 10):
             num_available_patterns = (2**num_input_nodes)**timesteps
-            for num_patterns in range(1, num_available_patterns ):
+            for num_patterns in range(2, num_available_patterns ):
                 for sparsity_length in range(0, 100):
                     for network_type in network_types:
                         for activation_function in activation_functions:
-                            for run in range(30):
-                                df = database_functions.get_dataset(num_input_nodes, )
+                            for run in range(1, 31):
 
+                                print("run", run, "activation function", activation_function,
+                                      "network", network_type, "sparsity", sparsity_length,
+                                      "num_patterns", num_patterns, "timesteps", timesteps)
+                                df = database_functions.get_dataset(timesteps=timesteps,
+                                                                    sparsity=sparsity_length,
+                                                                    num_input=num_input_nodes,
+                                                                    num_patterns=num_patterns,
+                                                                    network_type=network_type,
+                                                                    activation_function=activation_function,
+                                                                    run=run)
+                                if df.shape[0] == 0:
+                                    dt = datetime.now()
+                                    random_seed = dt.microsecond
+                                    random.seed(random_seed)
+                                    train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
+                                        gd.get_experiment_set(case_type=1,
+                                                              num_input_nodes=num_input_nodes,
+                                                              num_output_nodes=num_patterns,
+                                                              num_patterns=num_patterns,
+                                                              sequence_length=timesteps,
+                                                              sparsity_length=sparsity_length)
+
+                                    best_model, result, architecture = search_architecture(num_input_nodes,
+                                                                     2 ** num_input_nodes,
+                                                                     train_input,
+                                                                     train_out,
+                                                                     batch_size=10,
+                                                                     timesteps=timesteps,
+                                                                     network_type=network_type,
+                                                                     activation_function=activation_function)
+                                    print(best_model.summary())
+                                    validation_acc = np.amax(result.history['acc'])
+
+                                    database_functions.insert_experiment(case_type=1,
+                                                                          num_input=num_input_nodes,
+                                                                          num_output=num_patterns,
+                                                                          num_patterns_to_recall=num_patterns,
+                                                                          num_patterns_total=num_available_patterns,
+                                                                          timesteps=timesteps,
+                                                                          sparsity_length=sparsity_length,
+                                                                          random_seed=random_seed,
+                                                                          run_count=run,
+                                                                          error_when_stopped=validation_acc,
+                                                                          num_correctly_identified=0,
+                                                                          input_set=str(train_input),
+                                                                          output_set=str(train_out),
+                                                                          architecture=str(best_model.to_json()),
+                                                                          num_network_parameters=best_model.count_params(),
+                                                                          network_type=network_type,
+                                                                          training_algorithm="adam",
+                                                                          batch_size=10,
+                                                                          activation_function=activation_function,
+                                                                          full_network="")
+                                    keras.backend.clear_session()
 
 def main():
     case_type = 1
@@ -428,7 +420,10 @@ def main():
     batch_size = 10
     # gd.example()
     # investigate_number_of_patterns()
-    test_generate_dataset()
+    # test_generate_dataset()
+    # database_functions.insert_experiment()
+    test_loop()
+
 
 if __name__ == "__main__":
     main()
