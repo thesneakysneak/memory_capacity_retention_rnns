@@ -110,12 +110,13 @@ def insert_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2,
 def get_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2, network_type="lstm", activation_function="tanh",
                 run=1):
     global engine
-    df = pd.read_sql_query("select * from experiments where timesteps=" + str(timesteps)
-                           + " and sparsity_length=" + str(sparsity)
-                           + " and num_input=" + str(num_input)
-                           + " and num_patterns_total=" + str(num_patterns)
-                           + " and network_type='" + network_type + "'"
-                           + " and activation_function='" + str(activation_function) + "'"
-                           + " and run=" + str(run),
+    query_str = "select * from experiments where timesteps=" + str(timesteps) \
+                           + " and sparsity_length=" + str(sparsity) \
+                           + " and num_input=" + str(num_input) \
+                           + " and num_patterns_total=" + str(num_patterns) \
+                           + " and network_type='" + network_type + "'" \
+                           + " and activation_function='" + str(activation_function) + "'" \
+                           + " and run=" + str(run)
+    df = pd.read_sql_query(query_str,
                            con=engine)
     return df

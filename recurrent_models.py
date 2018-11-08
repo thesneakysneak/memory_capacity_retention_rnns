@@ -126,7 +126,7 @@ def get_lstm(x_train, y_train, x_test, y_test):
     model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
 
     earlystop = recurrent_models.EarlyStopping(monitor='acc',  # loss
-                              patience=20,
+                              patience=10,
                               verbose=1,
                               min_delta=0.05,
                               mode='auto')
