@@ -115,7 +115,8 @@ def get_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2, network_ty
                            + " and num_input=" + str(num_input) \
                            + " and num_patterns_total=" + str(num_patterns) \
                            + " and network_type='" + network_type + "'" \
-                           + " and activation_function='" + str(activation_function) + "'"
+                           + " and activation_function='" + str(activation_function) + "'" \
+                            + " and run=" + str(run)
     df = pd.read_sql_query(query_str,
                            con=engine)
     return df
