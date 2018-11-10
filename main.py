@@ -338,9 +338,9 @@ def test_loop():
 
     # Variable we are investigating
     for run in range(1, 31):
-        for sparsity_length in range(1, 100):
-            for num_input_nodes in range(1, 10):
-                for timesteps in range(1, 10):
+        for num_input_nodes in range(1, 100):
+            for sparsity_length in range(1, 100):
+                for timesteps in range(1, 100):
                     num_available_patterns = (2**num_input_nodes)**timesteps
                     for num_patterns in range(2, num_available_patterns ):
                         for network_type in network_types:
