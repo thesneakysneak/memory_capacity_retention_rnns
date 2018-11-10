@@ -112,6 +112,7 @@ def search_architecture(num_input,
                             validation_acc = np.amax(result.history['acc'])
                             y_predicted = model.predict(x_train, batch_size=batch_size)
                             f_score = recurrent_models.determine_score(y_train, y_predicted, f_only=True)
+                            print("f_score", f_score)
                             if f_score >= 1.0:
                                 print('Best validation acc of epoch:', validation_acc, "architecture", architecture)
                                 return model, result, architecture
@@ -338,9 +339,9 @@ def test_loop():
 
     # Variable we are investigating
     for run in range(1, 31):
-        for sparsity_length in range(1, 100):
-            for num_input_nodes in range(1, 10):
-                for timesteps in range(1, 10):
+        for sparsity_length in range(0, 51):
+            for num_input_nodes in range(1, 31):
+                for timesteps in range(1, 31):
                     num_available_patterns = (2**num_input_nodes)**timesteps
                     for num_patterns in range(2, num_available_patterns ):
                         for network_type in network_types:

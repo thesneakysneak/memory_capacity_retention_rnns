@@ -242,13 +242,14 @@ def determine_score(predicted, test, f_only=True):
     conf_mat = confusion_matrix(t_categories, p_categories)
     precision, recall, fbeta_score, beta = precision_recall_fscore_support(t_categories, p_categories, average="micro")
 
+    print(conf_mat)
     if f_only:
         return fbeta_score
     return precision, recall, fbeta_score, conf_mat
 
 
-earlystop = EarlyStopping(monitor='loss',  # loss
-                          patience=10,
+earlystop = EarlyStopping(monitor='accuracy',  # loss
+                          patience=30,
                           verbose=1,
                           min_delta=0.05,
                           mode='auto')
