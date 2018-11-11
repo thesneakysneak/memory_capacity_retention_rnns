@@ -160,7 +160,7 @@ def determine_score(predicted, test, f_only=True):
 
 earlystop = EarlyStopping(monitor='acc',  # loss
                           patience=30,
-                          verbose=1,
+                          verbose=0,
                           min_delta=0.05,
                           mode='auto')
 reset_state = ResetState()

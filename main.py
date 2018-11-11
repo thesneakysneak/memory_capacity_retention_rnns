@@ -537,9 +537,12 @@ def main():
                     bounds_num_patterns.append(num_patterns_bounds.pop(-1))
             bounds_num_patterns = sorted(bounds_num_patterns)
             print(run, bounds_num_input_nodes, bounds_sparsity_length, bounds_time_steps, bounds_num_patterns)
-            thread = Thread(target=experiment_loop, args=(run, bounds_num_input_nodes, bounds_sparsity_length, bounds_time_steps, bounds_num_patterns))
-            thread.start()
-        thread.join()
+            experiment_loop(run, bounds_num_input_nodes, bounds_sparsity_length, bounds_time_steps,
+                            bounds_num_patterns)
+
+            #     thread = Thread(target=experiment_loop, args=experiment_loop(run, bounds_num_input_nodes, bounds_sparsity_length, bounds_time_steps, bounds_num_patterns))
+        #     thread.start()
+        # thread.join()
 
 if __name__ == "__main__":
     main()
