@@ -111,7 +111,6 @@ def investigate_number_of_patterns():
     sparsity_length = 0
 
     import recurrent_models
-    from recurrent_models import get_lstm
     from recurrent_models import data
 
     for i in num_patterns:
@@ -242,7 +241,7 @@ def test_generate_dataset():
 
 
 def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4,
-                   timesteps = 1, sparsity_length = 0, num_patterns=0, smallest_architecture=[]):
+                   timesteps = 1, sparsity_length = 0, num_patterns=0, smallest_architecture=[], folder_root="timesteps"):
 
     activation_functions = ["softmax",
                             "elu", "selu", "softplus",
@@ -266,14 +265,20 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                   "num_patterns", num_patterns, "timesteps", timesteps)
 
             # TODO Revisit
-            df = database_functions.get_dataset(timesteps=timesteps,
-                                                sparsity=sparsity_length,
-                                                num_input=num_input_nodes,
-                                                num_patterns=num_patterns,
-                                                network_type=network_type,
-                                                activation_function=activation_function,
-                                                run=run)
-            if df.shape[0] == 0:
+            exists = database_functions.experiment_exists(
+                                            case_type=1,
+                                            num_input=num_input_nodes,
+                                            num_output=num_patterns,
+                                            num_patterns_to_recall=num_patterns,
+                                            num_patterns_total=num_patterns,
+                                            timesteps=timesteps,
+                                            sparsity_length=sparsity_length,
+                                            run_count=run,
+                                            network_type=network_type,
+                                            activation_function=activation_function,
+                                            folder_root=folder_root)
+
+            if not exists:
                 dt = datetime.now()
                 random_seed = dt.microsecond
                 random.seed(random_seed)
@@ -344,7 +349,8 @@ def experiment_loop(run):
                                                num_output_nodes=num_available_patterns,
                                                timesteps=timesteps, sparsity_length=sparsity_length,
                                                num_patterns=num_available_patterns,
-                                               smallest_architecture=smallest_architecture)
+                                               smallest_architecture=smallest_architecture,
+                                               folder_root="num_nodes")
         for sparsity_length in range(0, 51):
             # Test effect of increasing sparsity. All else constant
             s = [int(x / 2) for x in smallest_architecture]
@@ -352,7 +358,8 @@ def experiment_loop(run):
                                                    num_output_nodes=num_available_patterns,
                                                    timesteps=timesteps, sparsity_length=sparsity_length,
                                                    num_patterns=num_available_patterns,
-                                                   smallest_architecture=s)
+                                                   smallest_architecture=s,
+                                                    folder_root="sparsity")
         sparsity_length = 0
         for timesteps in range(1, 31):
             # Test effect of increasing timesteps. All else constant
@@ -360,7 +367,8 @@ def experiment_loop(run):
                                                    num_output_nodes=num_available_patterns,
                                                    timesteps=timesteps, sparsity_length=sparsity_length,
                                                    num_patterns=num_available_patterns,
-                                                   smallest_architecture=smallest_architecture)
+                                                   smallest_architecture=smallest_architecture,
+                                                    folder_root="timesteps")
         timesteps = 1
         for num_patterns in range(2, num_available_patterns):
             # Test effect of increasing num_patterns. All else constant
@@ -368,7 +376,8 @@ def experiment_loop(run):
                                                    num_output_nodes=num_patterns,
                                                    timesteps=timesteps, sparsity_length=sparsity_length,
                                                    num_patterns=num_patterns,
-                                                   smallest_architecture=[])
+                                                   smallest_architecture=[],
+                                                    folder_root="patterns")
 
 def test_loop():
     case_type = 1
