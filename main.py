@@ -44,7 +44,7 @@ def search_architecture(num_input,
     l3_start = 0
     l4_start = 0
     l5_start = 0
-    depth_start = 1
+    depth_start = num_input*2
     if len(base_architecture) > 2:
         l1_start = base_architecture[1]
         smallest_architecture = min(base_architecture)
@@ -59,15 +59,15 @@ def search_architecture(num_input,
     if len(base_architecture) > 6:
         l5_start = base_architecture[5]
 
-    for depth in range(depth_start, num_input * 3):
+    for depth in range(depth_start, num_input * 5):
         for l5 in range(l5_start, depth):
             for l4 in range(l4_start, depth):
                 for l3 in range(l3_start, depth):
                     for l2 in range(l2_start, depth):
                         upper_bound = depth + 1
                         lower_bound = l1_start
-                        if depth > int(np.ceil(num_input/2)) and depth>lower_bound:
-                            upper_bound = int(np.ceil(num_input/2)) + 1
+                        if depth < num_input*3+1:
+                            upper_bound = num_input*3+1
 
                         for l1 in range(lower_bound, upper_bound):
                             # Stop if accuracy == 1
@@ -336,7 +336,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
 
 
 def experiment_loop(run):
-    run = run[0]
+    run = run
     smallest_architecture = []
     # Variable we are investigating
     for num_input_nodes in range(2, 31):

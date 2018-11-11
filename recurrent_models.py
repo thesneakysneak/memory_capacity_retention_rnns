@@ -111,7 +111,7 @@ def train_model(input_set, output_set, model, training_alg, batch_size):
         reset_state
     ]
 
-    result = model.fit(input_set, output_set, epochs=1000, batch_size=batch_size, verbose=1, shuffle=False, callbacks=callbacks)
+    result = model.fit(input_set, output_set, epochs=1000, batch_size=batch_size, verbose=0, shuffle=False, callbacks=callbacks)
     return model, result
 
 
@@ -158,7 +158,7 @@ def determine_score(predicted, test, f_only=True):
     return precision, recall, fbeta_score, conf_mat
 
 
-earlystop = EarlyStopping(monitor='accuracy',  # loss
+earlystop = EarlyStopping(monitor='acc',  # loss
                           patience=30,
                           verbose=1,
                           min_delta=0.05,
