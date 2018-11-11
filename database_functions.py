@@ -1,4 +1,7 @@
 import pandas as pd
+from os import listdir
+from os.path import isfile, join
+
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine, Column
 from sqlalchemy.ext.declarative import declarative_base
@@ -60,7 +63,8 @@ def insert_experiment(case_type=1,
                       training_algorithm="adam",
                       batch_size=10,
                       activation_function="tanh",
-                      full_network="[0,0,0,0,0]"):
+                      full_network="[0,0,0,0,0]",
+                      folder_root=""):
     global engine
     df = pd.DataFrame()
     df["case_type"] = [case_type]
@@ -83,8 +87,13 @@ def insert_experiment(case_type=1,
     df["batch_size"] = [batch_size]
     df["activation_function"] = [activation_function]
     df["full_network"] = [str(full_network)]
-    df.to_sql('experiments', engine, index=False, if_exists='append')
-
+    # df.to_sql('experiments', engine, index=False, if_exists='append')
+    location = folder_root + "/" + str(run_count) + "_" + str(case_type) + "_" + str(num_input) \
+               + "_" + str(num_output) + "_" + str(timesteps) + "_" + str(num_patterns_to_recall) \
+               + "_" + str(sparsity_length) \
+               + "_" + str(num_patterns_total) + "_" + str(network_type) \
+               + "_" + str(activation_function) + "_" + str(num_patterns_total) + ".csv"
+    df.to_csv(location)
 
 def insert_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2,
                    train_input=[[[0, 1]], [[1, 0]]],
@@ -107,16 +116,43 @@ def insert_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2,
     df.to_sql('datasets', engine, index=False, if_exists='append')
 
 
-def get_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2, network_type="lstm", activation_function="tanh",
-                run=1):
-    global engine
-    query_str = "select * from experiments where timesteps=" + str(timesteps) \
-                           + " and sparsity_length=" + str(sparsity) \
-                           + " and num_input=" + str(num_input) \
-                           + " and num_patterns_total=" + str(num_patterns) \
-                           + " and network_type='" + network_type + "'" \
-                           + " and activation_function='" + str(activation_function) + "'" \
-                            + " and run=" + str(run)
-    df = pd.read_sql_query(query_str,
-                           con=engine)
-    return df
+def experiment_exists(case_type=1,
+                      num_input=0,
+                      num_output=0,
+                      num_patterns_to_recall=0,
+                      num_patterns_total=0,
+                      timesteps=0,
+                      sparsity_length=0,
+                      run_count=0,
+                      network_type="lstm",
+                      activation_function="tanh",
+                      folder_root=""):
+
+    onlyfiles = [f for f in listdir(folder_root) if isfile(join(folder_root, f))]
+    location = folder_root + "/" + str(run_count) + "_" + str(case_type) + "_" + str(num_input) \
+               + "_" + str(num_output) + "_" + str(timesteps) + "_" + str(num_patterns_to_recall) \
+               + "_" + str(sparsity_length) \
+               + "_" + str(num_patterns_total) + "_" + str(network_type) \
+               + "_" + str(activation_function) + "_" + str(num_patterns_total) + ".csv"
+
+    if location in onlyfiles:
+        return True
+    return False
+
+
+# def get_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2, network_type="lstm", activation_function="tanh",
+#                 run=1, folder=""):
+#     # global engine
+#     # query_str = "select * from experiments where timesteps=" + str(timesteps) \
+#     #                        + " and sparsity_length=" + str(sparsity) \
+#     #                        + " and num_input=" + str(num_input) \
+#     #                        + " and num_patterns_total=" + str(num_patterns) \
+#     #                        + " and network_type='" + network_type + "'" \
+#     #                        + " and activation_function='" + str(activation_function) + "'" \
+#     #                         + " and run=" + str(run)
+#     # df = pd.read_sql_query(query_str,
+#     #                        con=engine)
+#
+#     onlyfiles = [f for f in listdir(folder) if isfile(join(folder, f))]
+#
+#     return df

@@ -15,7 +15,7 @@ from keras.layers import SimpleRNN
 from keras.layers.core import Dense, Dropout, Activation
 from keras.models import Sequential
 
-
+import tensorflow as tf
 import numpy as np
 global x_train, y_train, x_test, y_test
 x_train  = []
