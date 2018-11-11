@@ -66,19 +66,19 @@ def search_architecture(num_input,
     l4_start = 0
     l5_start = 0
     depth_start = 1
-    if len(base_architecture) > 0:
-        l1_start = base_architecture[0]
+    if len(base_architecture) > 2:
+        l1_start = base_architecture[1]
         smallest_architecture = min(base_architecture)
         if smallest_architecture > 1:
-            depth_start = smallest_architecture 
-    if len(base_architecture) > 1:
-        l2_start = base_architecture[1]
-    if len(base_architecture) > 2:
-        l3_start = base_architecture[2]
+            depth_start = smallest_architecture
     if len(base_architecture) > 3:
-        l4_start = base_architecture[3]
+        l2_start = base_architecture[2]
     if len(base_architecture) > 4:
-        l5_start = base_architecture[4]
+        l3_start = base_architecture[3]
+    if len(base_architecture) > 5:
+        l4_start = base_architecture[4]
+    if len(base_architecture) > 6:
+        l5_start = base_architecture[5]
 
     for depth in range(depth_start, num_input * 3):
         for l5 in range(l5_start, depth):
