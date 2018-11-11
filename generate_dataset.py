@@ -160,10 +160,14 @@ def create_equal_spaced_patterns(patterns_to_identify, corresponding_output, ran
             train_out.append(corresponding_output[pattern_count])
             pattern_count += 1
         else:
-            rand_index_in = random.randint(0, len(random_patterns) - 1)
+            if len(random_patterns) == 1:
+                rand_index_in = 0
+                rand_index_out = 0
+            else:
+                rand_index_in = random.randint(0, len(random_patterns) - 1)
+                rand_index_out = random.randint(0, num_r_output - 1)
             # print("random_patterns", rand_index_in)
             train_list.append(random_patterns[rand_index_in])
-            rand_index_out = random.randint(0, num_r_output - 1)
             # print("random_output", rand_index_out)
             train_out.append(random_output[rand_index_out])
         counter += 1
