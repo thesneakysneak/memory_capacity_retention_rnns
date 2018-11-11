@@ -107,7 +107,7 @@ def insert_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2,
     df.to_sql('datasets', engine, index=False, if_exists='append')
 
 
-def get_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2, network_type="lstm", activation_function="tanh",
+def experiment_exists(timesteps=1, sparsity=0, num_input=2, num_patterns=2, network_type="lstm", activation_function="tanh",
                 run=1):
     global engine
     query_str = "select * from experiments_2 where timesteps=" + str(timesteps) \
@@ -119,4 +119,6 @@ def get_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2, network_ty
                             + " and run=" + str(run)
     df = pd.read_sql_query(query_str,
                            con=engine)
-    return df
+    if df.shape[0] > 0:
+        return True
+    return False
