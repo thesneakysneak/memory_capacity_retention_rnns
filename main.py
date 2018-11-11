@@ -1,46 +1,25 @@
-from hyperas import optim
-from hyperopt import Trials, STATUS_OK, tpe
+
 from keras.datasets import mnist
 from keras.layers.core import Dense, Dropout, Activation
 from keras.models import Sequential
 from keras.utils import np_utils
 
-from hyperas import optim
-from hyperas.distributions import choice, uniform
 
 import generate_dataset as gd
 import recurrent_models
-import recurrent_models as mds
+
 
 import random
-from datetime import datetime
 
 from datetime import datetime
 
-import itertools
+
 
 import database_functions
 
-# https://machinelearningmastery.com/timedistributed-layer-for-long-short-term-memory-networks-in-python/
 
-from keras.callbacks import Callback
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-import logging
 
 import keras
-from sklearn.metrics import roc_auc_score, precision_recall_fscore_support, confusion_matrix
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import LSTM
-from keras.layers import GRU
-from keras.layers import SimpleRNN
-
-import numpy as np
-
-from keras.datasets import mnist
-from keras.layers.core import Dense, Dropout, Activation
-from keras.models import Sequential
-from keras.utils import np_utils
 
 
 import numpy as np
@@ -351,8 +330,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
     return new_smallest
 
 
-def experiment_loop():
-    run = 1
+def experiment_loop(run):
     smallest_architecture = []
     # Variable we are investigating
     for num_input_nodes in range(2, 31):
@@ -369,15 +347,16 @@ def experiment_loop():
                                                smallest_architecture=smallest_architecture)
         for sparsity_length in range(0, 51):
             # Test effect of increasing sparsity. All else constant
-            smallest_architecture = run_experiment(run, case_type=case_type, num_input_nodes=num_input_nodes,
+            s = [int(x / 2) for x in smallest_architecture]
+            run_experiment(run, case_type=case_type, num_input_nodes=num_input_nodes,
                                                    num_output_nodes=num_available_patterns,
                                                    timesteps=timesteps, sparsity_length=sparsity_length,
                                                    num_patterns=num_available_patterns,
-                                                   smallest_architecture=smallest_architecture)
+                                                   smallest_architecture=s)
         sparsity_length = 0
         for timesteps in range(1, 31):
             # Test effect of increasing timesteps. All else constant
-            smallest_architecture = run_experiment(run, case_type=case_type, num_input_nodes=num_input_nodes,
+            run_experiment(run, case_type=case_type, num_input_nodes=num_input_nodes,
                                                    num_output_nodes=num_available_patterns,
                                                    timesteps=timesteps, sparsity_length=sparsity_length,
                                                    num_patterns=num_available_patterns,
@@ -385,7 +364,7 @@ def experiment_loop():
         timesteps = 1
         for num_patterns in range(2, num_available_patterns):
             # Test effect of increasing num_patterns. All else constant
-            smallest_architecture = run_experiment(run, case_type=case_type, num_input_nodes=num_input_nodes,
+            run_experiment(run, case_type=case_type, num_input_nodes=num_input_nodes,
                                                    num_output_nodes=num_patterns,
                                                    timesteps=timesteps, sparsity_length=sparsity_length,
                                                    num_patterns=num_patterns,
@@ -503,8 +482,8 @@ def main():
     # investigate_number_of_patterns()
     # test_generate_dataset()
     # database_functions.insert_experiment()
-    test_loop()
-
+    # test_loop()
+    experiment_loop(run=1)
 
 if __name__ == "__main__":
     main()

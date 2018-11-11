@@ -1,25 +1,20 @@
-from keras.callbacks import Callback
+
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-import logging
+
 
 import keras
 from sklearn.metrics import roc_auc_score, precision_recall_fscore_support, confusion_matrix
-from keras.models import Sequential
-from keras.layers import Dense
+
 from keras.layers import LSTM
 from keras.layers import GRU
 from keras.layers import SimpleRNN
 
-import numpy as np
 
-from hyperopt import Trials, STATUS_OK, tpe
-from keras.datasets import mnist
+
+
 from keras.layers.core import Dense, Dropout, Activation
 from keras.models import Sequential
-from keras.utils import np_utils
 
-from hyperas import optim
-from hyperas.distributions import choice, uniform
 
 import numpy as np
 global x_train, y_train, x_test, y_test
@@ -62,91 +57,6 @@ def data():
     x_test = data.x_train
     y_test = data.y_train
     return x_train, y_train, x_test, y_test
-
-
-def get_lstm(x_train, y_train, x_test, y_test):
-    from recurrent_models import get_lstm
-    from recurrent_models import ResetState
-    from recurrent_models import EarlyStopping
-    import recurrent_models
-    batch_size = get_lstm.batch_size
-    timesteps = get_lstm.timesteps
-    activation_function = get_lstm.activation_function
-    network_type = get_lstm.network_type
-
-    # Freaking weird serialization
-    a = {{choice([i for i in range(0, get_lstm.num_input * 3)] + [0 for i in range(0, get_lstm.num_input * 3)])}}
-    b = {{choice([i for i in range(0, get_lstm.num_input * 3)]+ [0 for i in range(0, get_lstm.num_input * 3)])}}
-    c = {{choice([i for i in range(0, get_lstm.num_input * 3)]+ [0 for i in range(0, get_lstm.num_input * 3)])}}
-    d = {{choice([i for i in range(0, get_lstm.num_input * 3)]+ [0 for i in range(0, get_lstm.num_input * 3)])}}
-    e = {{choice([i for i in range(0, get_lstm.num_input * 3)]+ [0 for i in range(0, get_lstm.num_input * 3)])}}
-
-    architecture = [a, b, c, d, e]
-    architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
-
-    return_sequences = False
-    if len(architecture) > 1:
-        return_sequences = True
-
-    model = Sequential()
-
-
-    if network_type == "lstm":
-        model.add(LSTM(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                       stateful=True,  return_sequences=return_sequences, activation=activation_function, name="layer1"))
-    elif network_type == "gru":
-        model.add(GRU(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                      stateful=True, return_sequences=return_sequences, activation=activation_function, name="layer1"))
-    elif network_type == "elman_rnn":
-        model.add(SimpleRNN(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                      stateful=True, return_sequences=return_sequences, activation=activation_function, name="layer1"))
-    elif network_type == "jordan_rnn":
-        model.add(SimpleRNN(architecture[0], batch_input_shape=(batch_size, timesteps, get_lstm.num_input),
-                      stateful=True, return_sequences=return_sequences, activation=activation_function, name="layer1"))
-
-
-    # Hidden layer how many ever
-    for h in range(1, len(architecture)):
-        return_sequences = False
-        if h < len(architecture) - 1:
-            return_sequences = True
-
-        # print(h, return_sequences)
-        if network_type == "lstm":
-            model.add(LSTM(architecture[h], return_sequences=return_sequences, activation=activation_function, name="layer"+str(h+1)))
-        elif network_type == "gru":
-            model.add(GRU(architecture[h], return_sequences=return_sequences, activation=activation_function, name="layer"+str(h+1)))
-        elif network_type == "elman_rnn":
-            model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function, name="layer"+str(h+1)))
-        elif network_type == "jordan_rnn":
-            model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function, name="layer"+str(h+1)))
-
-    model.add(Dense(get_lstm.num_output+1, activation="softmax", name="out_layer"))
-
-    model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
-
-    earlystop = recurrent_models.EarlyStopping(monitor='loss',  # loss
-                              patience=30,
-                              verbose=1,
-                              min_delta=0.05,
-                              mode='auto')
-    reset_state = recurrent_models.ResetState()
-
-    callbacks = [
-        earlystop,
-        reset_state
-    ]
-
-    # We can set shuffle to true by definition of the training set
-    result = model.fit(x_train, y_train, epochs=1000, batch_size=batch_size, verbose=2, shuffle=True, callbacks=callbacks)
-    #
-    # score, acc = model.evaluate(x_test, y_test, verbose=0)
-    # #
-    # print('Test accuracy:', acc)
-    # return {'loss': -acc, 'status': STATUS_OK, 'model': model}
-    validation_acc = np.amax(result.history['acc'])
-    print('Best validation acc of epoch:', validation_acc)
-    return {'loss': -validation_acc, 'status': STATUS_OK, 'model': model}
 
 def get_model(architecture=[2, 1, 1, 1],
               batch_size=10, timesteps=3,
