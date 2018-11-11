@@ -336,6 +336,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
 
 
 def experiment_loop(run):
+    run = run[0]
     smallest_architecture = []
     # Variable we are investigating
     for num_input_nodes in range(2, 31):
@@ -470,6 +471,8 @@ def test_loop():
                                                                           full_network=str(best_model.get_weights()))
                                     keras.backend.clear_session()
 
+from threading import Thread
+
 def main():
     case_type = 1
     num_input_nodes = 3
@@ -492,7 +495,11 @@ def main():
     # test_generate_dataset()
     # database_functions.insert_experiment()
     # test_loop()
-    experiment_loop(run=1)
+
+
+    thread = Thread(target=experiment_loop, args=(1,))
+    thread.start()
+    thread.join()
 
 if __name__ == "__main__":
     main()

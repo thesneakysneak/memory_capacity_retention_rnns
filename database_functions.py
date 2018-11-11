@@ -175,7 +175,8 @@ def experiment_exists(case_type=1,
     #     return True
     return False
 
-
+def say_done():
+    logging.info("================ DONE ================")
 # def get_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2, network_type="lstm", activation_function="tanh",
 #                 run=1, folder=""):
 #     # global engine
