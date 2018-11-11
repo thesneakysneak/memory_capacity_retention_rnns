@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 from os import listdir
 from os.path import isfile, join
@@ -43,6 +45,12 @@ import json
 # WITH (
 # 	OIDS=FALSE
 # ) ;
+
+global logfile
+logfile='myapp.log'
+
+
+logging.basicConfig(filename=logfile, level=logging.INFO)
 
 def insert_experiment(case_type=1,
                       num_input=0,
@@ -93,7 +101,29 @@ def insert_experiment(case_type=1,
                + "_" + str(sparsity_length) \
                + "_" + str(num_patterns_total) + "_" + str(network_type) \
                + "_" + str(activation_function) + "_" + str(num_patterns_total) + ".csv"
-    df.to_csv(location)
+    # df.to_csv(location)
+    string_to_write = str(case_type) + "," \
+            + str(num_input) + "," \
+            + str(num_output) + "," \
+            + str(num_patterns_to_recall) + "," \
+            + str(num_patterns_total) + "," \
+            + str(timesteps) + "," \
+            + str(sparsity_length) + "," \
+            + str(random_seed) + "," \
+            + str(run_count) + "," \
+            + str(error_when_stopped) + "," \
+            + str(num_correctly_identified) + "," \
+            + str(str(input_set)) + "," \
+            + str(str(output_set)) + "," \
+            + str(str(architecture)) + "," \
+            + str(num_network_parameters) + "," \
+            + str(network_type) + "," \
+            + str(training_algorithm) + "," \
+            + str(batch_size) + "," \
+            + str(activation_function) + "," \
+            + str(str(full_network)) + "\n"
+    logging.info(string_to_write)
+
 
 def insert_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2,
                    train_input=[[[0, 1]], [[1, 0]]],
@@ -127,16 +157,22 @@ def experiment_exists(case_type=1,
                       network_type="lstm",
                       activation_function="tanh",
                       folder_root=""):
+    global logfile
+    #
+    # onlyfiles = [f for f in listdir(folder_root) if isfile(join(folder_root, f))]
+    # location = folder_root + "/" + str(run_count) + "_" + str(case_type) + "_" + str(num_input) \
+    #            + "_" + str(num_output) + "_" + str(timesteps) + "_" + str(num_patterns_to_recall) \
+    #            + "_" + str(sparsity_length) \
+    #            + "_" + str(num_patterns_total) + "_" + str(network_type) \
+    #            + "_" + str(activation_function) + "_" + str(num_patterns_total) + ".csv"
 
-    onlyfiles = [f for f in listdir(folder_root) if isfile(join(folder_root, f))]
-    location = folder_root + "/" + str(run_count) + "_" + str(case_type) + "_" + str(num_input) \
-               + "_" + str(num_output) + "_" + str(timesteps) + "_" + str(num_patterns_to_recall) \
-               + "_" + str(sparsity_length) \
-               + "_" + str(num_patterns_total) + "_" + str(network_type) \
-               + "_" + str(activation_function) + "_" + str(num_patterns_total) + ".csv"
-
-    if location in onlyfiles:
-        return True
+    # with open(fname) as f:
+    #     content = f.readlines()
+    # # you may also want to remove whitespace characters like `\n` at the end of each line
+    # content = [x.strip() for x in content]
+    #
+    # if location in onlyfiles:
+    #     return True
     return False
 
 
