@@ -111,7 +111,7 @@ def train_model(input_set, output_set, model, training_alg, batch_size):
         reset_state
     ]
 
-    result = model.fit(input_set, output_set, epochs=1000, batch_size=batch_size, verbose=1, shuffle=False, callbacks=callbacks)
+    result = model.fit(input_set, output_set, epochs=1000, batch_size=batch_size, verbose=0, shuffle=False, callbacks=callbacks)
     return model, result
 
 
