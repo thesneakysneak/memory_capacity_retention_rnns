@@ -39,7 +39,7 @@ def search_architecture(num_input,
     architecture = []
     model = None
     result = {"history" : {"acc" : 0}}
-    l1_start = 1
+    l1_start = 0
     l2_start = 0
     l3_start = 0
     l4_start = 0
@@ -59,15 +59,15 @@ def search_architecture(num_input,
     if len(base_architecture) > 6:
         l5_start = base_architecture[5]
 
-    for depth in range(depth_start, num_input * 5):
+    for depth in range(depth_start, num_input * 3):
         for l5 in range(l5_start, depth):
             for l4 in range(l4_start, depth):
                 for l3 in range(l3_start, depth):
                     for l2 in range(l2_start, depth):
                         upper_bound = depth + 1
                         lower_bound = l1_start
-                        if depth < num_input*3+1:
-                            upper_bound = num_input*3+1
+                        if depth < lower_bound:
+                            upper_bound = lower_bound+1
 
                         for l1 in range(lower_bound, upper_bound):
                             # Stop if accuracy == 1
@@ -335,50 +335,66 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
     return new_smallest
 
 
-def experiment_loop(run):
+def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timesteps_bounds, num_patterns_bounds):
     run = run
     smallest_architecture = []
     # Variable we are investigating
-    for num_input_nodes in range(2, 31):
-        # Test effect of increasing num input nodes. All else constant
-        case_type = 1
-        timesteps = 1
-        sparsity_length = 0
+    case_type = 1
+    timesteps = 1
+    sparsity_length = 0
 
+    # Test effect of increasing num input nodes. All else constant
+    for num_input_nodes in num_input_nodes_bounds:
         num_available_patterns = (2 ** num_input_nodes) ** timesteps
-        smallest_architecture = run_experiment(run, case_type=case_type, num_input_nodes=num_input_nodes,
+        smallest_architecture = run_experiment(run,
+                                               case_type=1,
+                                               num_input_nodes=num_input_nodes,
                                                num_output_nodes=num_available_patterns,
-                                               timesteps=timesteps, sparsity_length=sparsity_length,
+                                               timesteps=1,
+                                               sparsity_length=0,
                                                num_patterns=num_available_patterns,
-                                               smallest_architecture=smallest_architecture,
+                                               smallest_architecture=[],
                                                folder_root="num_nodes")
-        for sparsity_length in range(0, 51):
-            # Test effect of increasing sparsity. All else constant
-            s = [int(x / 2) for x in smallest_architecture]
-            run_experiment(run, case_type=case_type, num_input_nodes=num_input_nodes,
-                                                   num_output_nodes=num_available_patterns,
-                                                   timesteps=timesteps, sparsity_length=sparsity_length,
-                                                   num_patterns=num_available_patterns,
-                                                   smallest_architecture=s,
-                                                    folder_root="sparsity")
-        sparsity_length = 0
-        for timesteps in range(1, 31):
-            # Test effect of increasing timesteps. All else constant
-            run_experiment(run, case_type=case_type, num_input_nodes=num_input_nodes,
-                                                   num_output_nodes=num_available_patterns,
-                                                   timesteps=timesteps, sparsity_length=sparsity_length,
-                                                   num_patterns=num_available_patterns,
-                                                   smallest_architecture=smallest_architecture,
-                                                    folder_root="timesteps")
-        timesteps = 1
-        for num_patterns in range(2, num_available_patterns):
-            # Test effect of increasing num_patterns. All else constant
-            run_experiment(run, case_type=case_type, num_input_nodes=num_input_nodes,
-                                                   num_output_nodes=num_patterns,
-                                                   timesteps=timesteps, sparsity_length=sparsity_length,
-                                                   num_patterns=num_patterns,
-                                                   smallest_architecture=[],
-                                                    folder_root="patterns")
+
+    num_input_nodes = 3
+    smallest_architecture = []
+    # Test effect of increasing sparsity. All else constant
+    for sparsity_length in sparsity_length_bounds:
+        smallest_architecture=run_experiment(run, case_type=case_type,
+                                                num_input_nodes=3,
+                                                num_output_nodes=2**3,
+                                                timesteps=1,
+                                                sparsity_length=sparsity_length,
+                                                num_patterns=2**3,
+                                                smallest_architecture=smallest_architecture,
+                                                folder_root="sparsity")
+
+    # Test effect of increasing timesteps. All else constant
+    num_input_nodes = 3
+    sparsity_length = 0
+    smallest_architecture = []
+    for timesteps in timesteps_bounds:
+        smallest_architecture = run_experiment(run,
+                       case_type=case_type,
+                       num_input_nodes=3,
+                       num_output_nodes=2**3,
+                       timesteps=timesteps,
+                       sparsity_length=0,
+                       num_patterns=2**3,
+                       smallest_architecture=smallest_architecture,
+                       folder_root="timesteps")
+
+    # Test effect of increasing num_patterns. All else constant
+    smallest_architecture = []
+    for num_patterns in num_patterns_bounds:
+        smallest_architecture = run_experiment(run, case_type=case_type,
+                       num_input_nodes=10,
+                       num_output_nodes=num_patterns,
+                       timesteps=1,
+                       sparsity_length=0,
+                       num_patterns=num_patterns,
+                       smallest_architecture=[],
+                       folder_root="patterns")
 
 def test_loop():
     case_type = 1
@@ -472,34 +488,58 @@ def test_loop():
                                     keras.backend.clear_session()
 
 from threading import Thread
+import math
+
 
 def main():
-    case_type = 1
-    num_input_nodes = 3
-    num_output_nodes = 2
-    num_patterns = 3
-    sequence_length = 2
-    sparsity_length = 1
-    sparsity_erratic = 0
-    random_seed = datetime.now().timestamp()
-    binary_input = 1
 
-    num_hidden_layers = 1
-    network_type = "lstm"
-    training_alg = "adam"
-    activation_function = "tanh"
-    architecture = [num_input_nodes, 2, num_output_nodes]
-    batch_size = 10
-    # gd.example()
-    # investigate_number_of_patterns()
-    # test_generate_dataset()
-    # database_functions.insert_experiment()
-    # test_loop()
+    runs = [1, 31]
+    num_input_nodes_bounds = [x for x in range(2, 52)]
+    sparsity_length_bounds = [x for x in range(1, 51)]
+    timesteps_bounds = [x for x in range(1, 51)]
+    num_patterns_bounds = [x for x in range(2, 1025)]
+
+    num_cores = 4
+    num_input_nodes_per_core = math.ceil(len(num_input_nodes_bounds)/num_cores)
+    num_patterns_bounds_per_core = math.ceil(len(num_patterns_bounds)/num_cores)
 
 
-    thread = Thread(target=experiment_loop, args=(1,))
-    thread.start()
-    thread.join()
+    for run in range(1, 2):
+        #experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timesteps_bounds, num_patterns_bounds)
+        for thread in range(2):
+
+            bounds_num_input_nodes = []
+            bounds_sparsity_length = []
+            bounds_time_steps = []
+            for i in range(math.ceil(num_input_nodes_per_core / 2)):
+                if len(num_input_nodes_bounds) > 0:
+                    bounds_num_input_nodes.append(num_input_nodes_bounds.pop(0))
+                    bounds_sparsity_length.append(sparsity_length_bounds.pop(0))
+                    bounds_time_steps.append(timesteps_bounds.pop(0))
+                if len(num_input_nodes_bounds) > 0:
+
+                    bounds_num_input_nodes.append(num_input_nodes_bounds.pop(-1))
+                    bounds_sparsity_length.append(sparsity_length_bounds.pop(-1))
+                    bounds_time_steps.append(timesteps_bounds.pop(-1))
+
+                    # bounds_num_input_nodes.append(num_input_nodes_bounds.pop(-1))
+                    # bounds_sparsity_length.append(sparsity_length_bounds.pop(-1))
+                    # bounds_time_steps.append(timesteps_bounds.pop(-1))
+            bounds_num_input_nodes = sorted(bounds_num_input_nodes)
+            bounds_sparsity_length = sorted(bounds_sparsity_length)
+            bounds_time_steps = sorted(bounds_time_steps)
+
+            bounds_num_patterns = []
+            for i in range(math.ceil(num_patterns_bounds_per_core / 2)):
+                if len(num_patterns_bounds) > 0:
+                    bounds_num_patterns.append(num_patterns_bounds.pop(0))
+                if len(num_patterns_bounds) > 0:
+                    bounds_num_patterns.append(num_patterns_bounds.pop(-1))
+            bounds_num_patterns = sorted(bounds_num_patterns)
+            print(run, bounds_num_input_nodes, bounds_sparsity_length, bounds_time_steps, bounds_num_patterns)
+            thread = Thread(target=experiment_loop, args=(run, bounds_num_input_nodes, bounds_sparsity_length, bounds_time_steps, bounds_num_patterns))
+            thread.start()
+        thread.join()
 
 if __name__ == "__main__":
     main()

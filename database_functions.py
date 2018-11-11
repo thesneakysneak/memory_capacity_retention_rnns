@@ -121,7 +121,8 @@ def insert_experiment(case_type=1,
             + str(training_algorithm) + "," \
             + str(batch_size) + "," \
             + str(activation_function) + "," \
-            + str(str(full_network)) + "\n"
+            + str(str(full_network)) + "," \
+            + str(folder_root) + "\n"
     logging.info(string_to_write)
 
 
