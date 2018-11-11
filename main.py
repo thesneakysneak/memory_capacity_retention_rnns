@@ -37,41 +37,14 @@ from keras.layers import SimpleRNN
 
 import numpy as np
 
-from hyperopt import Trials, STATUS_OK, tpe
 from keras.datasets import mnist
 from keras.layers.core import Dense, Dropout, Activation
 from keras.models import Sequential
 from keras.utils import np_utils
 
-from hyperas import optim
-from hyperas.distributions import choice, uniform
 
 import numpy as np
 
-
-class ResetState(keras.callbacks.Callback):
-    def on_train_begin(self, logs={}):
-        pass
-
-    def on_train_end(self, logs={}):
-        pass
-
-    def on_epoch_begin(self, epoch, logs={}):
-        pass
-
-    def on_epoch_end(self, epoch, logs={}):
-        pass
-
-    def on_batch_begin(self, batch, logs={}):
-        pass
-
-    def on_batch_end(self, batch, logs={}):
-        self.model.reset_states()
-        # #         print("reset model state", logs)
-        #         acc = logs.get("acc")
-        #         if acc == 1.0:
-
-        return
 
 
 def search_architecture(num_input,
@@ -81,18 +54,40 @@ def search_architecture(num_input,
                         batch_size=10,
                         timesteps=3,
                         network_type="lstm",
-                        activation_function='tanh'):
+                        activation_function='tanh',
+                        base_architecture=[]
+                        ):
     architecture = []
     model = None
     result = {"history" : {"acc" : 0}}
-    for depth in range(num_input * 3):
-        for l5 in range(depth):
-            for l4 in range(depth):
-                for l3 in range(depth):
-                    for l2 in range(depth):
+    l1_start = 1
+    l2_start = 0
+    l3_start = 0
+    l4_start = 0
+    l5_start = 0
+    depth_start = 1
+    if len(base_architecture) > 0:
+        l1_start = base_architecture[0]
+        smallest_architecture = min(base_architecture)
+        if smallest_architecture > 1:
+            depth_start = smallest_architecture 
+    if len(base_architecture) > 1:
+        l2_start = base_architecture[1]
+    if len(base_architecture) > 2:
+        l3_start = base_architecture[2]
+    if len(base_architecture) > 3:
+        l4_start = base_architecture[3]
+    if len(base_architecture) > 4:
+        l5_start = base_architecture[4]
+
+    for depth in range(depth_start, num_input * 3):
+        for l5 in range(l5_start, depth):
+            for l4 in range(l4_start, depth):
+                for l3 in range(l3_start, depth):
+                    for l2 in range(l2_start, depth):
                         upper_bound = depth + 1
-                        lower_bound = 1
-                        if depth > int(np.ceil(num_input/2)):
+                        lower_bound = l1_start
+                        if depth > int(np.ceil(num_input/2)) and depth>lower_bound:
                             upper_bound = int(np.ceil(num_input/2)) + 1
 
                         for l1 in range(lower_bound, upper_bound):
@@ -122,36 +117,6 @@ def search_architecture(num_input,
 
 
 
-def single_experiment(engine,
-                      case_type,
-                      num_input_nodes,
-                      num_output_nodes,
-                      num_patterns,
-                      sequence_length,
-                      sparsity_length,
-                      architecture,
-                      network_type,
-                      training_alg,
-                      activation_function,
-                      batch_size):
-    # generate set
-    train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
-        gd.get_experiment_set(case_type=1,
-                              num_input_nodes=num_input_nodes,
-                              num_output_nodes=num_output_nodes,
-                              num_patterns=num_patterns,
-                              sequence_length=sequence_length,
-                              sparsity_length=sparsity_length)
-    # train model until converge
-    # if model fails to fit, need to search the architecture
-    model = mds.get_model(architecture=architecture,
-                          batch_size=1,
-                          timesteps=sequence_length,
-                          network_type=network_type,
-                          activation_function=activation_function)
-
-    model = mds.train_model(train_input, train_out, model, training_alg=training_alg, batch_size=batch_size)
-    return model.history.history["acc"][0]
 
 
 def investigate_number_of_patterns():
