@@ -1,9 +1,4 @@
-import logging
-
 import pandas as pd
-from os import listdir
-from os.path import isfile, join
-
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine, Column
 from sqlalchemy.ext.declarative import declarative_base
@@ -20,7 +15,7 @@ import json
 #
 # -- DROP TABLE public.experiments
 #
-# CREATE TABLE public.experiments (
+# CREATE TABLE public.experiments_2 (
 # 	case_type int ,
 # 	num_input int ,
 # 	num_output int,
@@ -46,12 +41,6 @@ import json
 # 	OIDS=FALSE
 # ) ;
 
-global logfile
-logfile='myapp.log'
-
-
-logging.basicConfig(filename=logfile, level=logging.INFO)
-
 def insert_experiment(case_type=1,
                       num_input=0,
                       num_output=0,
@@ -71,8 +60,7 @@ def insert_experiment(case_type=1,
                       training_algorithm="adam",
                       batch_size=10,
                       activation_function="tanh",
-                      full_network="[0,0,0,0,0]",
-                      folder_root=""):
+                      full_network="[0,0,0,0,0]"):
     global engine
     df = pd.DataFrame()
     df["case_type"] = [case_type]
@@ -95,35 +83,7 @@ def insert_experiment(case_type=1,
     df["batch_size"] = [batch_size]
     df["activation_function"] = [activation_function]
     df["full_network"] = [str(full_network)]
-    # df.to_sql('experiments', engine, index=False, if_exists='append')
-    location = folder_root + "/" + str(run_count) + "_" + str(case_type) + "_" + str(num_input) \
-               + "_" + str(num_output) + "_" + str(timesteps) + "_" + str(num_patterns_to_recall) \
-               + "_" + str(sparsity_length) \
-               + "_" + str(num_patterns_total) + "_" + str(network_type) \
-               + "_" + str(activation_function) + "_" + str(num_patterns_total) + ".csv"
-    # df.to_csv(location)
-    string_to_write = str(case_type) + "," \
-            + str(num_input) + "," \
-            + str(num_output) + "," \
-            + str(num_patterns_to_recall) + "," \
-            + str(num_patterns_total) + "," \
-            + str(timesteps) + "," \
-            + str(sparsity_length) + "," \
-            + str(random_seed) + "," \
-            + str(run_count) + "," \
-            + str(error_when_stopped) + "," \
-            + str(num_correctly_identified) + "," \
-            + str(str(input_set)) + "," \
-            + str(str(output_set)) + "," \
-            + str(str(architecture)) + "," \
-            + str(num_network_parameters) + "," \
-            + str(network_type) + "," \
-            + str(training_algorithm) + "," \
-            + str(batch_size) + "," \
-            + str(activation_function) + "," \
-            + str(str(full_network)) + "," \
-            + str(folder_root) + "\n"
-    logging.info(string_to_write)
+    df.to_sql('experiments_2', engine, index=False, if_exists='append')
 
 
 def insert_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2,
@@ -147,50 +107,16 @@ def insert_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2,
     df.to_sql('datasets', engine, index=False, if_exists='append')
 
 
-def experiment_exists(case_type=1,
-                      num_input=0,
-                      num_output=0,
-                      num_patterns_to_recall=0,
-                      num_patterns_total=0,
-                      timesteps=0,
-                      sparsity_length=0,
-                      run_count=0,
-                      network_type="lstm",
-                      activation_function="tanh",
-                      folder_root=""):
-    global logfile
-    #
-    # onlyfiles = [f for f in listdir(folder_root) if isfile(join(folder_root, f))]
-    # location = folder_root + "/" + str(run_count) + "_" + str(case_type) + "_" + str(num_input) \
-    #            + "_" + str(num_output) + "_" + str(timesteps) + "_" + str(num_patterns_to_recall) \
-    #            + "_" + str(sparsity_length) \
-    #            + "_" + str(num_patterns_total) + "_" + str(network_type) \
-    #            + "_" + str(activation_function) + "_" + str(num_patterns_total) + ".csv"
-
-    # with open(fname) as f:
-    #     content = f.readlines()
-    # # you may also want to remove whitespace characters like `\n` at the end of each line
-    # content = [x.strip() for x in content]
-    #
-    # if location in onlyfiles:
-    #     return True
-    return False
-
-def say_done():
-    logging.info("================ DONE ================")
-# def get_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2, network_type="lstm", activation_function="tanh",
-#                 run=1, folder=""):
-#     # global engine
-#     # query_str = "select * from experiments where timesteps=" + str(timesteps) \
-#     #                        + " and sparsity_length=" + str(sparsity) \
-#     #                        + " and num_input=" + str(num_input) \
-#     #                        + " and num_patterns_total=" + str(num_patterns) \
-#     #                        + " and network_type='" + network_type + "'" \
-#     #                        + " and activation_function='" + str(activation_function) + "'" \
-#     #                         + " and run=" + str(run)
-#     # df = pd.read_sql_query(query_str,
-#     #                        con=engine)
-#
-#     onlyfiles = [f for f in listdir(folder) if isfile(join(folder, f))]
-#
-#     return df
+def get_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2, network_type="lstm", activation_function="tanh",
+                run=1):
+    global engine
+    query_str = "select * from experiments_2 where timesteps=" + str(timesteps) \
+                           + " and sparsity_length=" + str(sparsity) \
+                           + " and num_input=" + str(num_input) \
+                           + " and num_patterns_total=" + str(num_patterns) \
+                           + " and network_type='" + network_type + "'" \
+                           + " and activation_function='" + str(activation_function) + "'" \
+                            + " and run=" + str(run)
+    df = pd.read_sql_query(query_str,
+                           con=engine)
+    return df
