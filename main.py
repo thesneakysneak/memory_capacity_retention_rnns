@@ -545,28 +545,28 @@ def spawn_processes(run_commands=True, run=1):
                       + ' ' + str(run) + ' num_nodes ' + str(bounds_num_input_nodes) + '" & '
         print(command_str)
         if run_commands:
-            os.spawnl(os.P_DETACH, command_str)
+            os.system(command_str)
 
         experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_sparsity"
         command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
                       + ' ' + str(run) + ' sparsity ' + str(bounds_sparsity_length) + '" & '
         print(command_str)
         if run_commands:
-            os.spawnl(os.P_DETACH, command_str)
+            os.system(command_str)
 
         experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_timesteps"
         command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
                       + ' ' + str(run) + ' timesteps ' + str(bounds_time_steps) + '" & '
         print(command_str)
         if run_commands:
-            os.spawnl(os.P_DETACH, command_str)
+            os.system(command_str)
 
         experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_patterns"
         command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
                       + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns) + '" & '
         print(command_str)
         if run_commands:
-            os.spawnl(os.P_DETACH, command_str)
+            os.system(command_str)
 
 import sys
 import ast
