@@ -383,11 +383,11 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
         for timesteps in timesteps_bounds:
             smallest_architecture = run_experiment(run,
                            case_type=case_type,
-                           num_input_nodes=2,
-                           num_output_nodes=2**2,
+                           num_input_nodes=1,
+                           num_output_nodes=(2**1)**timesteps,
                            timesteps=timesteps,
                            sparsity_length=0,
-                           num_patterns=2**2,
+                           num_patterns=(2**1)**timesteps,
                            smallest_architecture=smallest_architecture,
                            folder_root="timesteps")
 
@@ -545,7 +545,8 @@ def spawn_processes():
             print("sparsity", run, bounds_num_input_nodes)
             print("timesteps", run, bounds_num_input_nodes)
             print("patterns", run, bounds_num_input_nodes)
-
+            import os
+            os.spawnl(os.P_DETACH, 'bash -c "exec -a MyUniqueProcessName <command> &"')
 
 import sys
 import ast
