@@ -499,10 +499,10 @@ def test_loop():
 from threading import Thread
 import math
 
-def spawn_processes(run_commands=True):
+def spawn_processes(run_commands=True, run=1):
     import os
     import math
-    runs = [1, 31]
+
     num_input_nodes_bounds = [x for x in range(2, 52)]
     sparsity_length_bounds = [x for x in range(1, 51)]
     timesteps_bounds = [x for x in range(1, 51)]
@@ -512,62 +512,61 @@ def spawn_processes(run_commands=True):
     num_input_nodes_per_core = math.ceil(len(num_input_nodes_bounds) / num_cores_per_experiment)
     num_patterns_bounds_per_core = math.ceil(len(num_patterns_bounds) / num_cores_per_experiment)
 
-    for run in range(1, 2):
-        # experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timesteps_bounds, num_patterns_bounds)
-        for thread in range(num_cores_per_experiment):
+    # experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timesteps_bounds, num_patterns_bounds)
+    for thread in range(num_cores_per_experiment):
 
-            bounds_num_input_nodes = []
-            bounds_sparsity_length = []
-            bounds_time_steps = []
-            for i in range(math.ceil(num_input_nodes_per_core / 2)):
-                if len(num_input_nodes_bounds) > 0:
-                    bounds_num_input_nodes.append(num_input_nodes_bounds.pop(0))
-                    bounds_sparsity_length.append(sparsity_length_bounds.pop(0))
-                    bounds_time_steps.append(timesteps_bounds.pop(0))
-                if len(num_input_nodes_bounds) > 0:
-                    bounds_num_input_nodes.append(num_input_nodes_bounds.pop(-1))
-                    bounds_sparsity_length.append(sparsity_length_bounds.pop(-1))
-                    bounds_time_steps.append(timesteps_bounds.pop(-1))
-            bounds_num_input_nodes = sorted(bounds_num_input_nodes)
-            bounds_sparsity_length = sorted(bounds_sparsity_length)
-            bounds_time_steps = sorted(bounds_time_steps)
+        bounds_num_input_nodes = []
+        bounds_sparsity_length = []
+        bounds_time_steps = []
+        for i in range(math.ceil(num_input_nodes_per_core / 2)):
+            if len(num_input_nodes_bounds) > 0:
+                bounds_num_input_nodes.append(num_input_nodes_bounds.pop(0))
+                bounds_sparsity_length.append(sparsity_length_bounds.pop(0))
+                bounds_time_steps.append(timesteps_bounds.pop(0))
+            if len(num_input_nodes_bounds) > 0:
+                bounds_num_input_nodes.append(num_input_nodes_bounds.pop(-1))
+                bounds_sparsity_length.append(sparsity_length_bounds.pop(-1))
+                bounds_time_steps.append(timesteps_bounds.pop(-1))
+        bounds_num_input_nodes = sorted(bounds_num_input_nodes)
+        bounds_sparsity_length = sorted(bounds_sparsity_length)
+        bounds_time_steps = sorted(bounds_time_steps)
 
-            bounds_num_patterns = []
-            for i in range(math.ceil(num_patterns_bounds_per_core / 2)):
-                if len(num_patterns_bounds) > 0:
-                    bounds_num_patterns.append(num_patterns_bounds.pop(0))
-                if len(num_patterns_bounds) > 0:
-                    bounds_num_patterns.append(num_patterns_bounds.pop(-1))
-            bounds_num_patterns = sorted(bounds_num_patterns)
+        bounds_num_patterns = []
+        for i in range(math.ceil(num_patterns_bounds_per_core / 2)):
+            if len(num_patterns_bounds) > 0:
+                bounds_num_patterns.append(num_patterns_bounds.pop(0))
+            if len(num_patterns_bounds) > 0:
+                bounds_num_patterns.append(num_patterns_bounds.pop(-1))
+        bounds_num_patterns = sorted(bounds_num_patterns)
 
-            import os
-            experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_num_nodes"
-            command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
-                          + ' ' + str(run) + ' num_nodes ' + str(bounds_num_input_nodes) + '" & '
-            print(command_str)
-            if run_commands:
-                os.spawnl(os.P_DETACH, command_str)
+        import os
+        experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_num_nodes"
+        command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
+                      + ' ' + str(run) + ' num_nodes ' + str(bounds_num_input_nodes) + '" & '
+        print(command_str)
+        if run_commands:
+            os.spawnl(os.P_DETACH, command_str)
 
-            experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_sparsity"
-            command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
-                          + ' ' + str(run) + ' sparsity ' + str(bounds_sparsity_length) + '" & '
-            print(command_str)
-            if run_commands:
-                os.spawnl(os.P_DETACH, command_str)
+        experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_sparsity"
+        command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
+                      + ' ' + str(run) + ' sparsity ' + str(bounds_sparsity_length) + '" & '
+        print(command_str)
+        if run_commands:
+            os.spawnl(os.P_DETACH, command_str)
 
-            experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_timesteps"
-            command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
-                          + ' ' + str(run) + ' timesteps ' + str(bounds_time_steps) + '" & '
-            print(command_str)
-            if run_commands:
-                os.spawnl(os.P_DETACH, command_str)
+        experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_timesteps"
+        command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
+                      + ' ' + str(run) + ' timesteps ' + str(bounds_time_steps) + '" & '
+        print(command_str)
+        if run_commands:
+            os.spawnl(os.P_DETACH, command_str)
 
-            experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_patterns"
-            command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
-                          + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns) + '" & '
-            print(command_str)
-            if run_commands:
-                os.spawnl(os.P_DETACH, command_str)
+        experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_patterns"
+        command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
+                      + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns) + '" & '
+        print(command_str)
+        if run_commands:
+            os.spawnl(os.P_DETACH, command_str)
 
 import sys
 import ast
@@ -601,7 +600,7 @@ if __name__ == "__main__":
         if sys.argv[1:][0] == "spawn":
             if len(sys.argv[1:]) > 1:
                 if sys.argv[1:][1] == "True":
-                    spawn_processes(run_commands=True)
+                    spawn_processes(run_commands=True, run=sys.argv[1:][2])
             spawn_processes(run_commands=False)
         elif len(sys.argv[1:]) > 3:
             main(sys.argv[1:])

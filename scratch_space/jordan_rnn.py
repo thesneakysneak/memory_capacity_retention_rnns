@@ -83,7 +83,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from keras.layers import Input
 import numpy as np
-sample_input = np.array([[[0],[1]],[[0],[1]]])
+sample_input = np.array([[[1, 1, 1, 1, 1],[0, 0]],[[1, 1, 1, 1, 1],[0, 0]]])
 sample_output = np.array([[0, 1, 0, 1], [0, 1, 0, 1]])
 
 #
@@ -93,76 +93,43 @@ sample_output = np.array([[0, 1, 0, 1], [0, 1, 0, 1]])
 num_inputs = 5
 num_layer2_outputs = 2
 
-dense_output = Input(shape=(None, num_layer2_outputs ), name='layer2_outputs')
+dense_output = Input(shape=(None, num_layer2_outputs ))
 
 # Layer 1
 layer1_inputs = Input(shape=(None, num_inputs), name='layer1_input')
-layer1_prev_out = Concatenate(axis=-1)([layer1_inputs, dense_output])
+layer1_prev_out = Concatenate()([layer1_inputs, dense_output])
 
 layer1 = LSTM(7, return_state=True, return_sequences=True, name='layer1')
 layer1_outputs, layer1_state_h, layer1_state_c = layer1(layer1_prev_out)
 
 # Layer 2
-output_nodes = Dense(num_layer2_outputs, activation="softmax", name='output_layer')
-dense_output = output_nodes(layer1_outputs)
+output_nodes = Dense(num_layer2_outputs, activation="softmax", name='output_layer')(layer1_outputs)
+output_nodes
 
 
 #
 # Build model
 #
 
-model = Model([layer1_inputs], dense_output)
-model.add(layer1)
-model.add(output_nodes)
+model = Model([layer1_inputs, dense_output], output_nodes)
+plot_model(model, to_file='model.png')
+
 
 model.compile(loss='categorical_crossentropy', optimizer='adam')
 
-input_set = np.array([[[1]*num_inputs], [[2]*num_inputs], [[3]*num_inputs]])
-output_set =np.array( [[0]*num_layer2_outputs, [1]*num_layer2_outputs, [1]*num_layer2_outputs])
+input_set = np.array([np.array([np.array([1]*num_inputs)])])
+output_set =np.array( [[[1]*num_layer2_outputs]])
 
 for epoc_ in range(10):
-    input_set = np.array([[[1] * num_inputs]])
+    input_set = np.array([1] * num_inputs)
     try:
         np_dense_output = K.eval(dense_output)
     except:
         np_dense_output = []
         for i in range(input_set.shape[0]):
-            np_dense_output.append([[0]*num_layer2_outputs])
+            np_dense_output = np.array([np.array([np.array([1]*num_layer2_outputs)])])
     print(np_dense_output)
     input_set_ = np.concatenate((input_set, np_dense_output), axis=-1)
-    model.fit(input_set_, output_set, epochs=1, verbose=2)
+    model.fit([input_set, np_dense_output], output_set, epochs=1, verbose=2)
 plot_model(model, show_shapes=True)
 
-
-##############
-#   Encoder
-############
-from keras.models import Model
-from keras.layers import Input
-from keras.layers import LSTM
-from keras.layers import Dense
-from keras.utils.vis_utils import plot_model
-# configure
-num_encoder_tokens = 71
-num_decoder_tokens = 93
-latent_dim = 256
-# Define an input sequence and process it.
-encoder_inputs = Input(shape=(None, num_encoder_tokens))
-encoder = LSTM(latent_dim, return_state=True)
-encoder_outputs, state_h, state_c = encoder(encoder_inputs)
-# We discard `encoder_outputs` and only keep the states.
-encoder_states = [state_h, state_c]
-# Set up the decoder, using `encoder_states` as initial state.
-decoder_inputs = Input(shape=(None, num_decoder_tokens))
-# We set up our decoder to return full output sequences,
-# and to return internal states as well. We don't use the
-# return states in the training model, but we will use them in inference.
-decoder_lstm = LSTM(latent_dim, return_sequences=True, return_state=True)
-decoder_outputs, _, _ = decoder_lstm(decoder_inputs, initial_state=encoder_states)
-decoder_dense = Dense(num_decoder_tokens, activation='softmax')
-decoder_outputs = decoder_dense(decoder_outputs)
-# Define the model that will turn
-# `encoder_input_data` & `decoder_input_data` into `decoder_target_data`
-model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
-# plot the model
-plot_model(model, to_file='model.png', show_shapes=True)
