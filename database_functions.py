@@ -20,7 +20,7 @@ from sqlalchemy.orm import sessionmaker
 #
 # -- DROP TABLE public.experiments
 #
-# CREATE TABLE public.experiments (
+# CREATE TABLE public.experiments_2 (
 # 	case_type int ,
 # 	num_input int ,
 # 	num_output int,
