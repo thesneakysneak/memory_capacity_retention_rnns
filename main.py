@@ -499,7 +499,7 @@ def test_loop():
 from threading import Thread
 import math
 
-def spawn_processes():
+def spawn_processes(run_commands=True):
     import os
     import math
     runs = [1, 31]
@@ -545,25 +545,29 @@ def spawn_processes():
             command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
                           + ' ' + str(run) + ' num_nodes ' + str(bounds_num_input_nodes) + '" & '
             print(command_str)
-            os.spawnl(os.P_DETACH, command_str)
+            if run_commands:
+                os.spawnl(os.P_DETACH, command_str)
 
             experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_sparsity"
             command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
                           + ' ' + str(run) + ' sparsity ' + str(bounds_sparsity_length) + '" & '
             print(command_str)
-            os.spawnl(os.P_DETACH, command_str)
+            if run_commands:
+                os.spawnl(os.P_DETACH, command_str)
 
             experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_timesteps"
             command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
                           + ' ' + str(run) + ' timesteps ' + str(bounds_time_steps) + '" & '
             print(command_str)
-            os.spawnl(os.P_DETACH, command_str)
+            if run_commands:
+                os.spawnl(os.P_DETACH, command_str)
 
             experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_patterns"
             command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
                           + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns) + '" & '
             print(command_str)
-            os.spawnl(os.P_DETACH, command_str)
+            if run_commands:
+                os.spawnl(os.P_DETACH, command_str)
 
 import sys
 import ast
@@ -577,7 +581,7 @@ def main(args):
         bounds += str_array.pop(0)
     bounds = ast.literal_eval(bounds)
     print(run, experiment_type, bounds)
-    logfile_location = ""
+    logfile_location = "/nfs2/danny_masters"
     global logfile
     logfile = logfile_location + "/" +str(thread) + "_" + str(run) + "_" + str(experiment_type) + '.log'
     logging.basicConfig(filename=logfile, level=logging.INFO)
@@ -595,6 +599,9 @@ if __name__ == "__main__":
     else:
         print(sys.argv[1:])
         if sys.argv[1:][0] == "spawn":
-            spawn_processes()
+            if len(sys.argv[1:]) > 1:
+                if sys.argv[1:][1] == True:
+                    spawn_processes(run_commands=True)
+            spawn_processes(run_commands=False)
         elif len(sys.argv[1:]) > 3:
             main(sys.argv[1:])
