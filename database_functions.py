@@ -9,11 +9,11 @@ from sqlalchemy import create_engine, Column
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-Base = declarative_base()
-
-global engine
-engine = create_engine('postgresql://masters_user:password@localhost:5432/masters_experiments')
-import json
+# Base = declarative_base()
+# #
+# # global engine
+# # engine = create_engine('postgresql://masters_user:password@localhost:5432/masters_experiments')
+# # import json
 
 
 # -- Drop table
@@ -46,11 +46,7 @@ import json
 # 	OIDS=FALSE
 # ) ;
 
-global logfile
-logfile='myapp.log'
 
-
-logging.basicConfig(filename=logfile, level=logging.INFO)
 
 def insert_experiment(case_type=1,
                       num_input=0,
@@ -102,27 +98,27 @@ def insert_experiment(case_type=1,
                + "_" + str(num_patterns_total) + "_" + str(network_type) \
                + "_" + str(activation_function) + "_" + str(num_patterns_total) + ".csv"
     # df.to_csv(location)
-    string_to_write = str(case_type) + "," \
-            + str(num_input) + "," \
-            + str(num_output) + "," \
-            + str(num_patterns_to_recall) + "," \
-            + str(num_patterns_total) + "," \
-            + str(timesteps) + "," \
-            + str(sparsity_length) + "," \
-            + str(random_seed) + "," \
-            + str(run_count) + "," \
-            + str(error_when_stopped) + "," \
-            + str(num_correctly_identified) + "," \
-            + str(str(input_set)) + "," \
-            + str(str(output_set)) + "," \
-            + str(str(architecture)) + "," \
-            + str(num_network_parameters) + "," \
-            + str(network_type) + "," \
-            + str(training_algorithm) + "," \
-            + str(batch_size) + "," \
-            + str(activation_function) + "," \
-            + str(str(full_network)) + "," \
-            + str(folder_root) + "\n"
+    string_to_write = str(folder_root) + "," \
+                        + str(run_count) + "," \
+                        + str(timesteps) + "," \
+                        + str(sparsity_length) + "," \
+                        + str(case_type) + "," \
+                        + str(num_input) + "," \
+                        + str(num_output) + "," \
+                        + str(num_patterns_to_recall) + "," \
+                        + str(num_patterns_total) + "," \
+                        + str(random_seed) + "," \
+                        + str(error_when_stopped) + "," \
+                        + str(str(architecture)) + "," \
+                        + str(num_network_parameters) + "," \
+                        + str(network_type) + "," \
+                        + str(training_algorithm) + "," \
+                        + str(batch_size) + "," \
+                        + str(activation_function) + "," \
+                        + str(num_correctly_identified) + "," \
+                        + str(str(input_set)) + "," \
+                        + str(str(output_set)) + "," \
+                        + str(full_network) + "\n"
     logging.info(string_to_write)
 
 

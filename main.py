@@ -1,3 +1,4 @@
+import logging
 
 from keras.datasets import mnist
 from keras.layers.core import Dense, Dropout, Activation
@@ -283,8 +284,8 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                 random_seed = dt.microsecond
                 random.seed(random_seed)
                 num_output_nodes = num_patterns
-                if sparsity_length > 0:
-                    num_output_nodes += 1
+                # if sparsity_length > 0:
+                #     num_output_nodes += 1
                 train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
                     gd.get_experiment_set(case_type=1,
                                           num_input_nodes=num_input_nodes,
@@ -326,7 +327,8 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                                                      training_algorithm="adam",
                                                      batch_size=10,
                                                      activation_function=activation_function,
-                                                     full_network=str(best_model.get_weights()))
+                                                     full_network=list(best_model.get_weights()),
+                                                     folder_root=folder_root)
                 keras.backend.clear_session()
                 architecture_sum = sum(architecture)
                 if smallest_architecture_sum >  architecture_sum:
@@ -335,7 +337,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
     return new_smallest
 
 
-def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timesteps_bounds, num_patterns_bounds):
+def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timesteps_bounds, num_patterns_bounds, experiment_type="num_nodes"):
     run = run
     smallest_architecture = []
     # Variable we are investigating
@@ -344,57 +346,64 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
     sparsity_length = 0
 
     # Test effect of increasing num input nodes. All else constant
-    for num_input_nodes in num_input_nodes_bounds:
-        num_available_patterns = (2 ** num_input_nodes) ** timesteps
-        smallest_architecture = run_experiment(run,
-                                               case_type=1,
-                                               num_input_nodes=num_input_nodes,
-                                               num_output_nodes=num_available_patterns,
-                                               timesteps=1,
-                                               sparsity_length=0,
-                                               num_patterns=num_available_patterns,
-                                               smallest_architecture=[],
-                                               folder_root="num_nodes")
+    print(experiment_type, "num_nodes", experiment_type == "num_nodes")
+    if experiment_type == "num_nodes":
+        print("Yass")
+        for num_input_nodes in num_input_nodes_bounds:
+            num_available_patterns = (2 ** num_input_nodes) ** timesteps
+            smallest_architecture = run_experiment(run,
+                                                   case_type=1,
+                                                   num_input_nodes=num_input_nodes,
+                                                   num_output_nodes=num_available_patterns,
+                                                   timesteps=1,
+                                                   sparsity_length=0,
+                                                   num_patterns=num_available_patterns,
+                                                   smallest_architecture=[],
+                                                   folder_root="num_nodes")
 
     num_input_nodes = 3
     smallest_architecture = []
     # Test effect of increasing sparsity. All else constant
-    for sparsity_length in sparsity_length_bounds:
-        smallest_architecture=run_experiment(run, case_type=case_type,
-                                                num_input_nodes=3,
-                                                num_output_nodes=2**3,
-                                                timesteps=1,
-                                                sparsity_length=sparsity_length,
-                                                num_patterns=2**3,
-                                                smallest_architecture=smallest_architecture,
-                                                folder_root="sparsity")
+    if experiment_type =="sparsity":
+        for sparsity_length in sparsity_length_bounds:
+            smallest_architecture=run_experiment(run, case_type=case_type,
+                                                    num_input_nodes=2,
+                                                    num_output_nodes=2**2,
+                                                    timesteps=1,
+                                                    sparsity_length=sparsity_length,
+                                                    num_patterns=2**2-1,
+                                                    smallest_architecture=smallest_architecture,
+                                                    folder_root="sparsity")
 
     # Test effect of increasing timesteps. All else constant
     num_input_nodes = 3
     sparsity_length = 0
     smallest_architecture = []
-    for timesteps in timesteps_bounds:
-        smallest_architecture = run_experiment(run,
-                       case_type=case_type,
-                       num_input_nodes=3,
-                       num_output_nodes=2**3,
-                       timesteps=timesteps,
-                       sparsity_length=0,
-                       num_patterns=2**3,
-                       smallest_architecture=smallest_architecture,
-                       folder_root="timesteps")
+    if experiment_type == "timesteps":
+        for timesteps in timesteps_bounds:
+            smallest_architecture = run_experiment(run,
+                           case_type=case_type,
+                           num_input_nodes=2,
+                           num_output_nodes=2**2,
+                           timesteps=timesteps,
+                           sparsity_length=0,
+                           num_patterns=2**2,
+                           smallest_architecture=smallest_architecture,
+                           folder_root="timesteps")
 
     # Test effect of increasing num_patterns. All else constant
     smallest_architecture = []
-    for num_patterns in num_patterns_bounds:
-        smallest_architecture = run_experiment(run, case_type=case_type,
-                       num_input_nodes=10,
-                       num_output_nodes=num_patterns,
-                       timesteps=1,
-                       sparsity_length=0,
-                       num_patterns=num_patterns,
-                       smallest_architecture=[],
-                       folder_root="patterns")
+
+    if experiment_type == "patterns":
+        for num_patterns in num_patterns_bounds:
+            smallest_architecture = run_experiment(run, case_type=case_type,
+                           num_input_nodes=10,
+                           num_output_nodes=num_patterns,
+                           timesteps=1,
+                           sparsity_length=0,
+                           num_patterns=num_patterns,
+                           smallest_architecture=[],
+                           folder_root="patterns")
 
 def test_loop():
     case_type = 1
@@ -490,23 +499,22 @@ def test_loop():
 from threading import Thread
 import math
 
-
-def main():
-
+def spawn_processes():
+    import os
+    import math
     runs = [1, 31]
     num_input_nodes_bounds = [x for x in range(2, 52)]
     sparsity_length_bounds = [x for x in range(1, 51)]
     timesteps_bounds = [x for x in range(1, 51)]
     num_patterns_bounds = [x for x in range(2, 1025)]
 
-    num_cores = 4
-    num_input_nodes_per_core = math.ceil(len(num_input_nodes_bounds)/num_cores)
-    num_patterns_bounds_per_core = math.ceil(len(num_patterns_bounds)/num_cores)
-
+    num_cores_per_experiment = 5
+    num_input_nodes_per_core = math.ceil(len(num_input_nodes_bounds) / num_cores_per_experiment)
+    num_patterns_bounds_per_core = math.ceil(len(num_patterns_bounds) / num_cores_per_experiment)
 
     for run in range(1, 2):
-        #experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timesteps_bounds, num_patterns_bounds)
-        for thread in range(2):
+        # experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timesteps_bounds, num_patterns_bounds)
+        for thread in range(num_cores_per_experiment):
 
             bounds_num_input_nodes = []
             bounds_sparsity_length = []
@@ -517,14 +525,9 @@ def main():
                     bounds_sparsity_length.append(sparsity_length_bounds.pop(0))
                     bounds_time_steps.append(timesteps_bounds.pop(0))
                 if len(num_input_nodes_bounds) > 0:
-
                     bounds_num_input_nodes.append(num_input_nodes_bounds.pop(-1))
                     bounds_sparsity_length.append(sparsity_length_bounds.pop(-1))
                     bounds_time_steps.append(timesteps_bounds.pop(-1))
-
-                    # bounds_num_input_nodes.append(num_input_nodes_bounds.pop(-1))
-                    # bounds_sparsity_length.append(sparsity_length_bounds.pop(-1))
-                    # bounds_time_steps.append(timesteps_bounds.pop(-1))
             bounds_num_input_nodes = sorted(bounds_num_input_nodes)
             bounds_sparsity_length = sorted(bounds_sparsity_length)
             bounds_time_steps = sorted(bounds_time_steps)
@@ -537,12 +540,35 @@ def main():
                     bounds_num_patterns.append(num_patterns_bounds.pop(-1))
             bounds_num_patterns = sorted(bounds_num_patterns)
             print(run, bounds_num_input_nodes, bounds_sparsity_length, bounds_time_steps, bounds_num_patterns)
-            experiment_loop(run, bounds_num_input_nodes, bounds_sparsity_length, bounds_time_steps,
-                            bounds_num_patterns)
 
-            #     thread = Thread(target=experiment_loop, args=experiment_loop(run, bounds_num_input_nodes, bounds_sparsity_length, bounds_time_steps, bounds_num_patterns))
-        #     thread.start()
-        # thread.join()
+            print("num_nodes", run, bounds_num_input_nodes)
+            print("sparsity", run, bounds_num_input_nodes)
+            print("timesteps", run, bounds_num_input_nodes)
+            print("patterns", run, bounds_num_input_nodes)
+
+
+import sys
+import ast
+def main(args):
+    str_array = sys.argv[1:]
+    thread = str_array.pop(0)
+    run = str_array.pop(0)
+    experiment_type = str(str_array.pop(0))
+    bounds = ""
+    while len(str_array) > 0:
+        bounds += str_array.pop(0)
+    bounds = ast.literal_eval(bounds)
+    print(run, experiment_type, bounds)
+    global logfile
+    logfile = str(thread) + "_" + str(run) + "_" + str(experiment_type) + '.log'
+    logging.basicConfig(filename=logfile, level=logging.INFO)
+
+    experiment_loop(run=run,
+                    num_input_nodes_bounds=bounds,
+                    sparsity_length_bounds=bounds,
+                    timesteps_bounds=bounds,
+                    num_patterns_bounds=bounds,
+                    experiment_type=experiment_type)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
