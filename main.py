@@ -546,7 +546,7 @@ def spawn_processes(run_commands=True, run=1):
         print(command_str)
         if run_commands:
             os.system(command_str)
-
+        
         experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_sparsity"
         command_str = 'bash -c "python main.py ' + str(thread) \
                       + ' ' + str(run) + ' sparsity ' + str(bounds_sparsity_length) + '" & '
@@ -567,6 +567,11 @@ def spawn_processes(run_commands=True, run=1):
         print(command_str)
         if run_commands:
             os.system(command_str)
+
+        import time
+        while True:
+            time.sleep(10)
+            print("================Still alive================")
 
 import sys
 import ast
