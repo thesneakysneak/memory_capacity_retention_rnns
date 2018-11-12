@@ -6,29 +6,13 @@ from  sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import confusion_matrix
 
 # LSTM for international airline passengers problem with time step regression framing
-import numpy
-import matplotlib.pyplot as plt
-from keras.wrappers.scikit_learn import KerasClassifier
-from pandas import read_csv
-import math
-from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import roc_curve
-import pandas as pd
 from keras import Sequential
-from matplotlib import pyplot
-from statsmodels.graphics.tsaplots import plot_acf
 import random
-import random
-from datetime import datetime
 
 import itertools
 
-import database_functions
 
 from numpy import array
 from numpy import argmax

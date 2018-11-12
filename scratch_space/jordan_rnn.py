@@ -1,7 +1,6 @@
 #
 # # LSTM for international airline passengers problem with time step regression framing
 # import numpy
-# import matplotlib.pyplot as plt
 # from keras import Model
 # from keras.utils import plot_model
 # from pandas import read_csv
@@ -71,16 +70,13 @@
 
 # LSTM for international airline passengers problem with time step regression framing
 import numpy
-import matplotlib.pyplot as plt
+
 from keras import Model
 from keras.utils import plot_model
-from pandas import read_csv
-import math
-from keras.models import Sequential
+
 from keras.layers import Dense, LSTMCell, add, TimeDistributed, Add, Concatenate, K
 from keras.layers import LSTM, Recurrent
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error
+
 from keras.layers import Input
 import numpy as np
 sample_input = np.array([[[1, 1, 1, 1, 1],[0, 0]],[[1, 1, 1, 1, 1],[0, 0]]])
