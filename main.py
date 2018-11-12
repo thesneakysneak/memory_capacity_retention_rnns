@@ -284,8 +284,8 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                 random_seed = dt.microsecond
                 random.seed(random_seed)
                 num_output_nodes = num_patterns
-                # if sparsity_length > 0:
-                #     num_output_nodes += 1
+                if sparsity_length > 0:
+                    num_output_nodes += 1
                 train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
                     gd.get_experiment_set(case_type=1,
                                           num_input_nodes=num_input_nodes,
