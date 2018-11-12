@@ -600,7 +600,7 @@ if __name__ == "__main__":
         print(sys.argv[1:])
         if sys.argv[1:][0] == "spawn":
             if len(sys.argv[1:]) > 1:
-                if sys.argv[1:][1] == True:
+                if sys.argv[1:][1] == "True":
                     spawn_processes(run_commands=True)
             spawn_processes(run_commands=False)
         elif len(sys.argv[1:]) > 3:
