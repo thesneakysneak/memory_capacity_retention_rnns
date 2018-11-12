@@ -402,7 +402,7 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
                            timesteps=1,
                            sparsity_length=0,
                            num_patterns=num_patterns,
-                           smallest_architecture=[],
+                           smallest_architecture=smallest_architecture,
                            folder_root="patterns")
 
 def test_loop():
@@ -546,7 +546,29 @@ def spawn_processes():
             print("timesteps", run, bounds_num_input_nodes)
             print("patterns", run, bounds_num_input_nodes)
             import os
-            os.spawnl(os.P_DETACH, 'bash -c "exec -a MyUniqueProcessName <command> &"')
+            experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_num_nodes"
+            command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
+                          + ' ' + str(run) + ' num_nodes ' + str(bounds_num_input_nodes) + '" & '
+            print(command_str)
+            # os.spawnl(os.P_DETACH, command_str)
+
+            experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_sparsity"
+            command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
+                          + ' ' + str(run) + ' sparsity ' + str(bounds_sparsity_length) + '" & '
+            print(command_str)
+            # os.spawnl(os.P_DETACH, command_str)
+
+            experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_timesteps"
+            command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
+                          + ' ' + str(run) + ' timesteps ' + str(bounds_time_steps) + '" & '
+            print(command_str)
+            # os.spawnl(os.P_DETACH, command_str)
+
+            experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_patterns"
+            command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
+                          + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns) + '" & '
+            print(command_str)
+            # os.spawnl(os.P_DETACH, command_str)
 
 import sys
 import ast
