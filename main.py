@@ -539,12 +539,7 @@ def spawn_processes():
                 if len(num_patterns_bounds) > 0:
                     bounds_num_patterns.append(num_patterns_bounds.pop(-1))
             bounds_num_patterns = sorted(bounds_num_patterns)
-            print(run, bounds_num_input_nodes, bounds_sparsity_length, bounds_time_steps, bounds_num_patterns)
 
-            print("num_nodes", run, bounds_num_input_nodes)
-            print("sparsity", run, bounds_num_input_nodes)
-            print("timesteps", run, bounds_num_input_nodes)
-            print("patterns", run, bounds_num_input_nodes)
             import os
             experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_num_nodes"
             command_str = 'bash -c "exec -a ' + experiment_name + ' python3.5 ' + str(thread) \
@@ -582,8 +577,9 @@ def main(args):
         bounds += str_array.pop(0)
     bounds = ast.literal_eval(bounds)
     print(run, experiment_type, bounds)
+    logfile_location = ""
     global logfile
-    logfile = str(thread) + "_" + str(run) + "_" + str(experiment_type) + '.log'
+    logfile = logfile_location + "/" +str(thread) + "_" + str(run) + "_" + str(experiment_type) + '.log'
     logging.basicConfig(filename=logfile, level=logging.INFO)
 
     experiment_loop(run=run,
@@ -594,4 +590,11 @@ def main(args):
                     experiment_type=experiment_type)
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    if len(sys.argv[1:]) == 0:
+        print("Nothing to do")
+    else:
+        print(sys.argv[1:])
+        if sys.argv[1:][0] == "spawn":
+            spawn_processes()
+        elif len(sys.argv[1:]) > 3:
+            main(sys.argv[1:])
