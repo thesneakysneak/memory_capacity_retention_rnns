@@ -90,28 +90,53 @@ sample_output = np.array([[0, 1, 0, 1], [0, 1, 0, 1]])
 #
 #
 # Define an input sequence and process it.
-num_inputs = 5
-num_layer2_outputs = 2
+def single_layer_jordan_rnn(num_inputs, num_output_layer_outputs, num_nodes_layer1):
 
-dense_output = Input(shape=(None, num_layer2_outputs ))
+    dense_output = Input(shape=(None, num_output_layer_outputs ))
 
-# Layer 1
-layer1_inputs = Input(shape=(None, num_inputs), name='layer1_input')
-layer1_prev_out = Concatenate()([layer1_inputs, dense_output])
+    # Layer 1
+    layer1_inputs = Input(shape=(None, num_inputs), name='layer1_input')
+    layer1_prev_out = Concatenate()([layer1_inputs, dense_output])
 
-layer1 = LSTM(7, return_state=True, return_sequences=True, name='layer1')
-layer1_outputs, layer1_state_h, layer1_state_c = layer1(layer1_prev_out)
+    layer1 = LSTM(num_nodes_layer1, return_state=True, return_sequences=True, name='layer1')
+    layer1_outputs, layer1_state_h, layer1_state_c = layer1(layer1_prev_out)
 
-# Layer 2
-output_nodes = Dense(num_layer2_outputs, activation="softmax", name='output_layer')(layer1_outputs)
-output_nodes
+    # Layer 2
+    output_nodes = Dense(num_output_layer_outputs, activation="softmax", name='output_layer')(layer1_outputs)
+
+    model = Model([layer1_inputs, dense_output], output_nodes)
+    return model
+
+def two_layer_jordan_rnn(num_inputs, num_layer2_outputs, num_output_layer_outputs, num_nodes_layer1, num_nodes_layer2):
+
+    dense_output = Input(shape=(None, num_layer2_outputs ))
+    dense_output_2 = Input(shape=(None, num_output_layer_outputs))
+
+    # Layer 1
+    layer1_inputs = Input(shape=(None, num_inputs), name='layer1_input')
+    layer1_prev_out = Concatenate()([layer1_inputs, dense_output])
+
+    layer1 = LSTM(num_nodes_layer1, return_state=True, return_sequences=True, name='layer1')
+    layer1_outputs, layer1_state_h, layer1_state_c = layer1(layer1_prev_out)
+
+    # Layer 2
+    layer2_prev_out = Concatenate()([layer1_outputs, dense_output_2])
+    layer2 = LSTM(num_nodes_layer2, return_state=True, return_sequences=True, name='layer2')
+    layer2_outputs, layer2_state_h, layer2_state_c = layer2(layer2_prev_out)
+
+    ##########
+    # output
+    output_nodes = Dense(num_layer2_outputs, activation="softmax", name='output_layer')(layer2_outputs)
+
+    model = Model([layer1_inputs, dense_output, dense_output_2], output_nodes)
+    return model
 
 
 #
 # Build model
 #
 
-model = Model([layer1_inputs, dense_output], output_nodes)
+
 plot_model(model, to_file='model.png')
 
 
