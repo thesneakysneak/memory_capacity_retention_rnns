@@ -10,7 +10,7 @@ from keras.utils import np_utils
 import generate_dataset as gd
 import recurrent_models
 
-
+import gc
 import random
 
 from datetime import datetime
@@ -336,6 +336,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                 if smallest_architecture_sum >  architecture_sum:
                     smallest_architecture_sum = architecture_sum
                     new_smallest = architecture
+    gc.collect()
     return new_smallest
 
 
