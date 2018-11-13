@@ -536,8 +536,6 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     num_patterns_bounds = [x for x in range(2, 100)]
 
     num_cores_per_experiment = 14
-    if experiment_type == "num_nodes":
-        num_cores_per_experiment = 8
 
     # experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timesteps_bounds, num_patterns_bounds)
     len_sparsity = int(len(sparsity_length_bounds)/num_cores_per_experiment)
