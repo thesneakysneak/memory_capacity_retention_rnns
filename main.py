@@ -512,7 +512,7 @@ import math
 def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     import os
     import math
-
+    print("run_commands", run_commands)
     num_input_nodes_bounds = [x for x in range(2, 33)]
     sparsity_length_bounds = [x for x in range(1, 33)]
     timesteps_bounds = [x for x in range(1, 33)]
@@ -553,30 +553,34 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
 
         command_str = 'bash -c "python main.py ' + str(thread) \
                       + ' ' + str(run) + ' num_nodes ' + str(bounds_num_input_nodes) + '" & '
-        print(command_str)
-        if run_commands and (experiment_type == "all" or experiment_type == "num_nodes"):
-            os.system(command_str)
+        if (experiment_type == "all" or experiment_type == "num_nodes"):
+            print(command_str)
+            if run_commands == True:
+                os.system(command_str)
 
 
         command_str = 'bash -c "python main.py ' + str(thread) \
                       + ' ' + str(run) + ' sparsity ' + str(bounds_sparsity_length) + '" & '
-        print(command_str)
-        if run_commands and (experiment_type == "all" or experiment_type == "sparsity"):
-            os.system(command_str)
+        if (experiment_type == "all" or experiment_type == "sparsity"):
+            print(command_str)
+            if run_commands == True:
+                os.system(command_str)
 
 
         command_str = 'bash -c "python main.py ' + str(thread) \
                       + ' ' + str(run) + ' timesteps ' + str(bounds_time_steps) + '" & '
-        print(command_str)
-        if run_commands and (experiment_type == "all" or experiment_type == "timesteps"):
-            os.system(command_str)
+        if (experiment_type == "all" or experiment_type == "timesteps"):
+            print(command_str)
+            if run_commands == True:
+                os.system(command_str)
 
 
         command_str = 'bash -c "python main.py ' + str(thread) \
                       + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns) + '" & '
-        print(command_str)
-        if run_commands and (experiment_type == "all" or experiment_type == "patterns"):
-            os.system(command_str)
+        if (experiment_type == "all" or experiment_type == "patterns"):
+            print(command_str)
+            if run_commands == True:
+                os.system(command_str)
 
     import time
     # while True:
@@ -614,11 +618,13 @@ if __name__ == "__main__":
         print(sys.argv[1:])
         if sys.argv[1:][0] == "spawn":
             if len(sys.argv[1:]) > 1:
-                if sys.argv[1:][1] == "True":
-                    if len(sys.argv[1:]) > 2:
-                        spawn_processes(run_commands=True, run=sys.argv[1:][2], experiment_type=sys.argv[1:][3])
-                    else:
-                        spawn_processes(run_commands=True, run=sys.argv[1:][2])
-            spawn_processes(run_commands=False)
+                if len(sys.argv[1:]) > 2:
+                    print("Yay")
+                    spawn_processes(run_commands=sys.argv[1:][1], run=sys.argv[1:][2], experiment_type=sys.argv[1:][3])
+                else:
+                    print("Nay")
+                    spawn_processes(run_commands=sys.argv[1:][1], run=sys.argv[1:][2])
+            else:
+                spawn_processes(run_commands=False)
         elif len(sys.argv[1:]) > 3:
             main(sys.argv[1:])
