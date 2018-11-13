@@ -579,9 +579,9 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
             os.system(command_str)
 
     import time
-    # while True:
-    #     time.sleep(10)
-    #     print("================Still alive================")
+    while True:
+        time.sleep(10)
+        print("================Still alive================")
 
 import sys
 import ast
