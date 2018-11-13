@@ -516,7 +516,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type=""):
     num_input_nodes_bounds = [x for x in range(2, 33)]
     sparsity_length_bounds = [x for x in range(1, 33)]
     timesteps_bounds = [x for x in range(1, 33)]
-    num_patterns_bounds = [x for x in range(2, 1025)]
+    num_patterns_bounds = [x for x in range(2, 100)]
 
     num_cores_per_experiment = 20
     num_input_nodes_per_core = math.ceil(len(num_input_nodes_bounds) / num_cores_per_experiment)
@@ -595,7 +595,7 @@ def main(args):
         bounds += str_array.pop(0)
     bounds = ast.literal_eval(bounds)
     print(run, experiment_type, bounds)
-    logfile_location = "/home/danielp/Documents/Masters/Code/danny_masters"
+    logfile_location = "/nfs2/danny_masters"
     global logfile
     logfile = logfile_location + "/" +str(thread) + "_" + str(run) + "_" + str(experiment_type) + '.log'
     logging.basicConfig(filename=logfile, level=logging.INFO)
