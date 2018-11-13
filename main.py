@@ -353,7 +353,7 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
     if experiment_type == "num_nodes":
         print("Yass")
         for num_input_nodes in num_input_nodes_bounds:
-            num_available_patterns = (2 ** num_input_nodes) ** timesteps
+            num_available_patterns = 2 #(2 ** num_input_nodes) ** timesteps
             smallest_architecture = run_experiment(run,
                                                    case_type=1,
                                                    num_input_nodes=num_input_nodes,
@@ -530,9 +530,9 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     import math
     run_commands = str(run_commands)
     print("run_commands", run_commands, run_commands == "True")
-    num_input_nodes_bounds = [x for x in range(2, 33)]
-    sparsity_length_bounds = [x for x in range(1, 33)]
-    timesteps_bounds = [x for x in range(1, 33)]
+    num_input_nodes_bounds = [x for x in range(1, 14)]
+    sparsity_length_bounds = [x for x in range(1, 14)]
+    timesteps_bounds = [x for x in range(1, 14)]
     num_patterns_bounds = [x for x in range(2, 100)]
 
     num_cores_per_experiment = 14
@@ -617,6 +617,12 @@ def main(args):
 if __name__ == "__main__":
     if len(sys.argv[1:]) == 0:
         print("Nothing to do")
+        experiment_loop(run=1,
+                        num_input_nodes_bounds=[10],
+                        sparsity_length_bounds=[],
+                        timesteps_bounds=[],
+                        num_patterns_bounds=[],
+                        experiment_type="num_nodes")
     else:
         print(sys.argv[1:])
         if sys.argv[1:][0] == "spawn":
