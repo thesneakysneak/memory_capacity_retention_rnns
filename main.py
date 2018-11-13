@@ -509,7 +509,7 @@ def test_loop():
 from threading import Thread
 import math
 
-def spawn_processes(run_commands=True, run=1, experiment_type=""):
+def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     import os
     import math
 
@@ -615,7 +615,10 @@ if __name__ == "__main__":
         if sys.argv[1:][0] == "spawn":
             if len(sys.argv[1:]) > 1:
                 if sys.argv[1:][1] == "True":
-                    spawn_processes(run_commands=True, run=sys.argv[1:][2])
+                    if len(sys.argv[1:]) > 2:
+                        spawn_processes(run_commands=True, run=sys.argv[1:][2], experiment_type=sys.argv[1:][3])
+                    else:
+                        spawn_processes(run_commands=True, run=sys.argv[1:][2])
             spawn_processes(run_commands=False)
         elif len(sys.argv[1:]) > 3:
             main(sys.argv[1:])
