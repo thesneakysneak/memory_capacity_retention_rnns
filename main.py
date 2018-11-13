@@ -530,9 +530,9 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     import math
     run_commands = str(run_commands)
     print("run_commands", run_commands, run_commands == "True")
-    num_input_nodes_bounds = [x for x in range(1, 14)]
-    sparsity_length_bounds = [x for x in range(1, 14)]
-    timesteps_bounds = [x for x in range(1, 14)]
+    num_input_nodes_bounds = [x for x in range(1, 15)]
+    sparsity_length_bounds = [x for x in range(1, 15)]
+    timesteps_bounds = [x for x in range(1, 15)]
     num_patterns_bounds = [x for x in range(2, 100)]
 
     num_cores_per_experiment = 14
