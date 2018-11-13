@@ -527,7 +527,8 @@ def chunks(l, n, max_cores):
 def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     import os
     import math
-    print("run_commands", run_commands, run_commands == True)
+    run_commands = bool(run_commands)
+    print("run_commands", run_commands, run_commands == "True")
     num_input_nodes_bounds = [x for x in range(2, 33)]
     sparsity_length_bounds = [x for x in range(1, 33)]
     timesteps_bounds = [x for x in range(1, 33)]
@@ -550,7 +551,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
                       + ' ' + str(run) + ' num_nodes ' + str(bounds_num_input_nodes[thread]) + '" & '
         if (experiment_type == "all" or experiment_type == "num_nodes"):
             print(command_str)
-            if run_commands == True:
+            if run_commands == "True":
                 print("Running")
                 os.system(command_str)
 
@@ -559,7 +560,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
                       + ' ' + str(run) + ' sparsity ' + str(bounds_sparsity_length[thread]) + '" & '
         if (experiment_type == "all" or experiment_type == "sparsity"):
             print(command_str)
-            if run_commands == True:
+            if run_commands == "True":
                 print("Running")
                 os.system(command_str)
 
@@ -568,7 +569,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
                       + ' ' + str(run) + ' timesteps ' + str(bounds_time_steps[thread]) + '" & '
         if (experiment_type == "all" or experiment_type == "timesteps"):
             print(command_str)
-            if run_commands == True:
+            if run_commands == "True":
                 print("Running")
                 os.system(command_str)
 
@@ -577,7 +578,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
                       + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns[thread]) + '" & '
         if (experiment_type == "all" or experiment_type == "patterns"):
             print(command_str)
-            if run_commands == True:
+            if run_commands == "True":
                 print("Running")
                 os.system(command_str)
 
