@@ -518,7 +518,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     timesteps_bounds = [x for x in range(1, 33)]
     num_patterns_bounds = [x for x in range(2, 100)]
 
-    num_cores_per_experiment = 12
+    num_cores_per_experiment = 14
     num_input_nodes_per_core = math.ceil(len(num_input_nodes_bounds) / num_cores_per_experiment)
     num_patterns_bounds_per_core = math.ceil(len(num_patterns_bounds) / num_cores_per_experiment)
 
@@ -542,7 +542,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
         bounds_time_steps = sorted(bounds_time_steps)
 
         bounds_num_patterns = []
-        for i in range(math.ceil(num_patterns_bounds_per_core / 2)):
+        for i in range(math.floor(num_patterns_bounds_per_core / 2)-1):
             if len(num_patterns_bounds) > 0:
                 bounds_num_patterns.append(num_patterns_bounds.pop(0))
             if len(num_patterns_bounds) > 0:
