@@ -551,6 +551,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
         if (experiment_type == "all" or experiment_type == "num_nodes"):
             print(command_str)
             if run_commands == True:
+                print("Running")
                 os.system(command_str)
 
 
@@ -559,6 +560,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
         if (experiment_type == "all" or experiment_type == "sparsity"):
             print(command_str)
             if run_commands == True:
+                print("Running")
                 os.system(command_str)
 
 
@@ -567,6 +569,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
         if (experiment_type == "all" or experiment_type == "timesteps"):
             print(command_str)
             if run_commands == True:
+                print("Running")
                 os.system(command_str)
 
 
@@ -575,6 +578,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
         if (experiment_type == "all" or experiment_type == "patterns"):
             print(command_str)
             if run_commands == True:
+                print("Running")
                 os.system(command_str)
 
 
