@@ -575,7 +575,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
         command_str = 'bash -c "python main.py ' + str(thread) \
                       + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns) + '" & '
         print(command_str)
-        if run_commands:
+        if run_commands and (experiment_type == "all" or experiment_type == "patterns"):
             os.system(command_str)
 
     import time
