@@ -67,6 +67,7 @@ def insert_experiment(case_type=1,
                       training_algorithm="adam",
                       batch_size=10,
                       activation_function="tanh",
+                      full_network_json=[],
                       full_network="[0,0,0,0,0]",
                       folder_root=""):
     global engine
@@ -98,27 +99,33 @@ def insert_experiment(case_type=1,
                + "_" + str(num_patterns_total) + "_" + str(network_type) \
                + "_" + str(activation_function) + "_" + str(num_patterns_total) + ".csv"
     # df.to_csv(location)
-    string_to_write = str(folder_root) + "," \
+
+    #               run_count, timesteps, sparsity_length, case_type, num_input, num_output,  num_patterns_to_recall,
+    # INFO:root:timesteps, 1,       11,              0,         1,          1,          2048,       2048,
+    #                       num_patterns_total      random_seed             error_when_stopped
+    #                       2048,                   4517                    ,1.0
+    string_to_write = str(folder_root) + ";" \
                         + str(run_count) + "," \
-                        + str(timesteps) + "," \
-                        + str(sparsity_length) + "," \
-                        + str(case_type) + "," \
-                        + str(num_input) + "," \
-                        + str(num_output) + "," \
-                        + str(num_patterns_to_recall) + "," \
-                        + str(num_patterns_total) + "," \
-                        + str(random_seed) + "," \
-                        + str(error_when_stopped) + "," \
-                        + str(str(architecture)) + "," \
-                        + str(num_network_parameters) + "," \
-                        + str(network_type) + "," \
-                        + str(training_algorithm) + "," \
-                        + str(batch_size) + "," \
-                        + str(activation_function) + "," \
-                        + str(num_correctly_identified) + "," \
-                        + str(str(input_set)) + "," \
-                        + str(str(output_set)) + "," \
-                        + str(full_network) + "\n"
+                        + str(timesteps) + ";" \
+                        + str(sparsity_length) + ";" \
+                        + str(case_type) + ";" \
+                        + str(num_input) + ";" \
+                        + str(num_output) + ";" \
+                        + str(num_patterns_to_recall) + ";" \
+                        + str(num_patterns_total) + ";" \
+                        + str(random_seed) + ";" \
+                        + str(error_when_stopped) + ";" \
+                        + str(num_network_parameters) + ";" \
+                        + str(network_type) + ";" \
+                        + str(training_algorithm) + ";" \
+                        + str(batch_size) + ";" \
+                        + str(activation_function) + ";" \
+                        + str(num_correctly_identified) + ";" \
+                        + str(str(input_set)) + ";" \
+                        + str(str(output_set)) + ";" \
+                          + str(str(architecture)) + ";" \
+                        +str(full_network_json) + ";" \
+                          + str(full_network) + "\n"
     logging.info(string_to_write)
 
 

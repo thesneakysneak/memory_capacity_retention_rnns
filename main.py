@@ -327,6 +327,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                                                      training_algorithm="adam",
                                                      batch_size=10,
                                                      activation_function=activation_function,
+                                                     full_network_json=str(best_model.to_json()),
                                                      full_network=list(best_model.get_weights()),
                                                      folder_root=folder_root)
                 keras.backend.clear_session()
@@ -384,12 +385,21 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
             smallest_architecture = run_experiment(run,
                            case_type=case_type,
                            num_input_nodes=1,
-                           num_output_nodes=(2**1)**timesteps,
+                           num_output_nodes=(2**1),
                            timesteps=timesteps,
                            sparsity_length=0,
-                           num_patterns=(2**1)**timesteps,
+                           num_patterns=(2**1),
                            smallest_architecture=smallest_architecture,
                            folder_root="timesteps")
+            # smallest_architecture = run_experiment(run,
+            #                                        case_type=case_type,
+            #                                        num_input_nodes=1,
+            #                                        num_output_nodes=(2 ** 1) ** timesteps,
+            #                                        timesteps=timesteps,
+            #                                        sparsity_length=0,
+            #                                        num_patterns=(2 ** 1) ** timesteps,
+            #                                        smallest_architecture=smallest_architecture,
+            #                                        folder_root="timesteps")
 
     # Test effect of increasing num_patterns. All else constant
     smallest_architecture = []
@@ -499,7 +509,7 @@ def test_loop():
 from threading import Thread
 import math
 
-def spawn_processes(run_commands=True, run=1):
+def spawn_processes(run_commands=True, run=1, experiment_type=""):
     import os
     import math
 
@@ -508,7 +518,7 @@ def spawn_processes(run_commands=True, run=1):
     timesteps_bounds = [x for x in range(1, 51)]
     num_patterns_bounds = [x for x in range(2, 1025)]
 
-    num_cores_per_experiment = 5
+    num_cores_per_experiment = 2
     num_input_nodes_per_core = math.ceil(len(num_input_nodes_bounds) / num_cores_per_experiment)
     num_patterns_bounds_per_core = math.ceil(len(num_patterns_bounds) / num_cores_per_experiment)
 
@@ -540,28 +550,28 @@ def spawn_processes(run_commands=True, run=1):
         bounds_num_patterns = sorted(bounds_num_patterns)
 
         import os
-        experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_num_nodes"
+
         command_str = 'bash -c "python main.py ' + str(thread) \
                       + ' ' + str(run) + ' num_nodes ' + str(bounds_num_input_nodes) + '" & '
         print(command_str)
-        if run_commands:
+        if run_commands and (experiment_type == "all" or experiment_type == "num_nodes"):
             os.system(command_str)
 
-        experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_sparsity"
+
         command_str = 'bash -c "python main.py ' + str(thread) \
                       + ' ' + str(run) + ' sparsity ' + str(bounds_sparsity_length) + '" & '
         print(command_str)
-        if run_commands:
+        if run_commands and (experiment_type == "all" or experiment_type == "sparsity"):
             os.system(command_str)
 
-        experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_timesteps"
+
         command_str = 'bash -c "python main.py ' + str(thread) \
                       + ' ' + str(run) + ' timesteps ' + str(bounds_time_steps) + '" & '
         print(command_str)
-        if run_commands:
+        if run_commands and (experiment_type == "all" or experiment_type == "timesteps"):
             os.system(command_str)
 
-        experiment_name = "experiment_" + str(thread) + "_" + str(run) + "_patterns"
+
         command_str = 'bash -c "python main.py ' + str(thread) \
                       + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns) + '" & '
         print(command_str)
@@ -569,9 +579,9 @@ def spawn_processes(run_commands=True, run=1):
             os.system(command_str)
 
     import time
-    while True:
-        time.sleep(10)
-        print("================Still alive================")
+    # while True:
+    #     time.sleep(10)
+    #     print("================Still alive================")
 
 import sys
 import ast
@@ -585,7 +595,7 @@ def main(args):
         bounds += str_array.pop(0)
     bounds = ast.literal_eval(bounds)
     print(run, experiment_type, bounds)
-    logfile_location = "/nfs2/danny_masters"
+    logfile_location = "/home/danielp/Documents/Masters/Code/danny_masters"
     global logfile
     logfile = logfile_location + "/" +str(thread) + "_" + str(run) + "_" + str(experiment_type) + '.log'
     logging.basicConfig(filename=logfile, level=logging.INFO)
