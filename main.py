@@ -1,4 +1,5 @@
 import logging
+from itertools import zip_longest
 
 from keras.datasets import mnist
 from keras.layers.core import Dense, Dropout, Activation
@@ -415,6 +416,8 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
                            smallest_architecture=smallest_architecture,
                            folder_root="patterns")
 
+    return
+
 def test_loop():
     case_type = 1
     num_input_nodes = 1
@@ -509,6 +512,18 @@ def test_loop():
 from threading import Thread
 import math
 
+def chunks(l, n, max_cores):
+    """Yield successive n-sized chunks from l."""
+    ar = np.array_split(np.array(l), n)
+    ar = [list(filter(None, i)) for i in zip_longest(*ar)]
+    count = 0
+    while len(ar) > max_cores:
+        last = ar.pop(-1)
+        ar[count].extend(last)
+        ar[count] = sorted(ar[count])
+        count += 1
+    return ar
+
 def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     import os
     import math
@@ -519,40 +534,20 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     num_patterns_bounds = [x for x in range(2, 100)]
 
     num_cores_per_experiment = 14
-    num_input_nodes_per_core = math.ceil(len(num_input_nodes_bounds) / num_cores_per_experiment)
-    num_patterns_bounds_per_core = math.ceil(len(num_patterns_bounds) / num_cores_per_experiment)
-
     # experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timesteps_bounds, num_patterns_bounds)
+    len_sparsity = int(len(sparsity_length_bounds)/num_cores_per_experiment)
+    len_patterns  = int(len(num_patterns_bounds)/num_cores_per_experiment)
+
+    bounds_num_input_nodes = chunks(num_input_nodes_bounds, len_sparsity, num_cores_per_experiment)
+    bounds_sparsity_length = chunks(sparsity_length_bounds, len_sparsity, num_cores_per_experiment)
+    bounds_time_steps = chunks(timesteps_bounds, len_sparsity, num_cores_per_experiment)
+    bounds_num_patterns = chunks(num_patterns_bounds, len_patterns, num_cores_per_experiment)
+
     for thread in range(num_cores_per_experiment):
-
-        bounds_num_input_nodes = []
-        bounds_sparsity_length = []
-        bounds_time_steps = []
-        for i in range(math.ceil(num_input_nodes_per_core / 2)-1):
-            if len(num_input_nodes_bounds) > 0:
-                bounds_num_input_nodes.append(num_input_nodes_bounds.pop(0))
-                bounds_sparsity_length.append(sparsity_length_bounds.pop(0))
-                bounds_time_steps.append(timesteps_bounds.pop(0))
-            if len(num_input_nodes_bounds) > 0:
-                bounds_num_input_nodes.append(num_input_nodes_bounds.pop(-1))
-                bounds_sparsity_length.append(sparsity_length_bounds.pop(-1))
-                bounds_time_steps.append(timesteps_bounds.pop(-1))
-        bounds_num_input_nodes = sorted(bounds_num_input_nodes)
-        bounds_sparsity_length = sorted(bounds_sparsity_length)
-        bounds_time_steps = sorted(bounds_time_steps)
-
-        bounds_num_patterns = []
-        for i in range(math.floor(num_patterns_bounds_per_core / 2)-1):
-            if len(num_patterns_bounds) > 0:
-                bounds_num_patterns.append(num_patterns_bounds.pop(0))
-            if len(num_patterns_bounds) > 0:
-                bounds_num_patterns.append(num_patterns_bounds.pop(-1))
-        bounds_num_patterns = sorted(bounds_num_patterns)
-
         import os
 
         command_str = 'bash -c "python main.py ' + str(thread) \
-                      + ' ' + str(run) + ' num_nodes ' + str(bounds_num_input_nodes) + '" & '
+                      + ' ' + str(run) + ' num_nodes ' + str(bounds_num_input_nodes[thread]) + '" & '
         if (experiment_type == "all" or experiment_type == "num_nodes"):
             print(command_str)
             if run_commands == True:
@@ -560,7 +555,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
 
 
         command_str = 'bash -c "python main.py ' + str(thread) \
-                      + ' ' + str(run) + ' sparsity ' + str(bounds_sparsity_length) + '" & '
+                      + ' ' + str(run) + ' sparsity ' + str(bounds_sparsity_length[thread]) + '" & '
         if (experiment_type == "all" or experiment_type == "sparsity"):
             print(command_str)
             if run_commands == True:
@@ -568,7 +563,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
 
 
         command_str = 'bash -c "python main.py ' + str(thread) \
-                      + ' ' + str(run) + ' timesteps ' + str(bounds_time_steps) + '" & '
+                      + ' ' + str(run) + ' timesteps ' + str(bounds_time_steps[thread]) + '" & '
         if (experiment_type == "all" or experiment_type == "timesteps"):
             print(command_str)
             if run_commands == True:
@@ -576,16 +571,16 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
 
 
         command_str = 'bash -c "python main.py ' + str(thread) \
-                      + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns) + '" & '
+                      + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns[thread]) + '" & '
         if (experiment_type == "all" or experiment_type == "patterns"):
             print(command_str)
             if run_commands == True:
                 os.system(command_str)
 
     import time
-    # while True:
-    #     time.sleep(10)
-    #     print("================Still alive================")
+    while True:
+        time.sleep(10)
+        print("================Still alive================")
 
 import sys
 import ast
@@ -597,6 +592,9 @@ def main(args):
     bounds = ""
     while len(str_array) > 0:
         bounds += str_array.pop(0)
+        if bounds.endswith("]]"):
+            break
+    print("while loop ended")
     bounds = ast.literal_eval(bounds)
     print(run, experiment_type, bounds)
     logfile_location = "/nfs2/danny_masters"
