@@ -577,10 +577,6 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
             if run_commands == True:
                 os.system(command_str)
 
-    import time
-    while True:
-        time.sleep(10)
-        print("================Still alive================")
 
 import sys
 import ast
@@ -624,5 +620,11 @@ if __name__ == "__main__":
                     spawn_processes(run_commands=sys.argv[1:][1], run=sys.argv[1:][2])
             else:
                 spawn_processes(run_commands=False)
+
+            import time
+
+            while True:
+                time.sleep(10)
+                print("================Still alive================")
         elif len(sys.argv[1:]) > 3:
             main(sys.argv[1:])
