@@ -628,6 +628,9 @@ if __name__ == "__main__":
 
             import time
 
+            while True:
+                time.sleep(100)
+                print("================Still alive================")
         elif len(sys.argv[1:]) > 3:
             print("Experiment", sys.argv[1:])
             main(sys.argv[1:])
