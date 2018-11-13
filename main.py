@@ -513,12 +513,12 @@ def spawn_processes(run_commands=True, run=1, experiment_type=""):
     import os
     import math
 
-    num_input_nodes_bounds = [x for x in range(2, 52)]
-    sparsity_length_bounds = [x for x in range(1, 51)]
-    timesteps_bounds = [x for x in range(1, 51)]
+    num_input_nodes_bounds = [x for x in range(2, 33)]
+    sparsity_length_bounds = [x for x in range(1, 33)]
+    timesteps_bounds = [x for x in range(1, 33)]
     num_patterns_bounds = [x for x in range(2, 1025)]
 
-    num_cores_per_experiment = 2
+    num_cores_per_experiment = 20
     num_input_nodes_per_core = math.ceil(len(num_input_nodes_bounds) / num_cores_per_experiment)
     num_patterns_bounds_per_core = math.ceil(len(num_patterns_bounds) / num_cores_per_experiment)
 
