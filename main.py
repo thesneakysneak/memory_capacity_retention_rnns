@@ -527,7 +527,7 @@ def chunks(l, n, max_cores):
 def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     import os
     import math
-    print("run_commands", run_commands)
+    print("run_commands", run_commands, run_commands == True)
     num_input_nodes_bounds = [x for x in range(2, 33)]
     sparsity_length_bounds = [x for x in range(1, 33)]
     timesteps_bounds = [x for x in range(1, 33)]
