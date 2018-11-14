@@ -14,7 +14,7 @@ sample_output = np.array([[0, 1, 0, 1], [0, 1, 0, 1]])
 #
 #
 # Define an input sequence and process it.
-def single_layer_jordan_rnn(num_inputs, num_output_layer_outputs, num_nodes_layer1):
+def single_layer_jordan_rnn(num_inputs, num_output_layer_outputs, num_nodes_layer1, prev_model=None):
 
     dense_output = Input(shape=(None, num_output_layer_outputs ))
 
