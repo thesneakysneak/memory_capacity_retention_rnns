@@ -722,7 +722,7 @@ def main(args):
     print(run, experiment_type, bounds)
 
     # TODO Refactor when in cloud
-    logfile_location = "Code/danny_masters"
+    logfile_location = "/nfs2/danny_masters"
     global logfile
     logfile = logfile_location + "/" +str(thread) + "_" + str(run) + "_" + str(experiment_type) + '.log'
     logging.basicConfig(filename=logfile, level=logging.INFO)
