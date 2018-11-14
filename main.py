@@ -495,7 +495,7 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
                                                                        timesteps=timesteps,
                                                                        network_type=network_type,
                                                                        activation_function=activation_function,
-                                                                       base_architecture=smallest_architecture)
+                                                                       base_architecture=[10, 10, 10**2])
                 for sparsity_length in sparsity_length_bounds:
                     run_experiment_sparsity(run, case_type=case_type,
                                                             num_input_nodes=10,
