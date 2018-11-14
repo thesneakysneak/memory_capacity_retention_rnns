@@ -13,10 +13,10 @@ import random
 
 import itertools
 
-
 from numpy import array
 from numpy import argmax
 from keras.utils import to_categorical
+
 
 def __print_lists__(train_list, train_out, corresponding_output):
     """
@@ -48,6 +48,7 @@ def generate_bit_patterns(bit_length=3):
         single_input = [bit for bit in bits]
         unique_input_patterns.append(single_input)
     return unique_input_patterns
+
 
 def all_unique_patterns(input_set, length):
     length = len(input_set)
@@ -163,7 +164,8 @@ def create_equal_spaced_patterns(patterns_to_identify, corresponding_output, ran
     # print(train_out)
     # print(train_list)
     # train_out = train_out.reshape(train_out.shape[0], train_out.shape[2])
-    return train_list,train_out
+    return train_list, train_out
+
 
 def generate_one_hot_output(num_patterns):
     # define example
@@ -173,6 +175,7 @@ def generate_one_hot_output(num_patterns):
     encoded = to_categorical(data)
     return encoded
 
+
 def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_patterns=3, sequence_length=2,
                        sparsity_length=1):
     print("Generating set")
@@ -181,15 +184,20 @@ def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_p
     if sparsity_length == 0:
         output = generate_one_hot_output(num_patterns)
         output = random.sample(list(output), len(output))
-        output_set = output
         random_output_patterns = []
         output_set = output
     else:
-        output = generate_one_hot_output(num_patterns+1)
+        output = generate_one_hot_output(num_patterns)
         output = random.sample(list(output), len(output))
-        output_set = output
-        random_output_patterns = [output.pop(0)]
-        output_set = output
+        output_set = []
+        for i in range(num_patterns):
+            output_set.append(output.pop(0))
+
+        if len(random_patterns) > 0:
+            for i in range(len(random_patterns)):
+                random_output_patterns = [[0 for x in range(len(output[0]))] * len(output)]
+        else:
+            random_output_patterns = []
 
     if case_type == 1:
         train_list, train_out = create_equal_spaced_patterns(input_set, output_set, random_patterns,
@@ -205,7 +213,6 @@ def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_p
     return train_list, train_out, input_set, output_set, random_patterns, random_output_patterns
 
 
-
 def example():
     case_type = 1
     num_input_nodes = 1
@@ -216,14 +223,15 @@ def example():
     pattern_input_set, random_patterns, input_set = generate_set(num_input_nodes, sequence_length, num_patterns)
     pattern_output_set, random_output, output_set = generate_set(num_output_nodes, 1, num_patterns)
 
-    train_list, train_out = create_equal_spaced_patterns(input_set, output_set, random_patterns, random_output, sparsity_length)
+    train_list, train_out = create_equal_spaced_patterns(input_set, output_set, random_patterns, random_output,
+                                                         sparsity_length)
 
     train_list.shape, train_out.shape
 
     # create and fit the LSTM network
     model = Sequential()
     model.add(LSTM(100, input_shape=(sequence_length, 1), return_sequences=True))
-    model.add(LSTM(20,return_sequences=True))
+    model.add(LSTM(20, return_sequences=True))
     model.add(LSTM(10))
     model.add(Dense(4, activation='softmax'))
     model.compile(loss='binary_crossentropy', metrics=['accuracy'], optimizer='adam')
@@ -237,12 +245,16 @@ def example():
     trainPredict
 
 
-
 def tests():
     # Generate first experiment
     expected = np.array([
-                         [[0]], [[0]],
-                         [[0]], [[1]],
-                         [[1]], [[0]],
-                         [[1]], [[1]],
+        [[0]], [[0]],
+        [[0]], [[1]],
+        [[1]], [[0]],
+        [[1]], [[1]],
     ])
+
+
+if __name__ == "__main__":
+    get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_patterns=3, sequence_length=2,
+                       sparsity_length=1)

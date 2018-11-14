@@ -370,11 +370,11 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
     if experiment_type =="sparsity":
         for sparsity_length in sparsity_length_bounds:
             smallest_architecture=run_experiment(run, case_type=case_type,
-                                                    num_input_nodes=2,
-                                                    num_output_nodes=2**2,
+                                                    num_input_nodes=8,
+                                                    num_output_nodes=8**2,
                                                     timesteps=1,
                                                     sparsity_length=sparsity_length,
-                                                    num_patterns=2**2-1,
+                                                    num_patterns=8**2,
                                                     smallest_architecture=smallest_architecture,
                                                     folder_root="sparsity")
 
