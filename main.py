@@ -600,7 +600,7 @@ def main(args):
     print("while loop ended")
     bounds = ast.literal_eval(bounds)
     print(run, experiment_type, bounds)
-    logfile_location = "/nfs2/danny_masters"
+    logfile_location = "Code/danny_masters"
     global logfile
     logfile = logfile_location + "/" +str(thread) + "_" + str(run) + "_" + str(experiment_type) + '.log'
     logging.basicConfig(filename=logfile, level=logging.INFO)
@@ -616,11 +616,11 @@ if __name__ == "__main__":
     if len(sys.argv[1:]) == 0:
         print("Nothing to do")
         experiment_loop(run=1,
-                        num_input_nodes_bounds=[10],
-                        sparsity_length_bounds=[],
+                        num_input_nodes_bounds=[2],
+                        sparsity_length_bounds=[2],
                         timesteps_bounds=[],
                         num_patterns_bounds=[],
-                        experiment_type="num_nodes")
+                        experiment_type="sparsity")
     else:
         print(sys.argv[1:])
         if sys.argv[1:][0] == "spawn":
