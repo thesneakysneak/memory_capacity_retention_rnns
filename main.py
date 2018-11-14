@@ -385,7 +385,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                 dt = datetime.now()
                 random_seed = dt.microsecond
                 random.seed(random_seed)
-                
+
                 train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
                     gd.get_experiment_set(case_type=1,
                                           num_input_nodes=num_input_nodes,
@@ -461,7 +461,7 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
                                                    timesteps=1,
                                                    sparsity_length=0,
                                                    num_patterns=2,
-                                                   smallest_architecture=[],
+                                                   smallest_architecture=smallest_architecture,
                                                    folder_root="num_nodes")
 
     num_input_nodes = 3
@@ -469,15 +469,27 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
     # Test effect of increasing sparsity. All else constant
     if experiment_type =="sparsity":
         ## TODO Revisit
+        smallest_architecture_sum = 10000000
+        new_smallest = []
         for sparsity_length in sparsity_length_bounds:
-            smallest_architecture=run_experiment(run, case_type=case_type,
-                                                    num_input_nodes=8,
-                                                    num_output_nodes=8**2,
-                                                    timesteps=1,
-                                                    sparsity_length=sparsity_length,
-                                                    num_patterns=8**2-1,
-                                                    smallest_architecture=smallest_architecture,
-                                                    folder_root="sparsity")
+            activation_functions = ["softmax",
+                                    "elu", "selu", "softplus",
+                                    "softsign", "tanh", "sigmoid",
+                                    "hard_sigmoid",
+                                    "relu",
+                                    "linear"]
+            network_types = ["lstm", "gru", "elman_rnn", ]  # "jordan_rnn"
+
+            for network_type in network_types:
+                for activation_function in activation_functions:
+                    run_experiment_sparsity(run, case_type=case_type,
+                                                            num_input_nodes=8,
+                                                            num_output_nodes=8**2,
+                                                            timesteps=1,
+                                                            sparsity_length=sparsity_length,
+                                                            num_patterns=8**2-1,
+                                                            smallest_architecture=smallest_architecture,
+                                                            folder_root="sparsity")
 
     # Test effect of increasing timesteps. All else constant
     num_input_nodes = 3
