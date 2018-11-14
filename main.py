@@ -91,7 +91,7 @@ def search_architecture(num_input,
                             print("f_score", f_score)
                             if f_score >= 1.0:
                                 print('Best validation acc of epoch:', validation_acc, "architecture", architecture)
-                                return model, result, architecture, f_score 
+                                return model, result, architecture, f_score
 
 
     return model, result, architecture
@@ -277,9 +277,8 @@ def run_experiment_sparsity(run, case_type = 1, num_input_nodes = 1, num_output_
     dt = datetime.now()
     random_seed = dt.microsecond
     random.seed(random_seed)
-    num_output_nodes = num_patterns
-    if sparsity_length > 0:
-        num_output_nodes += 1
+
+
     train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
         gd.get_experiment_set(case_type=1,
                               num_input_nodes=num_input_nodes,
@@ -318,7 +317,7 @@ def run_experiment_sparsity(run, case_type = 1, num_input_nodes = 1, num_output_
     num_available_patterns = (2 ** num_input_nodes) ** timesteps
     database_functions.insert_experiment(case_type=1,
                                          num_input=num_input_nodes,
-                                         num_output=num_patterns,
+                                         num_output=num_output_nodes,
                                          num_patterns_to_recall=num_patterns,
                                          num_patterns_total=num_available_patterns,
                                          timesteps=timesteps,
@@ -372,7 +371,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
             exists = database_functions.experiment_exists(
                                             case_type=1,
                                             num_input=num_input_nodes,
-                                            num_output=num_patterns,
+                                            num_output=num_output_nodes,
                                             num_patterns_to_recall=num_patterns,
                                             num_patterns_total=num_patterns,
                                             timesteps=timesteps,
@@ -386,9 +385,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                 dt = datetime.now()
                 random_seed = dt.microsecond
                 random.seed(random_seed)
-                num_output_nodes = num_patterns
-                if sparsity_length > 0:
-                    num_output_nodes += 1
+                
                 train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
                     gd.get_experiment_set(case_type=1,
                                           num_input_nodes=num_input_nodes,
@@ -413,7 +410,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                 num_available_patterns = (2 ** num_input_nodes) ** timesteps
                 database_functions.insert_experiment(case_type=1,
                                                      num_input=num_input_nodes,
-                                                     num_output=num_patterns,
+                                                     num_output=num_output_nodes,
                                                      num_patterns_to_recall=num_patterns,
                                                      num_patterns_total=num_available_patterns,
                                                      timesteps=timesteps,
