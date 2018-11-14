@@ -289,17 +289,7 @@ def run_experiment_sparsity(run, case_type = 1, num_input_nodes = 1, num_output_
                               )
 
 
-    best_model, result, architecture = search_architecture(num_input_nodes,
-                                                           num_output_nodes,
-                                                           train_input,
-                                                           train_out,
-                                                           batch_size=10,
-                                                           timesteps=timesteps,
-                                                           network_type=network_type,
-                                                           activation_function=activation_function,
-                                                           base_architecture=smallest_architecture)
-
-    model = recurrent_models.get_model(architecture=architecture,
+    model = recurrent_models.get_model(architecture=smallest_architecture,
                                        batch_size=10,
                                        timesteps=timesteps,
                                        network_type=network_type,
@@ -309,7 +299,7 @@ def run_experiment_sparsity(run, case_type = 1, num_input_nodes = 1, num_output_
     y_predicted = best_model.predict(train_input, batch_size=10)
     f_score = recurrent_models.determine_score(train_out, y_predicted, f_only=True)
     print("f_score", f_score)
-    print('Best validation acc of epoch:', validation_acc, "architecture", architecture)
+    print('Best validation acc of epoch:', validation_acc, "architecture", smallest_architecture)
 
     print(best_model.summary())
     validation_acc = np.amax(result.history['acc'])
