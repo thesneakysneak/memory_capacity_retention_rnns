@@ -79,12 +79,12 @@ def search_architecture(num_input,
                             architecture = list(filter(lambda a: a != 0, architecture))  # remove 0s
 
                             model = recurrent_models.get_model(architecture=architecture,
-                                                               batch_size=batch_size,
+                                                               batch_size=10,
                                                                timesteps=timesteps,
                                                                network_type=network_type,
                                                                activation_function=activation_function)
                             model, result = recurrent_models.train_model(x_train, y_train, model, "adam",
-                                                                         batch_size)
+                                                                         10)
                             validation_acc = np.amax(result.history['acc'])
                             y_predicted = model.predict(x_train, batch_size=batch_size)
                             f_score = recurrent_models.determine_score(y_train, y_predicted, f_only=True)
@@ -474,18 +474,19 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
                 train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
                     gd.get_experiment_set(case_type=1,
                                           num_input_nodes=10,
-                                          num_output_nodes=10**2,
-                                          num_patterns=10**2,
+                                          num_output_nodes=10,
+                                          num_patterns=10,
                                           sequence_length=1,
                                           sparsity_length=0
                                           )
-                train_input=  train_out=  input_set=  output_set=  pattern_input_set=  pattern_output_set = []
-                best_model, result, architecture, f_score = search_architecture(10, 10 ** 2,train_input,train_out,
+                best_model, result, architecture, f_score = search_architecture(10, 10,train_input,train_out,
                                                                        batch_size=10,
                                                                        timesteps=timesteps,
                                                                        network_type=network_type,
                                                                        activation_function=activation_function,
-                                                                       base_architecture=[10, 10, 10**2])
+                                                                       base_architecture=[])
+
+                train_input=  train_out=  input_set=  output_set=  pattern_input_set=  pattern_output_set = []
                 for sparsity_length in sparsity_length_bounds:
                     run_experiment_sparsity(run, case_type=case_type,
                                                             num_input_nodes=10,
@@ -718,6 +719,8 @@ def main(args):
     print("while loop ended")
     bounds = ast.literal_eval(bounds)
     print(run, experiment_type, bounds)
+
+    # TODO Refactor when in cloud
     logfile_location = "Code/danny_masters"
     global logfile
     logfile = logfile_location + "/" +str(thread) + "_" + str(run) + "_" + str(experiment_type) + '.log'

@@ -23,6 +23,37 @@ y_train = []
 x_test= []
 y_test = []
 
+def determine_score(predicted, test, f_only=True):
+    p_categories = [np.argmax(x) for x in predicted]
+    t_categories = [np.argmax(x) for x in test]
+
+    for i in range(len(p_categories)):
+        if p_categories[i] != t_categories[i]:
+            print("Class not correct", p_categories[i], t_categories[i])
+    conf_mat = confusion_matrix(t_categories, p_categories)
+    precision, recall, fbeta_score, beta = precision_recall_fscore_support(t_categories, p_categories, average="micro")
+
+    # print(conf_mat)
+    if f_only:
+        return fbeta_score
+    return precision, recall, fbeta_score, conf_mat
+
+
+class EarlyStopByF1(keras.callbacks.Callback):
+    def __init__(self, value = 0, verbose = 0):
+        super(keras.callbacks.Callback, self).__init__()
+        self.value = value
+        self.verbose = verbose
+
+
+    def on_epoch_end(self, epoch, logs={}):
+         predict = np.asarray(self.model.predict(self.validation_data[0], batch_size=10))
+         target = self.validation_data[1]
+         score = determine_score(target, predict, f_only=True)
+         if score >= 0.99:
+            if self.verbose >0:
+                print("Epoch %05d: early stopping Threshold" % epoch)
+            self.model.stop_training = True
 
 class ResetState(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
@@ -111,7 +142,8 @@ def train_model(input_set, output_set, model, training_alg, batch_size):
         reset_state
     ]
     print("training")
-    result = model.fit(input_set, output_set, epochs=1000, batch_size=batch_size, verbose=0, shuffle=False, callbacks=callbacks)
+    result = model.fit(input_set, output_set, epochs=1000, batch_size=10, verbose=1,
+                       shuffle=False, validation_data=(input_set, output_set), callbacks=callbacks)
     return model, result
 
 
@@ -145,24 +177,16 @@ def test():
         print(model.summary())
 
 
-def determine_score(predicted, test, f_only=True):
-    p_categories = [np.argmax(x) for x in predicted]
-    t_categories = [np.argmax(x) for x in test]
-
-    conf_mat = confusion_matrix(t_categories, p_categories)
-    precision, recall, fbeta_score, beta = precision_recall_fscore_support(t_categories, p_categories, average="micro")
-
-    print(conf_mat)
-    if f_only:
-        return fbeta_score
-    return precision, recall, fbeta_score, conf_mat
 
 
-earlystop = EarlyStopping(monitor='acc',  # loss
-                          patience=30,
-                          verbose=0,
-                          min_delta=0.05,
+earlystop = EarlyStopping(monitor='loss',  # loss
+                          patience=100,
+                          verbose=1,
+                          min_delta=0.15,
                           mode='auto')
+
+earlystop = EarlyStopByF1(value = .90, verbose =1)
+
 reset_state = ResetState()
 
 if __name__ == "main":
