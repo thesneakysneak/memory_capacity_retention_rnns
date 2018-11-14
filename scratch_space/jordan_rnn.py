@@ -55,13 +55,13 @@ y = layer(x)
 # Define an input sequence and process it.
 def single_layer_jordan_rnn(num_inputs, num_output_layer_outputs, num_nodes_layer1, input_shape=(1,1,1), batch_size=1, prev_model=None):
     #                           smaples, timesteps, features
-    layer1_inputs = Input(shape=(None, 10), name='layer1_input')
+    layer1_inputs = Input(shape=(None, num_inputs), name='layer1_input')
 
 
     if prev_model:
-        prev_output_layer = Reshape((None, num_output_layer_outputs))(prev_model.layers[1].output)
+        prev_output_layer = prev_model.layers[1].output
     else:
-        prev_output_layer = Input(shape=(None, 10), name='layer1_input_2')
+        prev_output_layer = Input(shape=(None, num_output_layer_outputs), name='layer1_input_2')
     layer1_prev_out = Concatenate()([layer1_inputs, prev_output_layer])
     # Layer 1
 
@@ -241,24 +241,31 @@ def five_layer_jordan_rnn(num_inputs,
 #
 
 
-plot_model(model, to_file='model.png')
 
+num_inputs = 10
+num_layer2_outputs = 2
+model = single_layer_jordan_rnn(num_inputs, num_layer2_outputs, 5,
+                                input_shape=(1,1,1), batch_size=1, prev_model=None)
 
 model.compile(loss='categorical_crossentropy', optimizer='adam')
 
 input_set = np.array([np.array([np.array([1]*num_inputs)])])
+prev_output_set = np.array( [[[1]*num_layer2_outputs]])
 output_set =np.array( [[[1]*num_layer2_outputs]])
+model.fit([input_set, prev_output_set], output_set, epochs=1, verbose=2)
 
-for epoc_ in range(10):
-    input_set = np.array([1] * num_inputs)
-    try:
-        np_dense_output = K.eval(dense_output)
-    except:
-        np_dense_output = []
-        for i in range(input_set.shape[0]):
-            np_dense_output = np.array([np.array([np.array([1]*num_layer2_outputs)])])
-    print(np_dense_output)
-    input_set_ = np.concatenate((input_set, np_dense_output), axis=-1)
-    model.fit([input_set, np_dense_output], output_set, epochs=1, verbose=2)
-plot_model(model, show_shapes=True)
 
+
+
+
+num_inputs = 10
+num_layer2_outputs = 2
+model2 = single_layer_jordan_rnn(num_inputs, num_layer2_outputs, 5,
+                                input_shape=(1,1,1), batch_size=1, prev_model=model)
+
+model2.compile(loss='categorical_crossentropy', optimizer='adam')
+
+input_set = np.array([np.array([np.array([1]*num_inputs)])])
+prev_output_set = np.array( [[[1]*num_layer2_outputs]])
+output_set =np.array( [[[1]*num_layer2_outputs]])
+model2.fit([input_set, prev_output_set], output_set, epochs=1, verbose=2)
