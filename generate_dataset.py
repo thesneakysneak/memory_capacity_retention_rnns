@@ -193,11 +193,10 @@ def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_p
         for i in range(num_patterns):
             output_set.append(output.pop(0))
 
-        if len(random_patterns) > 0:
-            for i in range(len(random_patterns)):
-                random_output_patterns = [[0 for x in range(len(output[0]))] * len(output)]
-        else:
-            random_output_patterns = []
+        random_output_patterns = []
+        for i in range(len(random_patterns)):
+            random_output_patterns.append([0] * num_patterns)
+
 
     if case_type == 1:
         train_list, train_out = create_equal_spaced_patterns(input_set, output_set, random_patterns,
