@@ -59,45 +59,46 @@ def insert_experiment(case_type=1,
                       run_count=0,
                       error_when_stopped=0.0,
                       num_correctly_identified=0,
-                      input_set=[0,0,0,0,0],
-                      output_set=[0,0,0,0,0],
-                      architecture=[0,0,0,0,0],
                       num_network_parameters=0,
                       network_type="lstm",
                       training_algorithm="adam",
-                      batch_size=10,
+                      f_score="0",
                       activation_function="tanh",
+                      architecture=[0, 0, 0, 0, 0],
+                      input_set=[0,0,0,0,0],
+                      output_set=[0,0,0,0,0],
+                      batch_size=10,
                       full_network_json=[],
                       full_network="[0,0,0,0,0]",
                       folder_root=""):
-    global engine
-    df = pd.DataFrame()
-    df["case_type"] = [case_type]
-    df["num_input"] = [num_input]
-    df["num_output"] = [num_output]
-    df["num_patterns_to_recall"] = [num_patterns_to_recall]
-    df["num_patterns_total"] = [num_patterns_total]
-    df["timesteps"] = [timesteps]
-    df["sparsity_length"] = [sparsity_length]
-    df["random_seed"] = [random_seed]
-    df["run"] = [run_count]
-    df["error_when_stopped"] = [error_when_stopped]
-    df["num_correctly_identified"] = [num_correctly_identified]
-    df["input_set"] = [str(input_set)]
-    df["output_set"] = [str(output_set)]
-    df["architecture"] = [str(architecture)]
-    df["num_network_parameters"] = [num_network_parameters]
-    df["network_type"] = [network_type]
-    df["training_algorithm"] = [training_algorithm]
-    df["batch_size"] = [batch_size]
-    df["activation_function"] = [activation_function]
-    df["full_network"] = [str(full_network)]
-    # df.to_sql('experiments', engine, index=False, if_exists='append')
-    location = folder_root + "/" + str(run_count) + "_" + str(case_type) + "_" + str(num_input) \
-               + "_" + str(num_output) + "_" + str(timesteps) + "_" + str(num_patterns_to_recall) \
-               + "_" + str(sparsity_length) \
-               + "_" + str(num_patterns_total) + "_" + str(network_type) \
-               + "_" + str(activation_function) + "_" + str(num_patterns_total) + ".csv"
+    # global engine
+    # df = pd.DataFrame()
+    # df["case_type"] = [case_type]
+    # df["num_input"] = [num_input]
+    # df["num_output"] = [num_output]
+    # df["num_patterns_to_recall"] = [num_patterns_to_recall]
+    # df["num_patterns_total"] = [num_patterns_total]
+    # df["timesteps"] = [timesteps]
+    # df["sparsity_length"] = [sparsity_length]
+    # df["random_seed"] = [random_seed]
+    # df["run"] = [run_count]
+    # df["error_when_stopped"] = [error_when_stopped]
+    # df["num_correctly_identified"] = [num_correctly_identified]
+    # df["input_set"] = [str(input_set)]
+    # df["output_set"] = [str(output_set)]
+    # df["architecture"] = [str(architecture)]
+    # df["num_network_parameters"] = [num_network_parameters]
+    # df["network_type"] = [network_type]
+    # df["training_algorithm"] = [training_algorithm]
+    # df["batch_size"] = [batch_size]
+    # df["activation_function"] = [activation_function]
+    # df["full_network"] = [str(full_network)]
+    # # df.to_sql('experiments', engine, index=False, if_exists='append')
+    # location = folder_root + "/" + str(run_count) + "_" + str(case_type) + "_" + str(num_input) \
+    #            + "_" + str(num_output) + "_" + str(timesteps) + "_" + str(num_patterns_to_recall) \
+    #            + "_" + str(sparsity_length) \
+    #            + "_" + str(num_patterns_total) + "_" + str(network_type) \
+    #            + "_" + str(activation_function) + "_" + str(num_patterns_total) + ".csv"
     # df.to_csv(location)
 
     #               run_count, timesteps, sparsity_length, case_type, num_input, num_output,  num_patterns_to_recall,
@@ -105,7 +106,8 @@ def insert_experiment(case_type=1,
     #                       num_patterns_total      random_seed             error_when_stopped
     #                       2048,                   4517                    ,1.0
     string_to_write = str(folder_root) + ";" \
-                        + str(run_count) + "," \
+                        + str(run_count) + ";" \
+                        + str(f_score) + ";" \
                         + str(timesteps) + ";" \
                         + str(sparsity_length) + ";" \
                         + str(case_type) + ";" \
