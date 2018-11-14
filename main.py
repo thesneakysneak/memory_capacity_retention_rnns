@@ -737,12 +737,33 @@ def main(args):
 if __name__ == "__main__":
     if len(sys.argv[1:]) == 0:
         print("Nothing to do")
-        experiment_loop(run=1,
-                        num_input_nodes_bounds=[2],
-                        sparsity_length_bounds=[2],
-                        timesteps_bounds=[],
-                        num_patterns_bounds=[],
-                        experiment_type="sparsity")
+        # experiment_loop(run=1,
+        #                 num_input_nodes_bounds=[2],
+        #                 sparsity_length_bounds=[2],
+        #                 timesteps_bounds=[],
+        #                 num_patterns_bounds=[],
+        #                 experiment_type="sparsity")
+
+        # experiment_loop(run=1,
+        #                 num_input_nodes_bounds=[4, 5],
+        #                 sparsity_length_bounds=[2],
+        #                 timesteps_bounds=[],
+        #                 num_patterns_bounds=[],
+        #                 experiment_type="num_nodes")
+
+        # experiment_loop(run=1,
+        #                 num_input_nodes_bounds=[4, 5],
+        #                 sparsity_length_bounds=[2],
+        #                 timesteps_bounds=[2, 3, 4],
+        #                 num_patterns_bounds=[],
+        #                 experiment_type="timesteps"
+        #                 )
+        # experiment_loop(run=1,
+        #                 num_input_nodes_bounds=[4, 5],
+        #                 sparsity_length_bounds=[2],
+        #                 timesteps_bounds=[],
+        #                 num_patterns_bounds=[2, 3],
+        #                 experiment_type="patterns")
     else:
         print(sys.argv[1:])
         if sys.argv[1:][0] == "spawn":
