@@ -187,11 +187,14 @@ def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_p
         random_output_patterns = []
         output_set = output
     else:
-        output = generate_one_hot_output(num_patterns)
+        output = generate_one_hot_output(num_output_nodes)
+        # Just shuffles
         output = random.sample(list(output), len(output))
         output_set = []
+
+        # Protection
         for i in range(num_patterns):
-            output_set.append(output.pop(0))
+            output_set.append(output[i%len(output)])
 
         random_output_patterns = []
         for i in range(len(random_patterns)):
