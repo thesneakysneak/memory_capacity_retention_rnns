@@ -91,7 +91,7 @@ def search_architecture(num_input,
                             print("f_score", f_score)
                             if f_score >= 1.0:
                                 print('Best validation acc of epoch:', validation_acc, "architecture", architecture)
-                                return model, result, architecture
+                                return model, result, architecture, f_score 
 
 
     return model, result, architecture
@@ -398,7 +398,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                                           sparsity_length=sparsity_length
                                           )
 
-                best_model, result, architecture = search_architecture(num_input_nodes,
+                best_model, result, architecture, f_score = search_architecture(num_input_nodes,
                                                                        num_output_nodes,
                                                                        train_input,
                                                                        train_out,
@@ -420,6 +420,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                                                      sparsity_length=sparsity_length,
                                                      random_seed=random_seed,
                                                      run_count=run,
+                                                     f_score=str(f_score),
                                                      error_when_stopped=validation_acc,
                                                      num_correctly_identified=0,
                                                      input_set=str(train_input),
