@@ -24,12 +24,14 @@ x_test= []
 y_test = []
 
 def determine_score(predicted, test, f_only=True):
+    predicted = predicted.round()
+    test = test.round()
     p_categories = [np.argmax(x) for x in predicted]
     t_categories = [np.argmax(x) for x in test]
 
-    for i in range(len(p_categories)):
-        if p_categories[i] != t_categories[i]:
-            print("Class not correct", p_categories[i], t_categories[i])
+    # for i in range(len(p_categories)):
+    #     if p_categories[i] != t_categories[i]:
+    #         print("Class not correct", p_categories[i], t_categories[i])
     conf_mat = confusion_matrix(t_categories, p_categories)
     precision, recall, fbeta_score, beta = precision_recall_fscore_support(t_categories, p_categories, average="micro")
 
@@ -72,7 +74,7 @@ class ResetState(keras.callbacks.Callback):
         pass
 
     def on_batch_end(self, batch, logs={}):
-        self.model.reset_states()
+        # self.model.reset_states()
         # #         print("reset model state", logs)
         #         acc = logs.get("acc")
         #         if acc == 1.0:
@@ -142,7 +144,7 @@ def train_model(input_set, output_set, model, training_alg, batch_size):
         reset_state
     ]
     print("training")
-    result = model.fit(input_set, output_set, epochs=1000, batch_size=10, verbose=1,
+    result = model.fit(input_set, output_set, epochs=1000, batch_size=10, verbose=0,
                        shuffle=False, validation_data=(input_set, output_set), callbacks=callbacks)
     return model, result
 
@@ -182,10 +184,10 @@ def test():
 earlystop = EarlyStopping(monitor='loss',  # loss
                           patience=100,
                           verbose=1,
-                          min_delta=0.15,
+                          min_delta=0.05,
                           mode='auto')
 
-earlystop = EarlyStopByF1(value = .90, verbose =1)
+earlystop = EarlyStopByF1(value = .99, verbose =1)
 
 reset_state = ResetState()
 

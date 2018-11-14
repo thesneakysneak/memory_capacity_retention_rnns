@@ -469,31 +469,32 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
                                 "linear"]
         network_types = ["lstm", "gru", "elman_rnn", ]  # "jordan_rnn"
 
+        architecture=[10, 10]
         for network_type in network_types:
             for activation_function in activation_functions:
-                train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
-                    gd.get_experiment_set(case_type=1,
-                                          num_input_nodes=10,
-                                          num_output_nodes=10,
-                                          num_patterns=10,
-                                          sequence_length=1,
-                                          sparsity_length=0
-                                          )
-                best_model, result, architecture, f_score = search_architecture(10, 10,train_input,train_out,
-                                                                       batch_size=10,
-                                                                       timesteps=timesteps,
-                                                                       network_type=network_type,
-                                                                       activation_function=activation_function,
-                                                                       base_architecture=[])
+                # train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
+                #     gd.get_experiment_set(case_type=1,
+                #                           num_input_nodes=10,
+                #                           num_output_nodes=10,
+                #                           num_patterns=10,
+                #                           sequence_length=1,
+                #                           sparsity_length=0
+                #                           )
+                # best_model, result, architecture, f_score = search_architecture(2, 4,train_input,train_out,
+                #                                                        batch_size=10,
+                #                                                        timesteps=timesteps,
+                #                                                        network_type=network_type,
+                #                                                        activation_function=activation_function,
+                #                                                        base_architecture=[])
 
                 train_input=  train_out=  input_set=  output_set=  pattern_input_set=  pattern_output_set = []
                 for sparsity_length in sparsity_length_bounds:
                     run_experiment_sparsity(run, case_type=case_type,
                                                             num_input_nodes=10,
-                                                            num_output_nodes=10**2,
+                                                            num_output_nodes=10,
                                                             timesteps=1,
                                                             sparsity_length=sparsity_length,
-                                                            num_patterns=10**2-1,
+                                                            num_patterns=9-1,
                                                             smallest_architecture=architecture,
                                                             folder_root="sparsity")
 

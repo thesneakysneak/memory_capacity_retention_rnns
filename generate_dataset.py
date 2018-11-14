@@ -84,7 +84,8 @@ def generate_set(input_length=3, sequence_length=3, num_patterns=3):
 
     all_sequences = list(itertools.product(possible_patterns, repeat=sequence_length))
     print("     all_sequences", len(all_sequences))
-    index_of_set = random.sample(range(0, len(all_sequences)), num_patterns)
+    # index_of_set = random.sample(range(0, len(all_sequences)), num_patterns)
+    index_of_set = [x for x in range(0, num_patterns)]
     sequences_to_identify = [all_sequences[i] for i in index_of_set]
     random_patterns = [x for x in all_sequences if x not in sequences_to_identify]
     print("     random_patterns", len(random_patterns))
@@ -149,6 +150,9 @@ def create_equal_spaced_patterns(patterns_to_identify, corresponding_output, ran
                 rand_index_in = 0
                 rand_index_out = 0
             else:
+                # print("RANDOM")
+                # print(len(random_patterns), random_patterns)
+                # print(len(random_output), random_output)
                 rand_index_in = random.randint(0, len(random_patterns) - 1)
                 rand_index_out = random.randint(0, num_r_output - 1)
             # print("random_patterns", rand_index_in)
@@ -183,22 +187,22 @@ def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_p
     # pattern_output_set, random_output, output_set = generate_set(num_output_nodes, sequences_length, num_patterns)
     if sparsity_length == 0:
         output = generate_one_hot_output(num_patterns)
-        output = random.sample(list(output), len(output))
+        # output = random.sample(list(output), len(output))
         random_output_patterns = []
-        output_set = output
+        output_set = output[:len(output)]
     else:
         output = generate_one_hot_output(num_output_nodes)
         # Just shuffles
-        output = random.sample(list(output), len(output))
-        output_set = []
+        # output = random.sample(list(output), len(output))
 
+        output_set = []
         # Protection
         for i in range(num_patterns):
             output_set.append(output[i%len(output)])
 
         random_output_patterns = []
         for i in range(len(random_patterns)):
-            random_output_patterns.append([0] * num_patterns)
+            random_output_patterns.append([0] * num_output_nodes)
 
 
     if case_type == 1:
