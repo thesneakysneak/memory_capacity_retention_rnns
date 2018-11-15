@@ -661,7 +661,11 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     bounds_num_input_nodes = chunks(num_input_nodes_bounds, len_sparsity, num_cores_per_experiment)
     bounds_sparsity_length = chunks(sparsity_length_bounds, len_sparsity, num_cores_per_experiment)
     bounds_time_steps = chunks(timesteps_bounds, len_sparsity, num_cores_per_experiment)
-    bounds_num_patterns = chunks(num_patterns_bounds, len_patterns, num_cores_per_experiment)
+
+    if num_cores_per_experiment != len(num_patterns_bounds):
+        bounds_num_patterns = chunks(num_patterns_bounds, len_patterns, num_cores_per_experiment)
+    else:
+        bounds_num_patterns = num_patterns_bounds
 
     for thread in range(num_cores_per_experiment):
         import os
