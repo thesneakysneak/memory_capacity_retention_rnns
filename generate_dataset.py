@@ -186,10 +186,17 @@ def get_experiment_set(case_type=1, num_input_nodes=3, num_output_nodes=3, num_p
     all_sequences, random_patterns, input_set = generate_set(num_input_nodes, sequence_length, num_patterns)
     # pattern_output_set, random_output, output_set = generate_set(num_output_nodes, sequences_length, num_patterns)
     if sparsity_length == 0:
-        output = generate_one_hot_output(num_patterns)
+        output = generate_one_hot_output(num_output_nodes)
         # output = random.sample(list(output), len(output))
         random_output_patterns = []
-        output_set = output[:len(output)]
+        output_set = []
+        # Protection
+        for i in range(num_patterns):
+            output_set.append(output[i%len(output)])
+
+        random_output_patterns = []
+        for i in range(len(random_patterns)):
+            random_output_patterns.append([0] * num_output_nodes)
     else:
         output = generate_one_hot_output(num_output_nodes)
         # Just shuffles
