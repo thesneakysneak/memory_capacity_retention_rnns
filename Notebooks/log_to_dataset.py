@@ -2,14 +2,14 @@ import ast
 
 from os import listdir
 from os.path import isfile, join
-directory = "/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/Notebooks/16_11_2018"
+directory = "/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/Notebooks/backup_15_11_2018_2000"
 onlyfiles = [f for f in listdir(directory) if isfile(join(directory, f))]
 
-with open('/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/Notebooks/sparsity.csv', 'a') as the_file:
+with open('/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/Notebooks/patterns.csv', 'a') as the_file:
     line_to_write = "folder_root,run_count,f_score,timesteps,sparsity_length,case_type,num_input,num_output,num_patterns_to_recall,num_patterns_total,random_seed,error_when_stopped,num_network_parameters,network_type,training_algorithm,batch_size,epocs,activation_function,num_correctly_identified,architecture,full_network_json ,model_history,full_network ,input_set,output_set"
     the_file.write(line_to_write + '\n')
     for f in onlyfiles:
-        if "sparsity.log" in f:
+        if "patterns.log" in f:
             file = open(directory + "/" + f)
             line = file.readline()
             info_seen = False
