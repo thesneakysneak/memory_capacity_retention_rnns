@@ -512,11 +512,11 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
         for timesteps in timesteps_bounds:
             smallest_architecture = run_experiment(run,
                            case_type=case_type,
-                           num_input_nodes=1,
-                           num_output_nodes=(2**1),
+                           num_input_nodes=2,
+                           num_output_nodes=(4**1),
                            timesteps=timesteps,
                            sparsity_length=0,
-                           num_patterns=(2**1),
+                           num_patterns=(4**1),
                            smallest_architecture=smallest_architecture,
                            folder_root="timesteps")
             # smallest_architecture = run_experiment(run,
@@ -660,9 +660,9 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     num_input_nodes_bounds = [x for x in range(1, 15)]
     sparsity_length_bounds = [x for x in range(1, 15)]
     timesteps_bounds = [x for x in range(1, 15)]
-    num_patterns_bounds = [x for x in range(2, 100)]
+    num_patterns_bounds = [x for x in range(2, 16)]
 
-    num_cores_per_experiment = 14
+    num_cores_per_experiment = 15
 
     # experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timesteps_bounds, num_patterns_bounds)
     len_sparsity = int(len(sparsity_length_bounds)/num_cores_per_experiment)
