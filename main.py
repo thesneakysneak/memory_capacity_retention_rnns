@@ -346,6 +346,15 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
     network_types = ["lstm", "gru", "elman_rnn", ] # "jordan_rnn"
     smallest_architecture_sum = 10000000
     new_smallest = []
+    train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
+        gd.get_experiment_set(case_type=1,
+                              num_input_nodes=num_input_nodes,
+                              num_output_nodes=num_output_nodes,
+                              num_patterns=num_patterns,
+                              sequence_length=timesteps,
+                              sparsity_length=sparsity_length
+                              )
+
     for network_type in network_types:
         for activation_function in activation_functions:
             print("=======================================================")
@@ -376,15 +385,6 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                 dt = datetime.now()
                 random_seed = dt.microsecond
                 random.seed(random_seed)
-
-                train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
-                    gd.get_experiment_set(case_type=1,
-                                          num_input_nodes=num_input_nodes,
-                                          num_output_nodes=num_output_nodes,
-                                          num_patterns=num_patterns,
-                                          sequence_length=timesteps,
-                                          sparsity_length=sparsity_length
-                                          )
 
                 best_model, result, architecture, f_score = search_architecture(num_input_nodes,
                                                                        num_output_nodes,
