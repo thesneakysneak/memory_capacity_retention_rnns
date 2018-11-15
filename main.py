@@ -328,6 +328,7 @@ def run_experiment_sparsity(run, case_type = 1, num_input_nodes = 1, num_output_
                                          full_network_json=str(best_model.to_json()),
                                          full_network=list(best_model.get_weights()),
                                          folder_root=folder_root,
+                                         model_history=str(result.history)
                                          )
     keras.backend.clear_session()
     gc.collect()

@@ -70,7 +70,8 @@ def insert_experiment(case_type=1,
                       batch_size=10,
                       full_network_json=[],
                       full_network="[0,0,0,0,0]",
-                      folder_root=""):
+                      folder_root="",
+                      model_history=""):
     # global engine
     # df = pd.DataFrame()
     # df["case_type"] = [case_type]
@@ -123,9 +124,10 @@ def insert_experiment(case_type=1,
                         + str(batch_size) + ";" \
                         + str(activation_function) + ";" \
                         + str(num_correctly_identified) + ";" \
+                        + str(str(architecture)) + ";" \
                         + str(str(input_set)) + ";" \
                         + str(str(output_set)) + ";" \
-                          + str(str(architecture)) + ";" \
+                        + str(str(model_history)) + ";" \
                         +str(full_network_json) + ";" \
                           + str(full_network) + "\n"
     logging.info(string_to_write)
