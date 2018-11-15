@@ -421,7 +421,8 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                                                      activation_function=activation_function,
                                                      full_network_json=str(best_model.to_json()),
                                                      full_network=list(best_model.get_weights()),
-                                                     folder_root=folder_root)
+                                                     folder_root=folder_root,
+                                                     model_history=str(result))
                 keras.backend.clear_session()
                 architecture_sum = sum(architecture)
                 if smallest_architecture_sum >  architecture_sum:
