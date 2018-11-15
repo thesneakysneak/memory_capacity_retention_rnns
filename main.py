@@ -368,19 +368,19 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                   "num_patterns", num_patterns, "timesteps", timesteps)
 
             # TODO Revisit
-            exists = database_functions.experiment_exists(
-                                            case_type=1,
-                                            num_input=num_input_nodes,
-                                            num_output=num_output_nodes,
-                                            num_patterns_to_recall=num_patterns,
-                                            num_patterns_total=num_patterns,
-                                            timesteps=timesteps,
-                                            sparsity_length=sparsity_length,
-                                            run_count=run,
-                                            network_type=network_type,
-                                            activation_function=activation_function,
-                                            folder_root=folder_root)
-
+            # exists = database_functions.experiment_exists(
+            #                                 case_type=1,
+            #                                 num_input=num_input_nodes,
+            #                                 num_output=num_output_nodes,
+            #                                 num_patterns_to_recall=num_patterns,
+            #                                 num_patterns_total=num_patterns,
+            #                                 timesteps=timesteps,
+            #                                 sparsity_length=sparsity_length,
+            #                                 run_count=run,
+            #                                 network_type=network_type,
+            #                                 activation_function=activation_function,
+            #                                 folder_root=folder_root)
+            exists = False
             if not exists:
                 dt = datetime.now()
                 random_seed = dt.microsecond
