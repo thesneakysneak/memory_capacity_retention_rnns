@@ -127,11 +127,12 @@ def insert_experiment(case_type=1,
                         + str(activation_function) + ";" \
                         + str(num_correctly_identified) + ";" \
                         + str(str(architecture)) + ";"  + "\n" \
+                      + str(full_network_json) + ";" + "\n" \
                       + str(str(model_history)) + ";"  + "\n" \
                       + str(full_network) + "\n" \
                       + str(str(input_set)) + ";"  + "\n"\
-                        + str(str(output_set)) + ";"  + "\n"\
-                        +str(full_network_json) + ";"  + "\n"
+                        + str(str(output_set)) + ";"  + "\n"
+
 
     logging.info(string_to_write)
 
