@@ -399,30 +399,33 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                 validation_acc = np.amax(result.history['acc'])
 
                 num_available_patterns = (2 ** num_input_nodes) ** timesteps
-                database_functions.insert_experiment(case_type=1,
-                                                     num_input=num_input_nodes,
-                                                     num_output=num_output_nodes,
-                                                     num_patterns_to_recall=num_patterns,
-                                                     num_patterns_total=num_available_patterns,
-                                                     timesteps=timesteps,
-                                                     sparsity_length=sparsity_length,
-                                                     random_seed=random_seed,
-                                                     run_count=run,
-                                                     f_score=str(f_score),
-                                                     error_when_stopped=validation_acc,
-                                                     num_correctly_identified=0,
-                                                     input_set=str(train_input),
-                                                     output_set=str(train_out),
-                                                     architecture=str(best_model.to_json()),
-                                                     num_network_parameters=best_model.count_params(),
-                                                     network_type=network_type,
-                                                     training_algorithm="adam",
-                                                     batch_size=10,
-                                                     activation_function=activation_function,
-                                                     full_network_json=str(best_model.to_json()),
-                                                     full_network=list(best_model.get_weights()),
-                                                     folder_root=folder_root,
-                                                     model_history=str(result))
+                count_p = best_model.count_params()
+                print(count_p)
+                database_functions.insert_experiment(case_type = 1,
+                                                    num_input = num_input_nodes,
+                                                    num_output = num_output_nodes,
+                                                    num_patterns_to_recall = num_patterns,
+                                                    num_patterns_total = num_available_patterns,
+                                                    timesteps = timesteps,
+                                                    sparsity_length=sparsity_length,
+                                                    random_seed=random_seed,
+                                                    run_count=run,
+                                                    error_when_stopped = validation_acc,
+                                                    num_correctly_identified = 0,
+                                                    num_network_parameters = best_model.count_params(),
+                                                    network_type = network_type,
+                                                    training_algorithm = "adam",
+                                                    f_score = str(f_score),
+                                                    activation_function = activation_function,
+                                                    architecture = str(architecture),
+                                                    input_set=str(train_input),
+                                                    output_set=str(train_out),
+                                                    batch_size = 10,
+                                                    full_network_json = str(best_model.to_json()),
+                                                    full_network = list(best_model.get_weights()),
+                                                    folder_root=folder_root,
+                                                    model_history=str(result.history))
+
                 keras.backend.clear_session()
                 architecture_sum = sum(architecture)
                 if smallest_architecture_sum >  architecture_sum:
@@ -610,7 +613,8 @@ def test_loop():
                                                                      activation_function=activation_function)
                                     print(best_model.summary())
                                     validation_acc = np.amax(result.history['acc'])
-
+                                    count_p = best_model.count_params()
+                                    print(count_p)
                                     database_functions.insert_experiment(case_type=1,
                                                                           num_input=num_input_nodes,
                                                                           num_output=num_patterns,
@@ -753,14 +757,18 @@ if __name__ == "__main__":
         #                 timesteps_bounds=[],
         #                 num_patterns_bounds=[],
         #                 experiment_type="num_nodes")
+        logfile_location = "/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/res"  # "/nfs2/danny_masters"
+        global logfile
+        logfile = logfile_location + "/timesteps.log"
+        logging.basicConfig(filename=logfile, level=logging.INFO)
 
-        # experiment_loop(run=1,
-        #                 num_input_nodes_bounds=[4, 5],
-        #                 sparsity_length_bounds=[2],
-        #                 timesteps_bounds=[2, 3, 4],
-        #                 num_patterns_bounds=[],
-        #                 experiment_type="timesteps"
-        #                 )
+        experiment_loop(run=1,
+                        num_input_nodes_bounds=[4, 5],
+                        sparsity_length_bounds=[2],
+                        timesteps_bounds=[2, 3, 4],
+                        num_patterns_bounds=[],
+                        experiment_type="timesteps"
+                        )
         # experiment_loop(run=1,
         #                 num_input_nodes_bounds=[4, 5],
         #                 sparsity_length_bounds=[2],

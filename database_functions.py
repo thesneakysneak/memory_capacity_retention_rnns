@@ -124,12 +124,13 @@ def insert_experiment(case_type=1,
                         + str(batch_size) + ";" \
                         + str(activation_function) + ";" \
                         + str(num_correctly_identified) + ";" \
-                        + str(str(architecture)) + ";" \
-                        + str(str(input_set)) + ";" \
-                        + str(str(output_set)) + ";" \
-                        + str(str(model_history)) + ";" \
-                        +str(full_network_json) + ";" \
-                          + str(full_network) + "\n"
+                        + str(str(architecture)) + ";"  + "\n" \
+                      + str(str(model_history)) + ";"  + "\n" \
+                      + str(full_network) + "\n" \
+                      + str(str(input_set)) + ";"  + "\n"\
+                        + str(str(output_set)) + ";"  + "\n"\
+                        +str(full_network_json) + ";"  + "\n"
+
     logging.info(string_to_write)
 
 
