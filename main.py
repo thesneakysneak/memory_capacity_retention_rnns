@@ -642,7 +642,7 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     num_input_nodes_bounds = [x for x in range(1, 15)]
     sparsity_length_bounds = [x for x in range(1, 15)]
     timesteps_bounds = [x for x in range(1, 15)]
-
+    num_patterns_bounds = []
     if run ==1:
         num_patterns_bounds = [1, 5, 12]
     if run == 2:
