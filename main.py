@@ -539,10 +539,11 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
     smallest_architecture = []
 
     if experiment_type == "patterns":
+        num_output_nodes = max(num_patterns_bounds)
         for num_patterns in num_patterns_bounds:
             smallest_architecture = run_experiment(run, case_type=case_type,
                            num_input_nodes=10,
-                           num_output_nodes=num_patterns,
+                           num_output_nodes=num_output_nodes,
                            timesteps=1,
                            sparsity_length=0,
                            num_patterns=num_patterns,
