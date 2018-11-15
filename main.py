@@ -518,13 +518,28 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
         for timesteps in timesteps_bounds:
             smallest_architecture = run_experiment(run,
                            case_type=case_type,
-                           num_input_nodes=2,
-                           num_output_nodes=(4**1),
+                           num_input_nodes=1,
+                           num_output_nodes=(2),
                            timesteps=timesteps,
                            sparsity_length=0,
-                           num_patterns=(4**1),
+                           num_patterns=(2**1),
                            smallest_architecture=smallest_architecture,
                            folder_root="timesteps")
+
+    num_input_nodes = 3
+    sparsity_length = 0
+    smallest_architecture = []
+    if experiment_type == "timesteps_with_patterns":
+        for timesteps in timesteps_bounds:
+            smallest_architecture = run_experiment(run,
+                                                   case_type=case_type,
+                                                   num_input_nodes=1,
+                                                   num_output_nodes=(2),
+                                                   timesteps=timesteps,
+                                                   sparsity_length=0,
+                                                   num_patterns=(2 ** 1)**timesteps,
+                                                   smallest_architecture=smallest_architecture,
+                                                   folder_root="timesteps_patterns")
             # smallest_architecture = run_experiment(run,
             #                                        case_type=case_type,
             #                                        num_input_nodes=1,
@@ -710,6 +725,13 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
                 print("Running")
                 os.system(command_str)
 
+        command_str = 'bash -c "python main.py ' + str(thread) \
+                      + ' ' + str(run) + ' timesteps_with_patterns ' + str(bounds_time_steps[thread]) + '" & '
+        if (experiment_type == "all" or experiment_type == "timesteps_with_patterns"):
+            print(command_str)
+            if run_commands == "True":
+                print("Running")
+                os.system(command_str)
 
         command_str = 'bash -c "python main.py ' + str(thread) \
                       + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns[thread]) + '" & '
