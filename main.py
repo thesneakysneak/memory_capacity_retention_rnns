@@ -765,7 +765,7 @@ if __name__ == "__main__":
         experiment_loop(run=1,
                         num_input_nodes_bounds=[4, 5],
                         sparsity_length_bounds=[2],
-                        timesteps_bounds=[2, 3, 4],
+                        timesteps_bounds=[4],
                         num_patterns_bounds=[],
                         experiment_type="timesteps"
                         )

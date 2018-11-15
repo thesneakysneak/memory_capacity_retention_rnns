@@ -141,6 +141,7 @@ def train_model(input_set, output_set, model, training_alg, batch_size):
 
     callbacks = [
         earlystop,
+        earlystop2,
         reset_state
     ]
     print("training")
@@ -181,7 +182,7 @@ def test():
 
 
 
-earlystop = EarlyStopping(monitor='loss',  # loss
+earlystop2 = EarlyStopping(monitor='loss',  # loss
                           patience=100,
                           verbose=1,
                           min_delta=0.05,
