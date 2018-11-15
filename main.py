@@ -401,6 +401,7 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                                                     error_when_stopped = validation_acc,
                                                     num_correctly_identified = 0,
                                                     num_network_parameters = best_model.count_params(),
+                                                     epocs=len(result.history['acc']),
                                                     network_type = network_type,
                                                     training_algorithm = "adam",
                                                     f_score = str(f_score),
@@ -629,6 +630,7 @@ def test_loop():
                                                                           sparsity_length=sparsity_length,
                                                                           random_seed=random_seed,
                                                                           run_count=run,
+                                                                         epocs=len(result.history['acc']),
                                                                           error_when_stopped=validation_acc,
                                                                           num_correctly_identified=0,
                                                                           input_set=str(train_input),
@@ -749,6 +751,10 @@ def main(args):
 if __name__ == "__main__":
     if len(sys.argv[1:]) == 0:
         print("Nothing to do")
+        logfile_location = "/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/res"  # "/nfs2/danny_masters"
+        global logfile
+        logfile = logfile_location + "/timesteps.log"
+        logging.basicConfig(filename=logfile, level=logging.INFO)
         # experiment_loop(run=1,
         #                 num_input_nodes_bounds=[2],
         #                 sparsity_length_bounds=[2],
@@ -762,10 +768,7 @@ if __name__ == "__main__":
         #                 timesteps_bounds=[],
         #                 num_patterns_bounds=[],
         #                 experiment_type="num_nodes")
-        logfile_location = "/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/res"  # "/nfs2/danny_masters"
-        global logfile
-        logfile = logfile_location + "/timesteps.log"
-        logging.basicConfig(filename=logfile, level=logging.INFO)
+
 
         experiment_loop(run=1,
                         num_input_nodes_bounds=[4, 5],

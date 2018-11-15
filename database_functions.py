@@ -71,7 +71,8 @@ def insert_experiment(case_type=1,
                       full_network_json=[],
                       full_network="[0,0,0,0,0]",
                       folder_root="",
-                      model_history=""):
+                      model_history="",
+                      epocs=""):
     # global engine
     # df = pd.DataFrame()
     # df["case_type"] = [case_type]
@@ -122,6 +123,7 @@ def insert_experiment(case_type=1,
                         + str(network_type) + ";" \
                         + str(training_algorithm) + ";" \
                         + str(batch_size) + ";" \
+                        + str(epocs) + ";" \
                         + str(activation_function) + ";" \
                         + str(num_correctly_identified) + ";" \
                         + str(str(architecture)) + ";"  + "\n" \
