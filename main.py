@@ -242,7 +242,9 @@ def test_generate_dataset():
     print("train_input", len(train_out))
 
 
-def run_experiment_sparsity(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4,
+def run_experiment_sparsity(run,
+                            train_input, train_out, input_set, output_set, random_seed,
+                            case_type = 1, num_input_nodes = 1, num_output_nodes = 4,
                    timesteps = 1, sparsity_length = 0, num_patterns=0, smallest_architecture=[],
                    activation_function="tanh", network_type="lstm",
                             folder_root="sparsity"):
@@ -273,20 +275,6 @@ def run_experiment_sparsity(run, case_type = 1, num_input_nodes = 1, num_output_
           "network", network_type, "sparsity", sparsity_length,
           "num_patterns", num_patterns, "timesteps", timesteps)
 
-
-    dt = datetime.now()
-    random_seed = dt.microsecond
-    random.seed(random_seed)
-
-
-    train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
-        gd.get_experiment_set(case_type=1,
-                              num_input_nodes=num_input_nodes,
-                              num_output_nodes=num_output_nodes,
-                              num_patterns=num_patterns,
-                              sequence_length=timesteps,
-                              sparsity_length=sparsity_length
-                              )
 
 
     model = recurrent_models.get_model(architecture=smallest_architecture,
@@ -493,8 +481,25 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
                 #                                                        base_architecture=[])
 
                 train_input=  train_out=  input_set=  output_set=  pattern_input_set=  pattern_output_set = []
+                num_input_nodes = 10
+                num_output_nodes = 10
+                num_patterns = 10-1
                 for sparsity_length in sparsity_length_bounds:
-                    run_experiment_sparsity(run, case_type=case_type,
+                    dt = datetime.now()
+                    random_seed = dt.microsecond
+                    random.seed(random_seed)
+
+                    train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
+                        gd.get_experiment_set(case_type=1,
+                                              num_input_nodes=num_input_nodes,
+                                              num_output_nodes=num_output_nodes,
+                                              num_patterns=num_patterns,
+                                              sequence_length=timesteps,
+                                              sparsity_length=sparsity_length
+                                              )
+
+                    run_experiment_sparsity(run, train_input, train_out, input_set, output_set, random_seed,
+                                            case_type=case_type,
                                                             num_input_nodes=10,
                                                             num_output_nodes=10,
                                                             timesteps=1,
