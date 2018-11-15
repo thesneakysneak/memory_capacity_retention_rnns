@@ -100,47 +100,6 @@ def search_architecture(num_input,
 
 
 
-def investigate_number_of_patterns():
-    activation_functions = ["tanh", "sigmoid", "elu",
-                            "relu", "exponential", "softplus",
-                            "softsign", "hard_sigmoid", "linear"]
-    network_type = ["lstm", "gru", "elman_rnn", "jordan_rnn"]
-    # Variable we are investigating
-    num_patterns = [x for x in range(5, 10)]
-
-    # constants
-    sequence_length = 1
-    sparsity_length = 0
-
-    import recurrent_models
-    from recurrent_models import data
-
-    for i in num_patterns:
-        num_input_nodes = i
-        print("     num_input_nodes ", i, "output_nodes", (2**num_input_nodes)**sequence_length, "num_patterns", (2**num_input_nodes)**sequence_length)
-
-        # masters_user, password, experiment1_num_patterns
-        train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
-            gd.get_experiment_set(case_type=1,
-                                  num_input_nodes=num_input_nodes,
-                                  num_output_nodes=(2**num_input_nodes)**sequence_length,
-                                  num_patterns=(2**num_input_nodes)**sequence_length,
-                                  sequence_length=sequence_length,
-                                  sparsity_length=sparsity_length)
-
-        best_model = search_architecture(num_input_nodes,
-                                         2 ** num_input_nodes,
-                                         train_input,
-                                         train_out,
-                                         batch_size=10,
-                                         timesteps=1,
-                                         network_type="lstm",
-                                         activation_function='tanh')
-        print(best_model.summary())
-        keras.backend.clear_session()
-
-
-
 def test_generate_dataset():
     timesteps = [x for x in range(1, 10)]
 
