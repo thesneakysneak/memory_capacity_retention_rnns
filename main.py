@@ -644,13 +644,13 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     timesteps_bounds = [x for x in range(1, 15)]
     num_patterns_bounds = []
     if run ==1 or run == "1":
-        num_patterns_bounds = [1, 5, 12]
+        num_patterns_bounds = [[1], [5], [12]]
     if run == 2 or run == "2":
-        num_patterns_bounds = [2, 6, 11]
+        num_patterns_bounds = [[2], [6], [11]]
     if run == 3 or run == "3":
-        num_patterns_bounds = [3, 7, 10]
+        num_patterns_bounds = [[3], [7], [10]]
     if run == 4 or run == "4":
-        num_patterns_bounds = [4, 8, 9]
+        num_patterns_bounds = [[4], [8], [9]]
 
     num_cores_per_experiment = 3
 
