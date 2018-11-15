@@ -496,8 +496,9 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
                                                             sparsity_length=sparsity_length,
                                                             num_patterns=9-1,
                                                             smallest_architecture=architecture,
-                                                            folder_root="sparsity")
-
+                                                            folder_root="sparsity",
+                                                            activation_function = activation_function,
+                                                            network_type = network_type)
     # Test effect of increasing timesteps. All else constant
     num_input_nodes = 3
     sparsity_length = 0
