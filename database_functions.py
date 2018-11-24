@@ -70,7 +70,9 @@ def insert_experiment(case_type=1,
                       batch_size=10,
                       full_network_json=[],
                       full_network="[0,0,0,0,0]",
-                      folder_root=""):
+                      folder_root="",
+                      model_history="",
+                      epocs=""):
     # global engine
     # df = pd.DataFrame()
     # df["case_type"] = [case_type]
@@ -121,13 +123,17 @@ def insert_experiment(case_type=1,
                         + str(network_type) + ";" \
                         + str(training_algorithm) + ";" \
                         + str(batch_size) + ";" \
+                        + str(epocs) + ";" \
                         + str(activation_function) + ";" \
                         + str(num_correctly_identified) + ";" \
-                        + str(str(input_set)) + ";" \
-                        + str(str(output_set)) + ";" \
-                          + str(str(architecture)) + ";" \
-                        +str(full_network_json) + ";" \
-                          + str(full_network) + "\n"
+                        + str(str(architecture)) + ";"  + "\n" \
+                      + str(full_network_json) + ";" + "\n" \
+                      + str(str(model_history)) + ";"  + "\n" \
+                      + str(full_network) + "\n" \
+                      + str(str(input_set)) + ";"  + "\n"\
+                        + str(str(output_set)) + ";"  + "\n"
+
+
     logging.info(string_to_write)
 
 
@@ -139,17 +145,17 @@ def insert_dataset(timesteps=1, sparsity=0, num_input=2, num_patterns=2,
                    pattern_input_set=[[[0, 1]], [[1, 0]]],
                    pattern_output_set=[[[0, 1]], [[1, 0]]]):
     df = pd.DataFrame()
-    df["timesteps"] = [timesteps]
-    df["sparsity"] = [sparsity]
-    df["num_input"] = [num_input]
-    df["num_patterns"] = [num_patterns]
-    df["train_input"] = [str(train_input)]
-    df["train_target"] = [str(train_target)]
-    df["input_set"] = [str(input_set)]
-    df["output_set"] = [str(output_set)]
-    df["pattern_input_set"] = [str(pattern_input_set)]
-    df["pattern_output_set"] = [str(pattern_output_set)]
-    df.to_sql('datasets', engine, index=False, if_exists='append')
+    # df["timesteps"] = [timesteps]
+    # df["sparsity"] = [sparsity]
+    # df["num_input"] = [num_input]
+    # df["num_patterns"] = [num_patterns]
+    # df["train_input"] = [str(train_input)]
+    # df["train_target"] = [str(train_target)]
+    # df["input_set"] = [str(input_set)]
+    # df["output_set"] = [str(output_set)]
+    # df["pattern_input_set"] = [str(pattern_input_set)]
+    # df["pattern_output_set"] = [str(pattern_output_set)]
+    # df.to_sql('datasets', engine, index=False, if_exists='append')
 
 
 def experiment_exists(case_type=1,

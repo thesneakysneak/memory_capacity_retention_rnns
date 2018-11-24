@@ -100,47 +100,6 @@ def search_architecture(num_input,
 
 
 
-def investigate_number_of_patterns():
-    activation_functions = ["tanh", "sigmoid", "elu",
-                            "relu", "exponential", "softplus",
-                            "softsign", "hard_sigmoid", "linear"]
-    network_type = ["lstm", "gru", "elman_rnn", "jordan_rnn"]
-    # Variable we are investigating
-    num_patterns = [x for x in range(5, 10)]
-
-    # constants
-    sequence_length = 1
-    sparsity_length = 0
-
-    import recurrent_models
-    from recurrent_models import data
-
-    for i in num_patterns:
-        num_input_nodes = i
-        print("     num_input_nodes ", i, "output_nodes", (2**num_input_nodes)**sequence_length, "num_patterns", (2**num_input_nodes)**sequence_length)
-
-        # masters_user, password, experiment1_num_patterns
-        train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
-            gd.get_experiment_set(case_type=1,
-                                  num_input_nodes=num_input_nodes,
-                                  num_output_nodes=(2**num_input_nodes)**sequence_length,
-                                  num_patterns=(2**num_input_nodes)**sequence_length,
-                                  sequence_length=sequence_length,
-                                  sparsity_length=sparsity_length)
-
-        best_model = search_architecture(num_input_nodes,
-                                         2 ** num_input_nodes,
-                                         train_input,
-                                         train_out,
-                                         batch_size=10,
-                                         timesteps=1,
-                                         network_type="lstm",
-                                         activation_function='tanh')
-        print(best_model.summary())
-        keras.backend.clear_session()
-
-
-
 def test_generate_dataset():
     timesteps = [x for x in range(1, 10)]
 
@@ -242,7 +201,9 @@ def test_generate_dataset():
     print("train_input", len(train_out))
 
 
-def run_experiment_sparsity(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4,
+def run_experiment_sparsity(run,
+                            train_input, train_out, input_set, output_set, random_seed,
+                            case_type = 1, num_input_nodes = 1, num_output_nodes = 4,
                    timesteps = 1, sparsity_length = 0, num_patterns=0, smallest_architecture=[],
                    activation_function="tanh", network_type="lstm",
                             folder_root="sparsity"):
@@ -273,20 +234,6 @@ def run_experiment_sparsity(run, case_type = 1, num_input_nodes = 1, num_output_
           "network", network_type, "sparsity", sparsity_length,
           "num_patterns", num_patterns, "timesteps", timesteps)
 
-
-    dt = datetime.now()
-    random_seed = dt.microsecond
-    random.seed(random_seed)
-
-
-    train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
-        gd.get_experiment_set(case_type=1,
-                              num_input_nodes=num_input_nodes,
-                              num_output_nodes=num_output_nodes,
-                              num_patterns=num_patterns,
-                              sequence_length=timesteps,
-                              sparsity_length=sparsity_length
-                              )
 
 
     model = recurrent_models.get_model(architecture=smallest_architecture,
@@ -328,6 +275,7 @@ def run_experiment_sparsity(run, case_type = 1, num_input_nodes = 1, num_output_
                                          full_network_json=str(best_model.to_json()),
                                          full_network=list(best_model.get_weights()),
                                          folder_root=folder_root,
+                                         model_history=str(result.history)
                                          )
     keras.backend.clear_session()
     gc.collect()
@@ -345,6 +293,15 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
     network_types = ["lstm", "gru", "elman_rnn", ] # "jordan_rnn"
     smallest_architecture_sum = 10000000
     new_smallest = []
+    train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
+        gd.get_experiment_set(case_type=1,
+                              num_input_nodes=num_input_nodes,
+                              num_output_nodes=num_output_nodes,
+                              num_patterns=num_patterns,
+                              sequence_length=timesteps,
+                              sparsity_length=sparsity_length
+                              )
+
     for network_type in network_types:
         for activation_function in activation_functions:
             print("=======================================================")
@@ -358,32 +315,23 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                   "num_patterns", num_patterns, "timesteps", timesteps)
 
             # TODO Revisit
-            exists = database_functions.experiment_exists(
-                                            case_type=1,
-                                            num_input=num_input_nodes,
-                                            num_output=num_output_nodes,
-                                            num_patterns_to_recall=num_patterns,
-                                            num_patterns_total=num_patterns,
-                                            timesteps=timesteps,
-                                            sparsity_length=sparsity_length,
-                                            run_count=run,
-                                            network_type=network_type,
-                                            activation_function=activation_function,
-                                            folder_root=folder_root)
-
+            # exists = database_functions.experiment_exists(
+            #                                 case_type=1,
+            #                                 num_input=num_input_nodes,
+            #                                 num_output=num_output_nodes,
+            #                                 num_patterns_to_recall=num_patterns,
+            #                                 num_patterns_total=num_patterns,
+            #                                 timesteps=timesteps,
+            #                                 sparsity_length=sparsity_length,
+            #                                 run_count=run,
+            #                                 network_type=network_type,
+            #                                 activation_function=activation_function,
+            #                                 folder_root=folder_root)
+            exists = False
             if not exists:
                 dt = datetime.now()
                 random_seed = dt.microsecond
                 random.seed(random_seed)
-
-                train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
-                    gd.get_experiment_set(case_type=1,
-                                          num_input_nodes=num_input_nodes,
-                                          num_output_nodes=num_output_nodes,
-                                          num_patterns=num_patterns,
-                                          sequence_length=timesteps,
-                                          sparsity_length=sparsity_length
-                                          )
 
                 best_model, result, architecture, f_score = search_architecture(num_input_nodes,
                                                                        num_output_nodes,
@@ -398,29 +346,34 @@ def run_experiment(run, case_type = 1, num_input_nodes = 1, num_output_nodes = 4
                 validation_acc = np.amax(result.history['acc'])
 
                 num_available_patterns = (2 ** num_input_nodes) ** timesteps
-                database_functions.insert_experiment(case_type=1,
-                                                     num_input=num_input_nodes,
-                                                     num_output=num_output_nodes,
-                                                     num_patterns_to_recall=num_patterns,
-                                                     num_patterns_total=num_available_patterns,
-                                                     timesteps=timesteps,
-                                                     sparsity_length=sparsity_length,
-                                                     random_seed=random_seed,
-                                                     run_count=run,
-                                                     f_score=str(f_score),
-                                                     error_when_stopped=validation_acc,
-                                                     num_correctly_identified=0,
-                                                     input_set=str(train_input),
-                                                     output_set=str(train_out),
-                                                     architecture=str(best_model.to_json()),
-                                                     num_network_parameters=best_model.count_params(),
-                                                     network_type=network_type,
-                                                     training_algorithm="adam",
-                                                     batch_size=10,
-                                                     activation_function=activation_function,
-                                                     full_network_json=str(best_model.to_json()),
-                                                     full_network=list(best_model.get_weights()),
-                                                     folder_root=folder_root)
+                count_p = best_model.count_params()
+                print(count_p)
+                database_functions.insert_experiment(case_type = 1,
+                                                    num_input = num_input_nodes,
+                                                    num_output = num_output_nodes,
+                                                    num_patterns_to_recall = num_patterns,
+                                                    num_patterns_total = num_available_patterns,
+                                                    timesteps = timesteps,
+                                                    sparsity_length=sparsity_length,
+                                                    random_seed=random_seed,
+                                                    run_count=run,
+                                                    error_when_stopped = validation_acc,
+                                                    num_correctly_identified = 0,
+                                                    num_network_parameters = best_model.count_params(),
+                                                     epocs=len(result.history['acc']),
+                                                    network_type = network_type,
+                                                    training_algorithm = "adam",
+                                                    f_score = str(f_score),
+                                                    activation_function = activation_function,
+                                                    architecture = str(architecture),
+                                                    input_set=str(train_input),
+                                                    output_set=str(train_out),
+                                                    batch_size = 10,
+                                                    full_network_json = str(best_model.to_json()),
+                                                    full_network = list(best_model.get_weights()),
+                                                    folder_root=folder_root,
+                                                    model_history=str(result.history))
+
                 keras.backend.clear_session()
                 architecture_sum = sum(architecture)
                 if smallest_architecture_sum >  architecture_sum:
@@ -488,16 +441,34 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
                 #                                                        base_architecture=[])
 
                 train_input=  train_out=  input_set=  output_set=  pattern_input_set=  pattern_output_set = []
+                num_input_nodes = 10
+                num_output_nodes = 10
+                num_patterns = 10-1
                 for sparsity_length in sparsity_length_bounds:
-                    run_experiment_sparsity(run, case_type=case_type,
+                    dt = datetime.now()
+                    random_seed = dt.microsecond
+                    random.seed(random_seed)
+
+                    train_input, train_out, input_set, output_set, pattern_input_set, pattern_output_set = \
+                        gd.get_experiment_set(case_type=1,
+                                              num_input_nodes=num_input_nodes,
+                                              num_output_nodes=num_output_nodes,
+                                              num_patterns=num_patterns,
+                                              sequence_length=timesteps,
+                                              sparsity_length=sparsity_length
+                                              )
+
+                    run_experiment_sparsity(run, train_input, train_out, input_set, output_set, random_seed,
+                                            case_type=case_type,
                                                             num_input_nodes=10,
                                                             num_output_nodes=10,
                                                             timesteps=1,
                                                             sparsity_length=sparsity_length,
                                                             num_patterns=9-1,
                                                             smallest_architecture=architecture,
-                                                            folder_root="sparsity")
-
+                                                            folder_root="sparsity",
+                                                            activation_function = activation_function,
+                                                            network_type = network_type)
     # Test effect of increasing timesteps. All else constant
     num_input_nodes = 3
     sparsity_length = 0
@@ -507,12 +478,27 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
             smallest_architecture = run_experiment(run,
                            case_type=case_type,
                            num_input_nodes=1,
-                           num_output_nodes=(2**1),
+                           num_output_nodes=(2),
                            timesteps=timesteps,
                            sparsity_length=0,
                            num_patterns=(2**1),
                            smallest_architecture=smallest_architecture,
                            folder_root="timesteps")
+
+    num_input_nodes = 3
+    sparsity_length = 0
+    smallest_architecture = []
+    if experiment_type == "timesteps_with_patterns":
+        for timesteps in timesteps_bounds:
+            smallest_architecture = run_experiment(run,
+                                                   case_type=case_type,
+                                                   num_input_nodes=1,
+                                                   num_output_nodes=(2),
+                                                   timesteps=timesteps,
+                                                   sparsity_length=0,
+                                                   num_patterns=(2 ** 1)**timesteps,
+                                                   smallest_architecture=smallest_architecture,
+                                                   folder_root="timesteps_patterns")
             # smallest_architecture = run_experiment(run,
             #                                        case_type=case_type,
             #                                        num_input_nodes=1,
@@ -527,10 +513,11 @@ def experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timeste
     smallest_architecture = []
 
     if experiment_type == "patterns":
+        num_output_nodes = 12
         for num_patterns in num_patterns_bounds:
             smallest_architecture = run_experiment(run, case_type=case_type,
                            num_input_nodes=10,
-                           num_output_nodes=num_patterns,
+                           num_output_nodes=12,
                            timesteps=1,
                            sparsity_length=0,
                            num_patterns=num_patterns,
@@ -607,7 +594,8 @@ def test_loop():
                                                                      activation_function=activation_function)
                                     print(best_model.summary())
                                     validation_acc = np.amax(result.history['acc'])
-
+                                    count_p = best_model.count_params()
+                                    print(count_p)
                                     database_functions.insert_experiment(case_type=1,
                                                                           num_input=num_input_nodes,
                                                                           num_output=num_patterns,
@@ -617,6 +605,7 @@ def test_loop():
                                                                           sparsity_length=sparsity_length,
                                                                           random_seed=random_seed,
                                                                           run_count=run,
+                                                                         epocs=len(result.history['acc']),
                                                                           error_when_stopped=validation_acc,
                                                                           num_correctly_identified=0,
                                                                           input_set=str(train_input),
@@ -653,9 +642,17 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     num_input_nodes_bounds = [x for x in range(1, 15)]
     sparsity_length_bounds = [x for x in range(1, 15)]
     timesteps_bounds = [x for x in range(1, 15)]
-    num_patterns_bounds = [x for x in range(2, 100)]
+    num_patterns_bounds = []
+    if run ==1 or run == "1":
+        num_patterns_bounds = [[1], [5], [12]]
+    if run == 2 or run == "2":
+        num_patterns_bounds = [[2], [6], [11]]
+    if run == 3 or run == "3":
+        num_patterns_bounds = [[3], [7], [10]]
+    if run == 4 or run == "4":
+        num_patterns_bounds = [[4], [8], [9]]
 
-    num_cores_per_experiment = 14
+    num_cores_per_experiment = 3
 
     # experiment_loop(run, num_input_nodes_bounds, sparsity_length_bounds, timesteps_bounds, num_patterns_bounds)
     len_sparsity = int(len(sparsity_length_bounds)/num_cores_per_experiment)
@@ -664,7 +661,11 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
     bounds_num_input_nodes = chunks(num_input_nodes_bounds, len_sparsity, num_cores_per_experiment)
     bounds_sparsity_length = chunks(sparsity_length_bounds, len_sparsity, num_cores_per_experiment)
     bounds_time_steps = chunks(timesteps_bounds, len_sparsity, num_cores_per_experiment)
-    bounds_num_patterns = chunks(num_patterns_bounds, len_patterns, num_cores_per_experiment)
+
+    if num_cores_per_experiment != len(num_patterns_bounds):
+        bounds_num_patterns = chunks(num_patterns_bounds, len_patterns, num_cores_per_experiment)
+    else:
+        bounds_num_patterns = num_patterns_bounds
 
     for thread in range(num_cores_per_experiment):
         import os
@@ -695,6 +696,13 @@ def spawn_processes(run_commands=True, run=1, experiment_type="all"):
                 print("Running")
                 os.system(command_str)
 
+        command_str = 'bash -c "python main.py ' + str(thread) \
+                      + ' ' + str(run) + ' timesteps_with_patterns ' + str(bounds_time_steps[thread]) + '" & '
+        if (experiment_type == "all" or experiment_type == "timesteps_with_patterns"):
+            print(command_str)
+            if run_commands == "True":
+                print("Running")
+                os.system(command_str)
 
         command_str = 'bash -c "python main.py ' + str(thread) \
                       + ' ' + str(run) + ' patterns ' + str(bounds_num_patterns[thread]) + '" & '
@@ -722,7 +730,7 @@ def main(args):
     print(run, experiment_type, bounds)
 
     # TODO Refactor when in cloud
-    logfile_location = "Code/danny_masters"
+    logfile_location = "/nfs2/danny_masters"
     global logfile
     logfile = logfile_location + "/" +str(thread) + "_" + str(run) + "_" + str(experiment_type) + '.log'
     logging.basicConfig(filename=logfile, level=logging.INFO)
@@ -737,6 +745,10 @@ def main(args):
 if __name__ == "__main__":
     if len(sys.argv[1:]) == 0:
         print("Nothing to do")
+        logfile_location = "/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/res"  # "/nfs2/danny_masters"
+        global logfile
+        logfile = logfile_location + "/timesteps.log"
+        logging.basicConfig(filename=logfile, level=logging.INFO)
         # experiment_loop(run=1,
         #                 num_input_nodes_bounds=[2],
         #                 sparsity_length_bounds=[2],
@@ -751,13 +763,14 @@ if __name__ == "__main__":
         #                 num_patterns_bounds=[],
         #                 experiment_type="num_nodes")
 
-        # experiment_loop(run=1,
-        #                 num_input_nodes_bounds=[4, 5],
-        #                 sparsity_length_bounds=[2],
-        #                 timesteps_bounds=[2, 3, 4],
-        #                 num_patterns_bounds=[],
-        #                 experiment_type="timesteps"
-        #                 )
+
+        experiment_loop(run=1,
+                        num_input_nodes_bounds=[4, 5],
+                        sparsity_length_bounds=[2],
+                        timesteps_bounds=[4],
+                        num_patterns_bounds=[2],
+                        experiment_type="patterns"
+                        )
         # experiment_loop(run=1,
         #                 num_input_nodes_bounds=[4, 5],
         #                 sparsity_length_bounds=[2],
