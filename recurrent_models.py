@@ -92,7 +92,8 @@ def data():
     return x_train, y_train, x_test, y_test
 
 def get_model(architecture=[2, 1, 1, 1],
-              batch_size=10, timesteps=3,
+              batch_size=10,
+              timesteps=3,
               network_type="lstm",
               activation_function='tanh'):
     model = Sequential()
@@ -137,7 +138,7 @@ def get_model(architecture=[2, 1, 1, 1],
 
 
 def train_model(input_set, output_set, model, training_alg, batch_size):
-    model.compile(loss='categorical_crossentropy', optimizer=training_alg, metrics=['accuracy'])
+    model.compile(loss='mean_squared_error', optimizer=training_alg, metrics=['accuracy'])
 
     callbacks = [
         earlystop,
