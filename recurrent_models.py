@@ -1,6 +1,5 @@
 
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-
+from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
 import keras
 from sklearn.metrics import roc_auc_score, precision_recall_fscore_support, confusion_matrix
@@ -137,16 +136,19 @@ def get_model(architecture=[2, 1, 1, 1],
     return model
 
 
-def train_model(input_set, output_set, model, training_alg, batch_size):
+def train_model(input_set, output_set, model, training_alg, batch_size, use_early_stop=False, verbose=0):
     model.compile(loss='mean_squared_error', optimizer=training_alg, metrics=['accuracy'])
+    callbacks = []
+    if use_early_stop:
+        callbacks = [
+            earlystop,
+            earlystop2,
+            reduce_lr,
+            reset_state
+        ]
 
-    callbacks = [
-        earlystop,
-        earlystop2,
-        reset_state
-    ]
     print("training")
-    result = model.fit(input_set, output_set, epochs=1000, batch_size=10, verbose=0,
+    result = model.fit(input_set, output_set, epochs=1000, batch_size=batch_size, verbose=verbose,
                        shuffle=False, validation_data=(input_set, output_set), callbacks=callbacks)
     return model, result
 
@@ -186,10 +188,14 @@ def test():
 earlystop2 = EarlyStopping(monitor='loss',  # loss
                           patience=100,
                           verbose=1,
-                          min_delta=0.05,
+                          min_delta=0.002,
                           mode='auto')
 
 earlystop = EarlyStopByF1(value = .99, verbose =1)
+
+
+reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,
+                              patience=5, min_lr=0.0000001)
 
 reset_state = ResetState()
 
