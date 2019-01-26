@@ -51,6 +51,7 @@ import random
 import logging
 import os
 import numpy as np
+import sys
 from keras import Input, Model
 from keras.callbacks import ReduceLROnPlateau
 from keras.layers import LSTM, Dense, SimpleRNN, GRU
@@ -203,94 +204,79 @@ def get_nodes_in_layer(num_parameters, nn_type):
         return int(num_patterns / 9)
     return int(num_patterns / 3)
 
+def get_runner_experiments(runner, total_num_parameters):
+    total_num_parameters = np.array(total_num_parameters).reshape(-1, 5)
+    for i in range(5):
+        if i % 2 == 0:
+            total_num_parameters[i] = sorted(total_num_parameters[i], reverse=True)
+    total_num_parameters = np.transpose(total_num_parameters)
+    return total_num_parameters[runner]
 
-random.seed(1000)
-total_num_parameters = divisible_by_all(30)
-activation_functions = ["softmax",
-                            "elu", "selu", "softplus",
-                            "softsign", "tanh", "sigmoid",
-                            "hard_sigmoid",
-                            "relu",
-                              "linear"]
-network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.JORDAN_RNN] # "jordan_rnn"
-thread = 1
-run = 1
-logfile_location = "danny_masters"
-logfile = logfile_location + "/" +str(thread) + "_" + str(run) + "_num_patterns.log"
-logfile = os.path.abspath(logfile)
+def main():
+    if len(sys.argv[1:]) == 0:
+        return 0
 
-if not os.path.exists(logfile):
-    f = open(logfile, "a")
-    f.write("")
-    f.close()
+    runner = sys.argv[1:][0]
 
-logging.basicConfig(filename=logfile, level=logging.INFO)
+    random.seed(1000)
+    total_num_parameters = divisible_by_all(30)
+    total_num_parameters = get_runner_experiments(runner, total_num_parameters)
+    
+    activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
+                            "linear"]
+    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.JORDAN_RNN]  # "jordan_rnn"
+    thread = 1
+    run = 1
+    logfile_location = "danny_masters"
+    logfile = logfile_location + "/" + str(thread) + "_" + str(run) + "_num_patterns.log"
+    logfile = os.path.abspath(logfile)
 
-num_patterns = 5
+    if not os.path.exists(logfile):
+        f = open(logfile, "a")
+        f.write("")
+        f.close()
 
+    logging.basicConfig(filename=logfile, level=logging.INFO)
 
-# possible_classes = np.unique(y_test)
-# y_predict_ = [convert_to_closest(x, possible_classes) for x in y_predict]
+    start = 2
+    prev = 1
+    steps = 0
+    smallest_not_retained = 10000
+    largest_retained = 0
+    nodes_in_layer = 2
+    activation_func = "sigmoid"
+    nn_type = "lstm"
 
-# count = 0
-# for t,p in zip(y_test_class, y_predict_class):
-#     if t == p:
-#         count += 1
+    for parameters in total_num_parameters:
+        for nn_type in network_types:
+            nodes_in_layer = get_nodes_in_layer(parameters, nn_type)
+            for activation_func in activation_functions:
+                while (smallest_not_retained - largest_retained) > 1:
+                    score_after_training_net = train_test_neural_net_architecture(num_patterns=start,
+                                                                                  nodes_in_layer=nodes_in_layer,
+                                                                                  nn_type=nn_type,
+                                                                                  activation_func=activation_func)
+                    #
+                    if score_after_training_net > 0.98:
+                        print("   -> ", start)
+                        largest_retained = start
+                        prev = start
+                        start *= 2
+                        if start > smallest_not_retained:
+                            start = smallest_not_retained - 1
+                    else:
+                        print("   <- ", start)
+                        smallest_not_retained = start
+                        start = int((start + prev) / 2)
+                    print(" Current Num patterns", start)
+                    print(" diff", str((smallest_not_retained - largest_retained)))
+                    print(" smallest_not_retained", smallest_not_retained)
+                    print(" largest_retained", largest_retained)
+                    print(" score", score_after_training_net)
 
-
-# print("r2_score", true_accuracy(y_predict, y_test))
-
-# d = {}
-# for x, y, z in zip(y_predict_, y_test, y_predict):
-#     if str(y) not in d.keys():
-#         d[str(y)] = []
-#     else:
-#         d[str(y)].extend(z)
-#
-# for key in d.keys():
-#     d[key] = np.unique(d[key])
-#
-# logging.log(logging.INFO, r2_score(y_predict_, y_test))
-
-
-
-start = 2
-prev = 1
-steps = 0
-smallest_not_retained = 10000
-largest_retained = 0
-nodes_in_layer=2
-activation_func="sigmoid"
-nn_type="lstm"
-
-for parameters in total_num_parameters:
-    for nn_type in network_types:
-        nodes_in_layer = get_nodes_in_layer(parameters, nn_type)
-        for activation_func in activation_functions:
-            while (smallest_not_retained - largest_retained) > 1:
-                score_after_training_net = train_test_neural_net_architecture(num_patterns=start,
-                                                                              nodes_in_layer=nodes_in_layer,
-                                                                              nn_type=nn_type,
-                                                                              activation_func=activation_func)
-                #
-                if score_after_training_net > 0.98:
-                    print("   -> ", start)
-                    largest_retained = start
-                    prev = start
-                    start *= 2
-                    if start > smallest_not_retained:
-                        start = smallest_not_retained - 1
-                else:
-                    print("   <- ", start)
-                    smallest_not_retained = start
-                    start = int((start+prev)/2)
-                print(" Current Num patterns", start)
-                print(" diff", str((smallest_not_retained - largest_retained)))
-                print(" smallest_not_retained", smallest_not_retained)
-                print(" largest_retained", largest_retained)
-                print(" score", score_after_training_net)
-
-            logging.log(logging.INFO, str(nn_type) + "," + str(activation_func) + "," + str(parameters) + "," + str(nodes_in_layer) + "," + str(largest_retained) + "," + str(smallest_not_retained))
+                logging.log(logging.INFO, str(nn_type) + "," + str(activation_func) + "," + str(parameters) + "," + str(
+                    nodes_in_layer) + "," + str(largest_retained) + "," + str(smallest_not_retained))
 
 
-
+if __name__ == "__main__":
+    main()
