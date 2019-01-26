@@ -196,6 +196,14 @@ def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type
     #
     return determine_score(y_predict, y_test)
 
+def get_nodes_in_layer(num_parameters, nn_type):
+    if nn_type == const.LSTM:
+        return int(num_patterns/12)
+    if nn_type == const.GRU:
+        return int(num_patterns / 9)
+    return int(num_patterns / 3)
+
+
 random.seed(1000)
 total_num_parameters = divisible_by_all(30)
 activation_functions = ["softmax",
@@ -249,28 +257,40 @@ num_patterns = 5
 start = 2
 prev = 1
 steps = 0
-smallest_not_retained = 1000
+smallest_not_retained = 10000
 largest_retained = 0
-while (smallest_not_retained - largest_retained) > 1:
-    score_after_training_net = train_test_neural_net_architecture(num_patterns=start, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid")
-    #
-    if score_after_training_net > 0.98:
-        print("   -> ", start)
-        largest_retained = start
-        prev = start
-        start *= 2
-        if start > smallest_not_retained:
-            start = smallest_not_retained - 1
-    else:
-        print("   <- ", start)
-        smallest_not_retained = start
-        start = int((start+prev)/2)
-    print(" Current Num patterns", start)
-    print(" diff", str((smallest_not_retained - largest_retained)))
-    print(" smallest_not_retained", smallest_not_retained)
-    print(" largest_retained", largest_retained)
-    print(" score", score_after_training_net)
+nodes_in_layer=2
+activation_func="sigmoid"
+nn_type="lstm"
 
+for parameters in total_num_parameters:
+    for nn_type in network_types:
+        nodes_in_layer = get_nodes_in_layer(parameters, nn_type)
+        for activation_func in activation_functions:
+            while (smallest_not_retained - largest_retained) > 1:
+                score_after_training_net = train_test_neural_net_architecture(num_patterns=start,
+                                                                              nodes_in_layer=nodes_in_layer,
+                                                                              nn_type=nn_type,
+                                                                              activation_func=activation_func)
+                #
+                if score_after_training_net > 0.98:
+                    print("   -> ", start)
+                    largest_retained = start
+                    prev = start
+                    start *= 2
+                    if start > smallest_not_retained:
+                        start = smallest_not_retained - 1
+                else:
+                    print("   <- ", start)
+                    smallest_not_retained = start
+                    start = int((start+prev)/2)
+                print(" Current Num patterns", start)
+                print(" diff", str((smallest_not_retained - largest_retained)))
+                print(" smallest_not_retained", smallest_not_retained)
+                print(" largest_retained", largest_retained)
+                print(" score", score_after_training_net)
+
+            logging.log(logging.INFO, str(nn_type) + "," + str(activation_func) + "," + str(parameters) + "," + str(nodes_in_layer) + "," + str(largest_retained) + "," + str(smallest_not_retained))
 
 
 
