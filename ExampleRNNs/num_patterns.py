@@ -210,6 +210,7 @@ def get_runner_experiments(runner, total_num_parameters):
         if i % 2 == 0:
             total_num_parameters[i] = sorted(total_num_parameters[i], reverse=True)
     total_num_parameters = np.transpose(total_num_parameters)
+    random.shuffle(total_num_parameters)
     return total_num_parameters[runner]
 
 def main():
@@ -221,7 +222,7 @@ def main():
     random.seed(1000)
     total_num_parameters = divisible_by_all(30)
     total_num_parameters = get_runner_experiments(runner, total_num_parameters)
-    
+
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
     network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.JORDAN_RNN]  # "jordan_rnn"
