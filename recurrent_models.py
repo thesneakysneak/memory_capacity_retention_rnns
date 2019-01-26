@@ -27,13 +27,11 @@ def determine_score(predicted, test, f_only=True):
     test = test.round()
     p_categories = [np.argmax(x) for x in predicted]
     t_categories = [np.argmax(x) for x in test]
-
     # for i in range(len(p_categories)):
     #     if p_categories[i] != t_categories[i]:
     #         print("Class not correct", p_categories[i], t_categories[i])
     conf_mat = confusion_matrix(t_categories, p_categories)
     precision, recall, fbeta_score, beta = precision_recall_fscore_support(t_categories, p_categories, average="micro")
-
     # print(conf_mat)
     if f_only:
         return fbeta_score
