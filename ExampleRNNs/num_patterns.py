@@ -124,7 +124,6 @@ def generate_sets(num_patterns):
 def generate_sets_class(num_patterns):
     x = random.sample(range(1, num_patterns + 1), num_patterns)
     y = np.eye(num_patterns)
-
     #
     x = [1.0 / z for z in x]
     #
@@ -151,7 +150,7 @@ def generate_sets_class(num_patterns):
     #
     return x_train, y_train, x_test, y_test
 
-
+random.seed(1000)
 total_num_parameters = divisible_by_all(30)
 activation_functions = ["softmax",
                             "elu", "selu", "softplus",
