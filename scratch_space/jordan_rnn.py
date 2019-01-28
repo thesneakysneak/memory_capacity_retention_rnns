@@ -43,9 +43,9 @@ class JordanRNNCell(keras.layers.Layer):
         self.states = states
         return output, [output]
 
-Layer2 = JordanRNNCell(10, None)
+Layer2 = Dense(10)
 Layer1 = JordanRNNCell(10, Layer2)
-cells = [Layer1, Layer2]
+cells = [Layer1]
 x = keras.Input((None, 5))
 layer = RNN(cells)
 y = layer(x)
@@ -53,6 +53,30 @@ y = layer(x)
 #
 #
 # Define an input sequence and process it.
+def single_jordan_rnn(num_inputs, num_output_layer_outputs, num_nodes_layer1, input_shape=(1,1,1), batch_size=1, prev_model=None):
+    #                           smaples, timesteps, features
+    #
+    layer1_inputs = Input(shape=(None, num_inputs), name='layer1_input')
+    #
+    if prev_model:
+        prev_output_layer = prev_model.layers[1].output
+    else:
+        prev_output_layer = Input(shape=(None, num_output_layer_outputs), name='layer1_input_2')
+    layer1_prev_out = Concatenate()([layer1_inputs, prev_output_layer])
+    # Layer 1
+    #
+    layer1 = SimpleRNN(num_nodes_layer1, name='layer1')
+    layer1_outputs = layer1(layer1_prev_out)
+    #
+    # Layer 2
+    output = Dense(num_output_layer_outputs)(layer1_outputs)
+    #
+    model = Model([layer1_inputs, prev_output_layer], output)
+    #
+    if prev_model:
+        model.set_weights(prev_model.get_weights())
+    return model
+
 def single_layer_jordan_rnn(num_inputs, num_output_layer_outputs, num_nodes_layer1, input_shape=(1,1,1), batch_size=1, prev_model=None):
     #                           smaples, timesteps, features
     layer1_inputs = Input(shape=(None, num_inputs), name='layer1_input')
@@ -260,7 +284,7 @@ model.fit([input_set, prev_output_set], output_set, epochs=1, verbose=2)
 
 num_inputs = 10
 num_layer2_outputs = 2
-model2 = single_layer_jordan_rnn(num_inputs, num_layer2_outputs, 5,
+model2 = single_jordan_rnn(num_inputs, num_layer2_outputs, 5,
                                 input_shape=(1,1,1), batch_size=1, prev_model=model)
 
 model2.compile(loss='categorical_crossentropy', optimizer='adam')

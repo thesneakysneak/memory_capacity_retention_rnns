@@ -54,10 +54,12 @@ import numpy as np
 import sys
 from keras import Input, Model
 from keras.callbacks import ReduceLROnPlateau
-from keras.layers import LSTM, Dense, SimpleRNN, GRU
+from keras.layers import LSTM, Dense, SimpleRNN, GRU, Concatenate
 from sklearn.metrics import r2_score, confusion_matrix, precision_recall_fscore_support
 import recurrent_models
 import ExampleRNNs.experiment_constants as const
+from scratch_space.jordan_rnn import JordanRNNCell
+
 '''
     Define a random set of unique input to output mappings. No input output pair will correspond to other samples.
     Thus there will never exists a set of input values that will have the same output value.
@@ -171,7 +173,45 @@ def generate_sets_class(num_patterns):
     #
     return x_train, y_train, x_test, y_test
 
-def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid"):
+def jordan_rnn(num_patterns=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", prev_model=None):
+    inp = Input(shape=(1, 1))
+    ls = SimpleRNN(nodes_in_layer)(inp)
+    #
+    output = Dense(num_patterns)(ls)
+    #
+    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
+    model = Model(inputs=[inp], outputs=[output])
+
+    if prev_model != None:
+        out = prev_model.get_layer('output_layer').output
+        layer1_prev_out = Concatenate()([inp, out])
+
+
+    layer1_inputs = Input(shape=(None, 1), name='layer1_input')
+
+
+    if prev_model:
+        prev_output_layer = prev_model.layers[1].output
+    else:
+        prev_output_layer = Input(shape=(None, num_patterns), name='layer1_input_2')
+    layer1_prev_out = Concatenate()([layer1_inputs, prev_output_layer])
+    # Layer 1
+
+    layer1 = SimpleRNN(nodes_in_layer, return_state=True, return_sequences=True, name='layer1')
+    layer1_outputs, layer1_state_h = layer1(layer1_prev_out)
+
+    output = Dense(num_patterns)(layer1_outputs)
+
+    model = Model([layer1_inputs, prev_output_layer], output)
+
+    if prev_model:
+        model.set_weights(prev_model.get_weights())
+    return model
+
+
+
+
+def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0):
     x_train, y_train, x_test, y_test = generate_sets_class(num_patterns)  # generate_sets(50)
     #
     batch_size = 10
@@ -181,17 +221,18 @@ def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type
         ls = SimpleRNN(nodes_in_layer)(inp)
     elif nn_type == const.ELMAN_RNN:
         ls = SimpleRNN(nodes_in_layer)(inp)
-    elif nn_type == const.JORDAN_RNN:
-        ls = SimpleRNN(nodes_in_layer)(inp)
-    else:
+    elif nn_type == const.GRU:
         ls = GRU(nodes_in_layer)(inp)
+    else:
+
+        ls = JordanRNNCell(nodes_in_layer)(inp)
     #
     output = Dense(num_patterns)(ls)
     #
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
     model = Model(inputs=[inp], outputs=[output])
     model.compile(optimizer='adam', loss='mean_squared_error')
-    model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr, recurrent_models.earlystop2], epochs=1000, verbose=0)
+    model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr, recurrent_models.earlystop2], epochs=1000, verbose=verbose)
     #
     y_predict = model.predict(x_test)
     #
@@ -281,3 +322,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+train_test_neural_net_architecture(num_patterns=10,nodes_in_layer=10, nn_type="jordan", activation_func="sigmoid")
