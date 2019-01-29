@@ -20,40 +20,23 @@ def convert_to_closest(predicted_value, possible_values):
     return min(possible_values, key=lambda x: abs(x - predicted_value))
 
 
-def generate_sets(sequence_length, num_samples):
-    x_train = x_test = [0] * sequence_length
-    y_train = y_test = [0] * sequence_length
-    #
-    for i in range(1, num_samples):
-        k = i + 1
-        set_of_nums = random.sample([1, 2] * sequence_length, (sequence_length - k)) + [3] * k
+def generate_sets(sequence_length=1000, num_samples=10):
+    x = x_test = [0] * 5000
+    y = y_test = [0] * 5000
+
+    for i in range(5000):
+        num_samples = 5000
+        k = random.randint(5, 45)
+        set_of_nums = random.sample([1, 2] * 10000, (sequence_length - k)) + [3] * k
         random.shuffle(set_of_nums)
-        x_train[i] = numpy.array(set_of_nums).reshape(-1, 1).astype(np.float32)
-        y_train[i] = numpy.array(1. / k).astype(np.float32)
-        #
-        random.shuffle(set_of_nums)
-        x_test[i] = numpy.array(set_of_nums).reshape(-1, 1).astype(np.float32)
-        y_test[i] = numpy.array(1. / k).astype(np.float32)
-    #
-    return x_train, y_train, x_test, y_test
+        x[i] = numpy.array(set_of_nums).reshape(-1, 1).astype(np.float32)
+        y[i] = numpy.array(1. / k).astype(np.float32)
 
+    x = numpy.array(x)
+    y = numpy.array(y)
+    return x, y, x_test, y_test
 
-x = [0] * 5000
-y = [0] * 5000
-import random
-
-
-for i in range(5000):
-    len = 5000
-    k = random.randint(5, 45)
-    set_of_nums = random.sample([1, 2] * 10000, (len - k)) + [3] * k
-    random.shuffle(set_of_nums)
-    x[i] = numpy.array(set_of_nums).reshape(-1, 1).astype(np.float32)
-    y[i] = numpy.array(1. / k).astype(np.float32)
-
-
-x = numpy.array(x)
-y = numpy.array(y)
+x_train, y_train, x_test, y_test = generate_sets(100, 10)
 
 inp = Input(shape=(5000, 1))
 ls = SimpleRNN(1)(inp)
@@ -65,4 +48,4 @@ reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,
 model = Model(inputs=[inp], outputs=[output])
 model.compile(optimizer='adam', loss='mean_squared_error')
 
-model.fit(x, y, validation_split=.2, callbacks=[reduce_lr])
+model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr])
