@@ -240,10 +240,10 @@ def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type
 
 def get_nodes_in_layer(num_parameters, nn_type):
     if nn_type == const.LSTM:
-        return int(num_patterns/12)
+        return int(num_parameters/12)
     if nn_type == const.GRU:
-        return int(num_patterns / 9)
-    return int(num_patterns / 3)
+        return int(num_parameters / 9)
+    return int(num_parameters / 3)
 
 def get_runner_experiments(runner, total_num_parameters):
     total_num_parameters = np.array(total_num_parameters).reshape(-1, 5)

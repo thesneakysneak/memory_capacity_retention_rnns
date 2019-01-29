@@ -1,36 +1,56 @@
 import random
 
 import numpy
+import numpy as np
 from keras import Input, Model
 from keras.callbacks import ReduceLROnPlateau
-from keras.layers import SimpleRNN, Dense
+from keras.layers import SimpleRNN, Dense, Concatenate
 
-x = [0] * 5000
-y = [0] * 5000
-
-
-
-for i in range(5000):
-    len = 5000
-    k = random.randint(5, 45)
-    set_of_nums = random.sample([1, 2] * 10000, (len - k)) + [3] * k
-    random.shuffle(set_of_nums)
-    x[i] = numpy.array(set_of_nums).reshape(-1, 1).astype(np.float32)
-    y[i] = numpy.array(1. / k).astype(numpy.float32)
+num_inputs = 1
+x = [random.random() for i in range(50)]
+y = [random.random() for i in range(50)]
 
 
-x = numpy.array(x)
-y = numpy.array(y)
+x = numpy.array(x).reshape(-1, 1).astype(np.float32)
+y = numpy.array(y).reshape(-1, 1).astype(np.float32)
 
-inp = Input(shape=(5000, 1))
-prev_out = Input(shape=(5000, 5))
-ls = SimpleRNN(1)(inp)
-output = Dense(1)(ls)
+inp = Input(shape=x.shape, name="input_layer")
+prev_out = Input(shape=y.shape, name="previous_output")
 
+layer1_inputs = Input(shape=x.shape, name='layer1_input')
+#
 
+prev_model = None
+if prev_model:
+    prev_output_layer = prev_model.layers[1].output
+else:
+    prev_output_layer = Input(shape=y.shape, name='layer1_input_2')
+layer1_prev_out = Concatenate()([layer1_inputs, prev_output_layer])
+# Layer 1
+#
+layer1 = SimpleRNN(10, name='layer1')
+layer1_outputs = layer1(layer1_prev_out)
+#
+# Layer 2
+output = Dense(1)(layer1_outputs)
+#
+model = Model([layer1_inputs, prev_output_layer], output)
+
+model.compile(loss='categorical_crossentropy', optimizer='adam')
 reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,
-                              patience=5, min_lr=0.001)
-model = Model(inputs=[inp], outputs=[output])
-model.compile(optimizer='adam', loss='mean_squared_error')
+                              patience=5, min_lr=0.0000001)
 
-model.fit(x, y, validation_split=.2, callbacks=[reduce_lr])
+initial_output_states = np.array([0] * 50).reshape(-1, 1).astype(np.float32)
+
+# TODO Decide if you want to change the input shape to contain both the y_predicted and x
+# For now I am going to revisit the jordan cell
+model.fit([x, initial_output_states], y, validation_split=.2, callbacks=[reduce_lr])
+
+
+
+
+
+
+
+
+
