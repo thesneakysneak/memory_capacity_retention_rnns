@@ -6,7 +6,7 @@ import sys
 import numpy as np
 from keras import Input, Model
 from keras.callbacks import ReduceLROnPlateau
-from keras.layers import Dense, SimpleRNN, GRU, Concatenate
+from keras.layers import Dense, SimpleRNN, GRU, Concatenate, LSTM
 
 import experiment_v2.experiment_constants as const
 import recurrent_models
@@ -126,19 +126,18 @@ def jordan_rnn(num_patterns=2, nodes_in_layer=2, nn_type="lstm", activation_func
 
 
 def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0):
-    x_train, y_train, x_test, y_test = generate_sets_class(num_patterns)  # generate_sets(50)
+    x_train, y_train, x_test, y_test = generate_sets(num_patterns)  # generate_sets(50)
     #
     batch_size = 10
     #
     inp = Input(shape=(1, 1))
     if nn_type == const.LSTM:
-        ls = SimpleRNN(nodes_in_layer)(inp)
+        ls = LSTM(nodes_in_layer)(inp)
     elif nn_type == const.ELMAN_RNN:
         ls = SimpleRNN(nodes_in_layer)(inp)
     elif nn_type == const.GRU:
         ls = GRU(nodes_in_layer)(inp)
     else:
-
         ls = JordanRNNCell(nodes_in_layer)(inp)
     #
     output = Dense(num_patterns)(ls)
@@ -149,6 +148,7 @@ def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type
     model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr, recurrent_models.earlystop2], epochs=1000, verbose=verbose)
     #
     y_predict = model.predict(x_test)
+    y_predict = gf.convert_to_closest(y_predict, set(y_test))
     #
     return gf.determine_f_score(y_predict, y_test)
 

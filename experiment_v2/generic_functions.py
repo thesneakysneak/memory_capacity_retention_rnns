@@ -1,10 +1,14 @@
 import random
 
 import numpy as np
+from keras import Input, Model
+from keras.callbacks import ReduceLROnPlateau
+from keras.layers import LSTM, SimpleRNN, GRU, Dense
 from sklearn.metrics import r2_score, confusion_matrix, precision_recall_fscore_support
 
 import experiment_v2.experiment_constants as const
-
+import recurrent_models
+from scratch_space.jordan_rnn import JordanRNNCell
 
 
 def get_runner_experiments(runner, total_num_parameters):
@@ -84,3 +88,35 @@ def get_runner_experiments(runner, total_num_parameters):
     total_num_parameters = np.transpose(total_num_parameters)
     random.shuffle(total_num_parameters)
     return total_num_parameters[runner]
+
+
+def train_test_neural_net_architecture(x_train, y_train,
+                                       x_test, y_test,
+                                       nodes_in_layer=2, nodes_in_out_layer=1,
+                                       nn_type="lstm", activation_func="sigmoid",
+                                       verbose=0):
+
+    #
+    batch_size = 10
+    #
+    inp = Input(shape=(len(x_train[0]), 1))
+    if nn_type == const.LSTM:
+        ls = LSTM(nodes_in_layer, activation=activation_func)(inp)
+    elif nn_type == const.ELMAN_RNN:
+        ls = SimpleRNN(nodes_in_layer, activation=activation_func)(inp)
+    elif nn_type == const.GRU:
+        ls = GRU(nodes_in_layer, activation=activation_func)(inp)
+    else:
+        ls = JordanRNNCell(nodes_in_layer, activation=activation_func)(inp)
+    #
+    output = Dense(nodes_in_out_layer)(ls)
+    #
+    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
+    model = Model(inputs=[inp], outputs=[output])
+    model.compile(optimizer='adam', loss='mean_squared_error')
+    model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr, recurrent_models.earlystop2], epochs=1000,
+              verbose=verbose)
+    #
+    y_predict = model.predict(x_test)
+    #
+    return gf.determine_f_score(y_predict, y_test)

@@ -60,8 +60,7 @@ def generate_count_set(sequence_length_=300, max_count=10, total_num_patterns=10
     return x, y
 
 
-def train_test_neural_net_architecture(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid",
-                                       verbose=0):
+def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0):
     sequence_length = 3000
     x_train, y_train = generate_count_set(sequence_length_=sequence_length,
                                           max_count=max_count,
@@ -69,30 +68,17 @@ def train_test_neural_net_architecture(max_count=2, nodes_in_layer=2, nn_type="l
     x_test, y_test = generate_count_set(sequence_length_=sequence_length,
                                         max_count=max_count,
                                         total_num_patterns=100)
-    #
-    batch_size = 10
-    #
-    inp = Input(shape=(sequence_length, 1))
-    if nn_type == const.LSTM:
-        ls = SimpleRNN(nodes_in_layer)(inp)
-    elif nn_type == const.ELMAN_RNN:
-        ls = SimpleRNN(nodes_in_layer)(inp)
-    elif nn_type == const.GRU:
-        ls = GRU(nodes_in_layer)(inp)
-    else:
-        ls = JordanRNNCell(nodes_in_layer)(inp)
-    #
-    output = Dense(1)(ls)
-    #
-    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
-    model = Model(inputs=[inp], outputs=[output])
-    model.compile(optimizer='adam', loss='mean_squared_error')
-    model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr, recurrent_models.earlystop2], epochs=1000,
-              verbose=verbose)
-    #
-    y_predict = model.predict(x_test)
-    #
-    return gf.determine_f_score(y_predict, y_test)
+
+
+    result = gf.train_test_neural_net_architecture(x_train, y_train,
+                                       x_test, y_test,
+                                       nodes_in_layer=nodes_in_layer,
+                                       nodes_in_out_layer=1,
+                                       nn_type=nn_type, activation_func=activation_func,
+                                       verbose=0)
+
+    return result
+
 
 
 def main():
@@ -135,10 +121,10 @@ def main():
             nodes_in_layer = gf.get_nodes_in_layer(parameters, nn_type)
             for activation_func in activation_functions:
                 while (smallest_not_retained - largest_retained) > 1:
-                    score_after_training_net = train_test_neural_net_architecture(max_count=start,
-                                                                                  nodes_in_layer=nodes_in_layer,
-                                                                                  nn_type=nn_type,
-                                                                                  activation_func=activation_func)
+                    score_after_training_net = run_experiment(max_count=start,
+                                                              nodes_in_layer=nodes_in_layer,
+                                                              nn_type=nn_type,
+                                                              activation_func=activation_func)
                     #
                     if score_after_training_net > 0.98:
                         print("   -> ", start)
