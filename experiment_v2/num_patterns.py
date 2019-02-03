@@ -152,21 +152,12 @@ def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type
     #
     return gf.determine_f_score(y_predict, y_test)
 
-def main():
-    if len(sys.argv[1:]) == 0:
-        return 0
-
-    runner = sys.argv[1:][0]
-
-    random.seed(1000)
-    total_num_parameters = gf.divisible_by_all(30)
-    total_num_parameters = gf.get_runner_experiments(runner, total_num_parameters)
+def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
 
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
-    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.JORDAN_RNN]  # "jordan_rnn"
-    thread = 1
-    run = 1
+    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN]  # "jordan_rnn" const.JORDAN_RNN
+    run = runner
     logfile_location = "danny_masters"
     logfile = logfile_location + "/" + str(thread) + "_" + str(run) + "_num_patterns.log"
     logfile = os.path.abspath(logfile)

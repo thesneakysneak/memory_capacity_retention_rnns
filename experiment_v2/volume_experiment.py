@@ -118,23 +118,13 @@ def search_in_range(parameters, nn_type, activation_func, max_elements_to_count=
         nodes_in_layer) + "," + str(largest_retained) + "," + str(smallest_not_retained))
     return smallest_score, score_after_training_net, largest_retained, smallest_not_retained
 
-def main():
-    if len(sys.argv[1:]) == 0:
-        return 0
-
-    runner = sys.argv[1:][0]
-
-    random.seed(1000)
-    total_num_parameters = gf.divisible_by_all(30)
-    total_num_parameters = gf.get_runner_experiments(runner, total_num_parameters)
-    thread = 1
-    run = runner
+def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
     network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.JORDAN_RNN]  # "jordan_rnn"
 
     logfile_location = "danny_masters"
-    logfile = logfile_location + "/" + str(thread) + "_" + str(run) + "_volume_experiment.log"
+    logfile = logfile_location + "/" + str(thread) + "_" + str(runner) + "_volume_experiment.log"
     logfile = os.path.abspath(logfile)
 
     if not os.path.exists(logfile):

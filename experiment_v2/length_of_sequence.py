@@ -81,23 +81,13 @@ def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_fun
 
 
 
-def main():
-    if len(sys.argv[1:]) == 0:
-        return 0
-
-    runner = sys.argv[1:][0]
-
-    random.seed(1000)
-    total_num_parameters = gf.divisible_by_all(30)
-    total_num_parameters = gf.get_runner_experiments(runner, total_num_parameters)
-
+def run_length_exp(total_num_parameters=[1, 2], runner=1, thread=1):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
     network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.JORDAN_RNN]  # "jordan_rnn"
-    thread = 1
-    run = 1
+
     logfile_location = "danny_masters"
-    logfile = logfile_location + "/" + str(thread) + "_" + str(run) + "_longest_sequence.log"
+    logfile = logfile_location + "/" + str(thread) + "_" + str(runner) + "_longest_sequence.log"
     logfile = os.path.abspath(logfile)
 
     if not os.path.exists(logfile):
