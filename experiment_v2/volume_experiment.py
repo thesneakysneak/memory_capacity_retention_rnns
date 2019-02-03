@@ -150,11 +150,12 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
         for nn_type in network_types:
             nodes_in_layer = gf.get_nodes_in_layer(parameters, nn_type)
             for activation_func in activation_functions:
+                print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
                 while (smallest_not_retained - largest_retained) > 1:
                     lower_bound_score, upper_bound_training_net, largest_len_retained, smallest_len_not_retained =  search_in_range(parameters,
                                                                                                                             nn_type=nn_type,
                                                                                                                             activation_func=activation_func,
-                                                                                                                            max_elements_to_count=start)
+                                                                                                                            max_elements_to_count=start,)
 
 
                     #
@@ -199,8 +200,13 @@ def sample():
     y_predict = [[round(p[0]), round(p[1])] for p in y_predict]
 
 
-# if __name__ == "__main__":
-#     main()
+def main():
+    total_num_parameters = gf.divisible_by_all(1)
+    run_volume_experiment(total_num_parameters=total_num_parameters, runner=1, thread=1)
+
+
+if __name__ == "__main__":
+    main()
 
 
 

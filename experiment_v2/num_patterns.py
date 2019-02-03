@@ -182,6 +182,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
         for nn_type in network_types:
             nodes_in_layer = gf.get_nodes_in_layer(parameters, nn_type)
             for activation_func in activation_functions:
+                print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
                 while (smallest_not_retained - largest_retained) > 1:
                     score_after_training_net = train_test_neural_net_architecture(num_patterns=start,
                                                                                   nodes_in_layer=nodes_in_layer,
