@@ -132,13 +132,13 @@ def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type
     #
     inp = Input(shape=(1, 1))
     if nn_type == const.LSTM:
-        ls = LSTM(nodes_in_layer)(inp)
+        ls = LSTM(nodes_in_layer, activation=activation_func)(inp)
     elif nn_type == const.ELMAN_RNN:
-        ls = SimpleRNN(nodes_in_layer)(inp)
+        ls = SimpleRNN(nodes_in_layer, activation=activation_func)(inp)
     elif nn_type == const.GRU:
-        ls = GRU(nodes_in_layer)(inp)
+        ls = GRU(nodes_in_layer, activation=activation_func)(inp)
     else:
-        ls = JordanRNNCell(nodes_in_layer)(inp)
+        ls = JordanRNNCell(nodes_in_layer, activation=activation_func)(inp)
     #
     output = Dense(num_patterns)(ls)
     #
@@ -187,7 +187,8 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
                     score_after_training_net = train_test_neural_net_architecture(num_patterns=start,
                                                                                   nodes_in_layer=nodes_in_layer,
                                                                                   nn_type=nn_type,
-                                                                                  activation_func=activation_func)
+                                                                                  activation_func=activation_func,
+                                                                                  verbose=1)
                     #
                     if score_after_training_net > 0.98:
                         print("   -> ", start)

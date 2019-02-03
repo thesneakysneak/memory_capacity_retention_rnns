@@ -75,7 +75,7 @@ def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_fun
                                        nodes_in_layer=nodes_in_layer,
                                        nodes_in_out_layer=1,
                                        nn_type=nn_type, activation_func=activation_func,
-                                       verbose=0)
+                                       verbose=1)
 
     return result
 
