@@ -193,7 +193,7 @@ earlystop = EarlyStopByF1(value = .99, verbose =1)
 
 
 reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,
-                              patience=5, min_lr=0.0000001)
+                              patience=5, min_lr=0.00001)
 
 reset_state = ResetState()
 

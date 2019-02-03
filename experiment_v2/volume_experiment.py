@@ -66,7 +66,7 @@ def run_experiment(max_count=2, max_elements_to_count=2, nodes_in_layer=2, nn_ty
                                        x_test, y_test,
                                        nodes_in_layer=nodes_in_layer, nodes_in_out_layer=max_elements_to_count,
                                        nn_type=nn_type, activation_func=activation_func,
-                                       verbose=0)
+                                       verbose=1)
 
     return result
 
