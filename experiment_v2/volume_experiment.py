@@ -71,7 +71,52 @@ def run_experiment(max_count=2, max_elements_to_count=2, nodes_in_layer=2, nn_ty
     return result
 
 
+def search_in_range(parameters, nn_type, activation_func, max_elements_to_count=1):
+    """
+    Function searches for the maximum length that can be counted for the given number of elements that need to be counted
+    :param parameters:
+    :param nn_type:
+    :param activation_func:
+    :param max_elements_to_count:
+    :return:
+    """
+    start = 2
+    prev = 1
+    steps = 0
+    smallest_score = 0
+    smallest_not_retained = 10000
+    largest_retained = 0
 
+
+    nodes_in_layer = gf.get_nodes_in_layer(parameters, nn_type)
+
+    while (smallest_not_retained - largest_retained) > 1:
+        score_after_training_net = run_experiment(max_count=start,
+                                                  max_elements_to_count=max_elements_to_count,
+                                                  nodes_in_layer=nodes_in_layer,
+                                                  nn_type=nn_type,
+                                                  activation_func=activation_func)
+        #
+        if score_after_training_net > 0.98:
+            print("   -> ", start)
+            largest_retained = start
+            prev = start
+            start *= 2
+            if start > smallest_not_retained:
+                start = smallest_not_retained - 1
+        else:
+            print("   <- ", start)
+            smallest_not_retained = start
+            start = int((start + prev) / 2)
+        print(" Current Num patterns", start)
+        print(" diff", str((smallest_not_retained - largest_retained)))
+        print(" smallest_not_retained", smallest_not_retained)
+        print(" largest_retained", largest_retained)
+        print(" score", score_after_training_net)
+
+    logging.log(logging.INFO, str(nn_type) + "," + str(activation_func) + "," + str(parameters) + "," + str(
+        nodes_in_layer) + "," + str(largest_retained) + "," + str(smallest_not_retained))
+    return smallest_score, score_after_training_net, largest_retained, smallest_not_retained
 
 def main():
     if len(sys.argv[1:]) == 0:
@@ -103,6 +148,8 @@ def main():
     prev = 1
     steps = 0
     smallest_not_retained = 10000
+    smallest_len_not_retained = 0
+    largest_len_retained = 0
     max_elements_to_count = 10
     largest_retained = 0
     nodes_in_layer = 2
@@ -114,13 +161,14 @@ def main():
             nodes_in_layer = gf.get_nodes_in_layer(parameters, nn_type)
             for activation_func in activation_functions:
                 while (smallest_not_retained - largest_retained) > 1:
-                    score_after_training_net = run_experiment(max_count=start,
-                                                              max_elements_to_count=max_elements_to_count,
-                                                              nodes_in_layer=nodes_in_layer,
-                                                              nn_type=nn_type,
-                                                              activation_func=activation_func)
+                    lower_bound_score, upper_bound_training_net, largest_len_retained, smallest_len_not_retained =  search_in_range(parameters,
+                                                                                                                            nn_type=nn_type,
+                                                                                                                            activation_func=activation_func,
+                                                                                                                            max_elements_to_count=start)
+
+
                     #
-                    if score_after_training_net > 0.98:
+                    if lower_bound_score > 0.98:
                         print("   -> ", start)
                         largest_retained = start
                         prev = start
@@ -133,12 +181,15 @@ def main():
                         start = int((start + prev) / 2)
                     print(" Current Num patterns", start)
                     print(" diff", str((smallest_not_retained - largest_retained)))
-                    print(" smallest_not_retained", smallest_not_retained)
-                    print(" largest_retained", largest_retained)
-                    print(" score", score_after_training_net)
+                    print(" max elements to count smallest_not_retained", smallest_not_retained)
+                    print(" max elements to count largest_retained", largest_retained)
+                    print(" length to count smallest_not_retained", smallest_len_not_retained)
+                    print(" length to count largest_retained", largest_len_retained)
+                    print(" score", lower_bound_score)
 
                 logging.log(logging.INFO, str(nn_type) + "," + str(activation_func) + "," + str(parameters) + "," + str(
-                    nodes_in_layer) + "," + str(largest_retained) + "," + str(smallest_not_retained))
+                    nodes_in_layer) + "," + str(largest_retained) + "," + str(smallest_not_retained)
+                                    + "," + str(largest_len_retained) + "," + str(smallest_len_not_retained))
 
 
 def sample():
