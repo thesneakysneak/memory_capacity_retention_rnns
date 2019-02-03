@@ -52,7 +52,7 @@ def generate_count_set(sequence_length_=300, max_count=10, total_num_patterns=10
         y[i] = numpy.array(1. / k).astype(np.float32)
     #
     single_list = list(zip(x, y))
-    single_list = random.shuffle(single_list)
+    random.shuffle(single_list)
     x, y = zip(*single_list)
     #
     x = numpy.array(x)
