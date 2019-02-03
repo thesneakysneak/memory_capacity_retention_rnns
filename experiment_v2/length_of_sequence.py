@@ -161,5 +161,5 @@ def sample():
     model.fit(x, y, validation_split=.2, callbacks=[reduce_lr, recurrent_models.earlystop2], epochs=100)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

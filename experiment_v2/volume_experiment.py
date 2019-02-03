@@ -127,12 +127,12 @@ def main():
     random.seed(1000)
     total_num_parameters = gf.divisible_by_all(30)
     total_num_parameters = gf.get_runner_experiments(runner, total_num_parameters)
-
+    thread = 1
+    run = runner
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
     network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.JORDAN_RNN]  # "jordan_rnn"
-    thread = 1
-    run = 1
+
     logfile_location = "danny_masters"
     logfile = logfile_location + "/" + str(thread) + "_" + str(run) + "_volume_experiment.log"
     logfile = os.path.abspath(logfile)
@@ -209,8 +209,8 @@ def sample():
     y_predict = [[round(p[0]), round(p[1])] for p in y_predict]
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
 
 
 

@@ -218,8 +218,8 @@ def main():
                     nodes_in_layer) + "," + str(largest_retained) + "," + str(smallest_not_retained))
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
 
 
 # train_test_neural_net_architecture(num_patterns=10,nodes_in_layer=10, nn_type="jordan", activation_func="sigmoid")

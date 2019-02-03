@@ -81,13 +81,13 @@ def get_nodes_in_layer(num_parameters, nn_type):
 
 
 def get_runner_experiments(runner, total_num_parameters):
-    total_num_parameters = np.array(total_num_parameters).reshape(-1, 5)
+    total = np.array(total_num_parameters).reshape(-1, 5)
     for i in range(5):
         if i % 2 == 0:
-            total_num_parameters[i] = sorted(total_num_parameters[i], reverse=True)
-    total_num_parameters = np.transpose(total_num_parameters)
-    random.shuffle(total_num_parameters)
-    return total_num_parameters[runner]
+            total[i] = sorted(total[i], reverse=True)
+    # Weird inconsistencies
+    # total = np.transpose(total).reshape(-1, 5)
+    return [total[i][runner-1] for i in range(len(total))]
 
 
 def train_test_neural_net_architecture(x_train, y_train,
@@ -119,4 +119,4 @@ def train_test_neural_net_architecture(x_train, y_train,
     #
     y_predict = model.predict(x_test)
     #
-    return gf.determine_f_score(y_predict, y_test)
+    return determine_f_score(y_predict, y_test)
