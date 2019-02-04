@@ -25,7 +25,7 @@ def true_accuracy(y_predict, y_true):
     y_predict_unscaled = [round(x) for x in y_predict]
     return r2_score(y_predict_unscaled, y_true)
 
-def generate_volume_set(sequence_length_=300, max_count=10, total_num_patterns=100, total_num_to_count=10):
+def generate_volume_set(sequence_length_=3000, max_count=10, total_num_patterns=100, total_num_to_count=10):
     x = [0] * total_num_patterns
     y = [0] * total_num_patterns
     #
@@ -83,8 +83,8 @@ def search_in_range(parameters, nn_type, activation_func, max_elements_to_count=
     start = 2
     prev = 1
     steps = 0
-    smallest_score = 0
-    smallest_not_retained = 10000
+    score_after_training_net = 0.0
+    smallest_not_retained = 300
     largest_retained = 0
 
 
@@ -96,6 +96,7 @@ def search_in_range(parameters, nn_type, activation_func, max_elements_to_count=
                                                   nodes_in_layer=nodes_in_layer,
                                                   nn_type=nn_type,
                                                   activation_func=activation_func)
+        print("Score", score_after_training_net)
         #
         if score_after_training_net > 0.98:
             print("   -> ", start)
@@ -115,8 +116,9 @@ def search_in_range(parameters, nn_type, activation_func, max_elements_to_count=
         print(" score", score_after_training_net)
 
     logging.log(logging.INFO, str(nn_type) + "," + str(activation_func) + "," + str(parameters) + "," + str(
-        nodes_in_layer) + "," + str(largest_retained) + "," + str(smallest_not_retained))
-    return smallest_score, score_after_training_net, largest_retained, smallest_not_retained
+        nodes_in_layer) + "," + str(max_elements_to_count) + "," + str(max_elements_to_count)
+                + str(largest_retained) + "," + str(smallest_not_retained) + ",processing")
+    return score_after_training_net, largest_retained, smallest_not_retained
 
 def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
@@ -137,7 +139,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     start = 2
     prev = 1
     steps = 0
-    smallest_not_retained = 10000
+    smallest_not_retained = 300
     smallest_len_not_retained = 0
     largest_len_retained = 0
     max_elements_to_count = 10
@@ -149,17 +151,19 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     for parameters in total_num_parameters:
         for nn_type in network_types:
             nodes_in_layer = gf.get_nodes_in_layer(parameters, nn_type)
+            start = 1
+            prev = 0
             for activation_func in activation_functions:
                 print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
                 while (smallest_not_retained - largest_retained) > 1:
-                    lower_bound_score, upper_bound_training_net, largest_len_retained, smallest_len_not_retained =  search_in_range(parameters,
+                    score_after_training_net, largest_len_retained, smallest_len_not_retained =  search_in_range(parameters,
                                                                                                                             nn_type=nn_type,
                                                                                                                             activation_func=activation_func,
                                                                                                                             max_elements_to_count=start,)
 
-
+                    print(" ==================================== ", score_after_training_net)
                     #
-                    if lower_bound_score > 0.98:
+                    if score_after_training_net > 0.98:
                         print("   -> ", start)
                         largest_retained = start
                         prev = start
@@ -176,11 +180,11 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
                     print(" max elements to count largest_retained", largest_retained)
                     print(" length to count smallest_not_retained", smallest_len_not_retained)
                     print(" length to count largest_retained", largest_len_retained)
-                    print(" score", lower_bound_score)
+                    print(" score", score_after_training_net)
 
                 logging.log(logging.INFO, str(nn_type) + "," + str(activation_func) + "," + str(parameters) + "," + str(
                     nodes_in_layer) + "," + str(largest_retained) + "," + str(smallest_not_retained)
-                                    + "," + str(largest_len_retained) + "," + str(smallest_len_not_retained))
+                                    + "," + str(largest_len_retained) + "," + str(smallest_len_not_retained)+ ",found")
 
 
 def sample():
