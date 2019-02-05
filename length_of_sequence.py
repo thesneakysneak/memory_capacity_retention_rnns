@@ -1,18 +1,5 @@
 import numpy
-import sys
-from keras import Sequential
 from keras.callbacks import ReduceLROnPlateau
-from keras.preprocessing.text import Tokenizer
-from keras.models import Model
-from keras.layers import *
-from sklearn.metrics import r2_score
-
-import random
-
-import numpy
-from keras import Sequential
-from keras.callbacks import ReduceLROnPlateau
-from keras.preprocessing.text import Tokenizer
 from keras.models import Model
 from keras.layers import *
 from sklearn.metrics import r2_score
@@ -20,13 +7,10 @@ from sklearn.metrics import r2_score
 import logging
 import os
 import random
-import sys
-import random
 
-import experiment_v2.experiment_constants as const
+import experiment_constants as const
 import recurrent_models
-import experiment_v2.generic_functions as gf
-from scratch_space.jordan_rnn import JordanRNNCell
+import generic_functions as gf
 
 length_of_series = 1000
 
@@ -81,7 +65,7 @@ def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_fun
 
 
 
-def run_length_exp(total_num_parameters=[1, 2], runner=1, thread=1):
+def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
     network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.JORDAN_RNN]  # "jordan_rnn"

@@ -6,7 +6,7 @@ from keras.callbacks import ReduceLROnPlateau
 from keras.layers import LSTM, SimpleRNN, GRU, Dense
 from sklearn.metrics import r2_score, confusion_matrix, precision_recall_fscore_support
 
-import experiment_v2.experiment_constants as const
+import experiment_constants as const
 import recurrent_models
 from scratch_space.jordan_rnn import JordanRNNCell
 
@@ -25,9 +25,6 @@ def true_accuracy_one_hot(y_predict, y_true):
     y_predict_unscaled = [np.argmax(x) for x in y_predict]
     return r2_score(y_predict_unscaled, y_true)
 
-def convert_to_closest(predicted_value, possible_values):
-    return min(possible_values, key=lambda x: abs(x - predicted_value))
-
 
 def true_accuracy(y_predict, y_true):
     y_predict_unscaled = [round(x) for x in y_predict]
@@ -35,6 +32,7 @@ def true_accuracy(y_predict, y_true):
 
 
 def convert_to_closest(predicted_value, possible_values):
+    print(possible_values, predicted_value)
     return min(possible_values, key=lambda x: abs(x - predicted_value))
 
 
@@ -80,9 +78,10 @@ def get_nodes_in_layer(num_parameters, nn_type):
     return int(num_parameters / 3)
 
 
-def get_runner_experiments(runner, total_num_parameters):
-    total = np.array(total_num_parameters).reshape(-1, 5)
-    for i in range(5):
+def get_runner_experiments(runner, total_num_parameters, num_workers=5):
+    splitter = int(len(total_num_parameters)/num_workers)
+    total = np.array(total_num_parameters).reshape(-1, splitter)
+    for i in range(splitter):
         if i % 2 == 0:
             total[i] = sorted(total[i], reverse=True)
     # Weird inconsistencies

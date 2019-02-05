@@ -1,16 +1,15 @@
 import logging
 import os
 import random
-import sys
 
 import numpy as np
 from keras import Input, Model
 from keras.callbacks import ReduceLROnPlateau
 from keras.layers import Dense, SimpleRNN, GRU, Concatenate, LSTM
 
-import experiment_v2.experiment_constants as const
+import experiment_constants as const
 import recurrent_models
-import experiment_v2.generic_functions as gf
+import generic_functions as gf
 from scratch_space.jordan_rnn import JordanRNNCell
 
 '''
@@ -140,7 +139,7 @@ def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type
     else:
         ls = JordanRNNCell(nodes_in_layer, activation=activation_func)(inp)
     #
-    output = Dense(num_patterns)(ls)
+    output = Dense(1)(ls)
     #
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
     model = Model(inputs=[inp], outputs=[output])
@@ -148,7 +147,7 @@ def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type
     model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr, recurrent_models.earlystop2], epochs=1000, verbose=verbose)
     #
     y_predict = model.predict(x_test)
-    y_predict = gf.convert_to_closest(y_predict, set(y_test))
+    y_predict = [[gf.convert_to_closest(a, set(y_test))] for a in y_predict ]
     #
     return gf.determine_f_score(y_predict, y_test)
 

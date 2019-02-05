@@ -2,9 +2,7 @@
 # https://machinelearningmastery.com/sequence-prediction-problems-learning-lstm-recurrent-neural-networks/
 
 import numpy
-from keras import Sequential
 from keras.callbacks import ReduceLROnPlateau
-from keras.preprocessing.text import Tokenizer
 from keras.models import Model
 from keras.layers import *
 from sklearn.metrics import r2_score
@@ -12,13 +10,10 @@ from sklearn.metrics import r2_score
 import logging
 import os
 import random
-import sys
-import random
 
-import experiment_v2.experiment_constants as const
+import experiment_constants as const
 import recurrent_models
-import experiment_v2.generic_functions as gf
-from scratch_space.jordan_rnn import JordanRNNCell
+import generic_functions as gf
 
 
 def true_accuracy(y_predict, y_true):

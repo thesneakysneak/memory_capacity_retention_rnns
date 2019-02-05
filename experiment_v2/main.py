@@ -1,9 +1,9 @@
 import random
 import sys
-import experiment_v2.generic_functions as gf
-import experiment_v2.num_patterns as num_pat
-import experiment_v2.length_of_sequence as length_exp
-import experiment_v2.volume_experiment as vol_exp
+import generic_functions as gf
+import num_patterns as num_pat
+import length_of_sequence as length_exp
+import volume_experiment as vol_exp
 import threading
 import time
 
