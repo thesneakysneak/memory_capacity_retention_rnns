@@ -1,3 +1,5 @@
+import sys
+
 import numpy
 from keras.callbacks import ReduceLROnPlateau
 from keras.models import Model
@@ -24,7 +26,7 @@ def convert_to_closest(predicted_value, possible_values):
     return min(possible_values, key=lambda x: abs(x - predicted_value))
 
 
-def generate_count_set(sequence_length_=300, max_count=10, total_num_patterns=100):
+def generate_count_set(sequence_length_=3000, max_count=10, total_num_patterns=100):
     x = [0] * total_num_patterns
     y = [0] * total_num_patterns
     #
@@ -45,13 +47,13 @@ def generate_count_set(sequence_length_=300, max_count=10, total_num_patterns=10
 
 
 def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0):
-    sequence_length = 3000
+    sequence_length = 1000
     x_train, y_train = generate_count_set(sequence_length_=sequence_length,
                                           max_count=max_count,
-                                          total_num_patterns=100)  # generate_sets(50)
+                                          total_num_patterns=300)  # generate_sets(50)
     x_test, y_test = generate_count_set(sequence_length_=sequence_length,
                                         max_count=max_count,
-                                        total_num_patterns=100)
+                                        total_num_patterns=300)
 
 
     result = gf.train_test_neural_net_architecture(x_train, y_train,
@@ -138,3 +140,20 @@ def sample():
 
 # if __name__ == "__main__":
 #     main()
+
+
+if __name__ == "__main__":
+    """
+    Runs all other experiments. Pipes them to the background
+
+    Runner is [1, 2, 3, 4, 5]
+    :return:
+    """
+
+    if len(sys.argv[1:]) != 0:
+        total_num_parameters = [int(x) for x in sys.argv[1:][0].split(",")]
+        runner = int(sys.argv[1:][1])
+        thread = int(sys.argv[1:][2])
+        run_length_experiment(total_num_parameters=total_num_parameters, runner=runner, thread=thread)
+    else:
+        sample()

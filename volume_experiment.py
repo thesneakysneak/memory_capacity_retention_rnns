@@ -1,5 +1,6 @@
 
 # https://machinelearningmastery.com/sequence-prediction-problems-learning-lstm-recurrent-neural-networks/
+import sys
 
 import numpy
 from keras.callbacks import ReduceLROnPlateau
@@ -205,7 +206,18 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    """
+    Runs all other experiments. Pipes them to the background
+
+    Runner is [1, 2, 3, 4, 5]
+    :return:
+    """
+
+    if len(sys.argv[1:]) != 0:
+        total_num_parameters = [int(x) for x in sys.argv[1:][0].split(",")]
+        runner = int(sys.argv[1:][1])
+        thread = int(sys.argv[1:][2])
+        run_volume_experiment(total_num_parameters=total_num_parameters, runner=runner, thread=thread)
 
 
 

@@ -81,12 +81,7 @@ def get_nodes_in_layer(num_parameters, nn_type):
 def get_runner_experiments(runner, total_num_parameters, num_workers=5):
     splitter = int(len(total_num_parameters)/num_workers)
     total = np.array(total_num_parameters).reshape(-1, splitter)
-    for i in range(splitter):
-        if i % 2 == 0:
-            total[i] = sorted(total[i], reverse=True)
-    # Weird inconsistencies
-    # total = np.transpose(total).reshape(-1, 5)
-    return [total[i][runner-1] for i in range(len(total))]
+    return total[runner-1]
 
 
 def train_test_neural_net_architecture(x_train, y_train,

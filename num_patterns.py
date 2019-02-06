@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import sys
 
 import numpy as np
 from keras import Input, Model
@@ -215,3 +216,17 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
 
 
 # train_test_neural_net_architecture(num_patterns=10,nodes_in_layer=10, nn_type="jordan", activation_func="sigmoid")
+
+if __name__ == "__main__":
+    """
+    Runs all other experiments. Pipes them to the background
+
+    Runner is [1, 2, 3, 4, 5]
+    :return:
+    """
+
+    if len(sys.argv[1:]) != 0:
+        total_num_parameters = [int(x) for x in sys.argv[1:][0].split(",")]
+        runner = int(sys.argv[1:][1])
+        thread = int(sys.argv[1:][2])
+        run_num_patterns(total_num_parameters=total_num_parameters, runner=runner, thread=thread)

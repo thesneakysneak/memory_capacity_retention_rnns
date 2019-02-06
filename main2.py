@@ -1,3 +1,4 @@
+import os
 import random
 import sys
 import generic_functions as gf
@@ -32,11 +33,12 @@ if __name__ == "__main__":
 
         runner = sys.argv[1:][0]
         print("runner ", runner )
-
+        runner = 4
         random.seed(1000)
         total_num_parameters = gf.divisible_by_all(15)
+        print(total_num_parameters)
         total_num_parameters = gf.get_runner_experiments(int(runner), total_num_parameters, num_workers=5)
-
+        print(total_num_parameters)
         for i in range(len(total_num_parameters)):
             run_volume_exp.runner = run_length_exp.runner = run_num_exp.runner = runner
             run_volume_exp.thread = run_length_exp.thread = run_num_exp.thread = i
@@ -50,7 +52,20 @@ if __name__ == "__main__":
             #
             # t = threading.Thread(name='Running volume of patterns experiment ' + str(i), target=run_volume_exp)
             # t.start()
+            command_str = 'bash -c "python length_of_sequence.py ' + \
+                          str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
+                          + ' ' + str(runner) + ' ' + str(i) + '" & '
+            print("starting ", command_str)
+            # os.system(command_str)
 
-            run_length_exp()
-            run_volume_exp()
-            run_num_exp()
+            command_str = 'bash -c "python num_patterns.py ' + \
+                          str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
+                          + ' ' + str(runner) + ' ' + str(i) + '" & '
+            print("starting ", command_str)
+            # os.system(command_str)
+
+            command_str = 'bash -c "python volume_experiment.py ' + \
+                          str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
+                          + ' ' + str(runner) + ' ' + str(i) + '" & '
+            print("starting ", command_str)
+            # os.system(command_str)
