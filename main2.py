@@ -50,6 +50,7 @@ if __name__ == "__main__":
             #
             # t = threading.Thread(name='Running volume of patterns experiment ' + str(i), target=run_volume_exp)
             # t.start()
-            run_num_exp()
+
             run_length_exp()
             run_volume_exp()
+            run_num_exp()

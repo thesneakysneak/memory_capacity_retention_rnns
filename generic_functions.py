@@ -113,7 +113,11 @@ def train_test_neural_net_architecture(x_train, y_train,
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
     model = Model(inputs=[inp], outputs=[output])
     model.compile(optimizer='adam', loss='mean_squared_error')
-    model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr, recurrent_models.earlystop2], epochs=1000,
+    model.fit(x_train, y_train,
+              validation_split=.2,
+              callbacks=[reduce_lr, recurrent_models.earlystop2],
+              epochs=1000,
+              batch_size=batch_size,
               verbose=verbose)
     #
     y_predict = model.predict(x_test)
