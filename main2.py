@@ -41,16 +41,16 @@ if __name__ == "__main__":
             run_volume_exp.runner = run_length_exp.runner = run_num_exp.runner = runner
             run_volume_exp.thread = run_length_exp.thread = run_num_exp.thread = i
             run_volume_exp.total_num_parameters = run_length_exp.total_num_parameters  = run_num_exp.total_num_parameters = [total_num_parameters[i]]
-            t = threading.Thread(name='Running number of patterns experiment ' + str(i), target=run_num_exp)
-            t.start()
+            # t = threading.Thread(name='Running number of patterns experiment ' + str(i), target=run_num_exp)
+            # t.start()
+            #
+            # t = threading.Thread(name='Running length of patterns experiment ' + str(i), target=run_length_exp)
+            # t.start()
+            #
+            #
+            # t = threading.Thread(name='Running volume of patterns experiment ' + str(i), target=run_volume_exp)
+            # t.start()
 
-            t = threading.Thread(name='Running length of patterns experiment ' + str(i), target=run_length_exp)
-            t.start()
-
-
-            t = threading.Thread(name='Running volume of patterns experiment ' + str(i), target=run_volume_exp)
-            t.start()
-
-            # run_length_exp()
-            # run_volume_exp()
-            # run_num_exp()
+            run_length_exp()
+            run_volume_exp()
+            run_num_exp()
