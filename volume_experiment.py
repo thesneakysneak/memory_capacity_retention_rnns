@@ -144,7 +144,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     smallest_not_retained = 3000
     smallest_len_not_retained = 0
     largest_len_retained = 0
-    max_elements_to_count = 20
+    max_elements_to_count = 10
     largest_retained = 0
     nodes_in_layer = 2
     activation_func = "sigmoid"

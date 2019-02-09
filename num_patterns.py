@@ -125,32 +125,32 @@ def jordan_rnn(num_patterns=2, nodes_in_layer=2, nn_type="lstm", activation_func
 
 
 
-def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0):
-    x_train, y_train, x_test, y_test = generate_sets(num_patterns)  # generate_sets(50)
-    #
-    batch_size = 10
-    #
-    inp = Input(shape=(1, 1))
-    if nn_type == const.LSTM:
-        ls = LSTM(nodes_in_layer, activation=activation_func)(inp)
-    elif nn_type == const.ELMAN_RNN:
-        ls = SimpleRNN(nodes_in_layer, activation=activation_func)(inp)
-    elif nn_type == const.GRU:
-        ls = GRU(nodes_in_layer, activation=activation_func)(inp)
-    else:
-        ls = JordanRNNCell(nodes_in_layer, activation=activation_func)(inp)
-    #
-    output = Dense(1)(ls)
-    #
-    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
-    model = Model(inputs=[inp], outputs=[output])
-    model.compile(optimizer='adam', loss='mean_squared_error')
-    model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr, recurrent_models.earlystop2], epochs=1000, verbose=verbose)
-    #
-    y_predict = model.predict(x_test)
-    y_predict = [[gf.convert_to_closest(a, set(y_test))] for a in y_predict ]
-    #
-    return gf.determine_f_score(y_predict, y_test)
+# def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0):
+#     x_train, y_train, x_test, y_test = generate_sets(num_patterns)  # generate_sets(50)
+#     #
+#     batch_size = 10
+#     #
+#     inp = Input(shape=(1, 1))
+#     if nn_type == const.LSTM:
+#         ls = LSTM(nodes_in_layer, activation=activation_func)(inp)
+#     elif nn_type == const.ELMAN_RNN:
+#         ls = SimpleRNN(nodes_in_layer, activation=activation_func)(inp)
+#     elif nn_type == const.GRU:
+#         ls = GRU(nodes_in_layer, activation=activation_func)(inp)
+#     else:
+#         ls = JordanRNNCell(nodes_in_layer, activation=activation_func)(inp)
+#     #
+#     output = Dense(1)(ls)
+#     #
+#     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
+#     model = Model(inputs=[inp], outputs=[output])
+#     model.compile(optimizer='adam', loss='mean_squared_error')
+#     model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr, recurrent_models.earlystop2], epochs=1000, verbose=verbose)
+#     #
+#     y_predict = model.predict(x_test)
+#     y_predict = [[gf.convert_to_closest(a, set(y_test))] for a in y_predict ]
+#     #
+#     return gf.determine_f_score(y_predict, y_test)
 
 def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
 
@@ -197,11 +197,16 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
                 largest_retained = 0
                 print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
                 while (smallest_not_retained - largest_retained) > 1:
-                    score_after_training_net = train_test_neural_net_architecture(num_patterns=start,
-                                                                                  nodes_in_layer=nodes_in_layer,
-                                                                                  nn_type=nn_type,
-                                                                                  activation_func=activation_func,
-                                                                                  verbose=1)
+                    x_train, y_train, x_test, y_test = generate_sets(start)
+                    score_after_training_net = gf.train_test_neural_net_architecture(
+                        x_train, y_train,
+                        x_test, y_test,
+                        nodes_in_layer=nodes_in_layer,
+                        nodes_in_out_layer=1,
+                        nn_type=nn_type,
+                        activation_func=activation_func,
+                        verbose=1)
+
                     #
                     if score_after_training_net > 0.98:
                         print("   -> ", start)
