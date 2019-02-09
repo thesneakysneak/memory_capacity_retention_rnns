@@ -35,11 +35,11 @@ def generate_sets(num_patterns):
     y = [1.0 / z for z in y]
     #
     training_set = list(zip(x, y))
-    training_set = training_set * 1000
+    training_set = training_set * 100
     random.shuffle(training_set)
     #
     test_set = list(zip(x, y))
-    test_set = test_set * 100
+    test_set = test_set * 10
     random.shuffle(test_set)
     #
     x_train, y_train = zip(*training_set)
@@ -65,11 +65,11 @@ def generate_sets_class(num_patterns):
     x = [1.0 / z for z in x]
     #
     training_set = list(zip(x, y))
-    training_set = training_set * 1000
+    training_set = training_set * 100
     random.shuffle(training_set)
     #
     test_set = list(zip(x, y))
-    test_set = test_set * 100
+    test_set = test_set * 10
     random.shuffle(test_set)
     #
     x_train, y_train = zip(*training_set)
