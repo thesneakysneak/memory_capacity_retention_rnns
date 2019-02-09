@@ -178,10 +178,23 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
     activation_func = "sigmoid"
     nn_type = "lstm"
 
-    for parameters in total_num_parameters:
-        for nn_type in network_types:
-            nodes_in_layer = gf.get_nodes_in_layer(parameters, nn_type)
+
+    num_divisible_by_all = 216
+
+    for i in range(0, 5):
+        for parameters in total_num_parameters:
+            for nn_type in network_types:
+                nodes_in_layer = gf.get_nodes_in_layer(parameters, nn_type)
+                extra_layers = []
+                for n in range(0, i):
+                    extra_layers.append(gf.get_nodes_in_layer(num_divisible_by_all, nn_type))
+                extra_layers.append(nodes_in_layer)
+                nodes_in_layer = extra_layers
             for activation_func in activation_functions:
+                start = 1
+                prev = 0
+                smallest_not_retained = 10000
+                largest_retained = 0
                 print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
                 while (smallest_not_retained - largest_retained) > 1:
                     score_after_training_net = train_test_neural_net_architecture(num_patterns=start,

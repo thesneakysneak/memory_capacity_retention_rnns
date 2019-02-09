@@ -92,36 +92,49 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
     activation_func = "sigmoid"
     nn_type = "lstm"
 
-    for parameters in total_num_parameters:
-        for nn_type in network_types:
-            nodes_in_layer = gf.get_nodes_in_layer(parameters, nn_type)
-            for activation_func in activation_functions:
-                print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
-                while (smallest_not_retained - largest_retained) > 1:
-                    score_after_training_net = run_experiment(max_count=start,
-                                                              nodes_in_layer=nodes_in_layer,
-                                                              nn_type=nn_type,
-                                                              activation_func=activation_func)
-                    #
-                    if score_after_training_net > 0.98:
-                        print("   -> ", start)
-                        largest_retained = start
-                        prev = start
-                        start *= 2
-                        if start > smallest_not_retained:
-                            start = smallest_not_retained - 1
-                    else:
-                        print("   <- ", start)
-                        smallest_not_retained = start
-                        start = int((start + prev) / 2)
-                    print(" Current Num patterns", start)
-                    print(" diff", str((smallest_not_retained - largest_retained)))
-                    print(" smallest_not_retained", smallest_not_retained)
-                    print(" largest_retained", largest_retained)
-                    print(" score", score_after_training_net)
 
-                logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                    nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained))
+    num_divisible_by_all = 216
+
+    for i in range(0, 5):
+        for parameters in total_num_parameters:
+            for nn_type in network_types:
+                nodes_in_layer = gf.get_nodes_in_layer(parameters, nn_type)
+                extra_layers = []
+                for n in range(0, i):
+                    extra_layers.append(gf.get_nodes_in_layer(num_divisible_by_all, nn_type))
+                extra_layers.append(nodes_in_layer)
+                nodes_in_layer = extra_layers
+                for activation_func in activation_functions:
+                    start = 1
+                    prev = 0
+                    smallest_not_retained = 100000
+                    largest_retained = 0
+                    print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
+                    while (smallest_not_retained - largest_retained) > 1:
+                        score_after_training_net = run_experiment(max_count=start,
+                                                                  nodes_in_layer=nodes_in_layer,
+                                                                  nn_type=nn_type,
+                                                                  activation_func=activation_func)
+                        #
+                        if score_after_training_net > 0.98:
+                            print("   -> ", start)
+                            largest_retained = start
+                            prev = start
+                            start *= 2
+                            if start > smallest_not_retained:
+                                start = smallest_not_retained - 1
+                        else:
+                            print("   <- ", start)
+                            smallest_not_retained = start
+                            start = int((start + prev) / 2)
+                        print(" Current Num patterns", start)
+                        print(" diff", str((smallest_not_retained - largest_retained)))
+                        print(" smallest_not_retained", smallest_not_retained)
+                        print(" largest_retained", largest_retained)
+                        print(" score", score_after_training_net)
+
+                    logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                        nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained))
 
 
 def sample():

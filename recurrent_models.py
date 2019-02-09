@@ -186,7 +186,7 @@ def test():
 earlystop2 = EarlyStopping(monitor='loss',  # loss
                           patience=100,
                           verbose=1,
-                          min_delta=0.002,
+                          min_delta=0.02,
                           mode='auto')
 
 earlystop = EarlyStopByF1(value = .99, verbose =1)
