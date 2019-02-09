@@ -20,6 +20,7 @@ def get_runner_experiments(runner, total_num_parameters):
     random.shuffle(total_num_parameters)
     return total_num_parameters[runner]
 
+
 def true_accuracy_one_hot(y_predict, y_true):
     y_true = [np.argmax(x) for x in y_true]
     y_predict_unscaled = [np.argmax(x) for x in y_predict]
@@ -36,13 +37,12 @@ def convert_to_closest(predicted_value, possible_values):
     return min(possible_values, key=lambda x: abs(x - predicted_value))
 
 
-
 def divisible_by_all(n):
     j = i = 0
     y = []
     while j < n:
         i += 1
-        x = 12*i
+        x = 12 * i
         if x % 9 == 0:
             y.append(x)
             j += 1
@@ -79,9 +79,9 @@ def get_nodes_in_layer(num_parameters, nn_type):
 
 
 def get_runner_experiments(runner, total_num_parameters, num_workers=5):
-    splitter = int(len(total_num_parameters)/num_workers)
+    splitter = int(len(total_num_parameters) / num_workers)
     total = np.array(total_num_parameters).reshape(-1, splitter)
-    return total[runner-1]
+    return total[runner - 1]
 
 
 def train_test_neural_net_architecture(x_train, y_train,
@@ -89,19 +89,38 @@ def train_test_neural_net_architecture(x_train, y_train,
                                        nodes_in_layer=2, nodes_in_out_layer=1,
                                        nn_type="lstm", activation_func="sigmoid",
                                        verbose=0):
-
     #
     batch_size = 10
     #
     inp = Input(shape=(len(x_train[0]), 1))
-    if nn_type == const.LSTM:
-        ls = LSTM(nodes_in_layer, activation=activation_func)(inp)
-    elif nn_type == const.ELMAN_RNN:
-        ls = SimpleRNN(nodes_in_layer, activation=activation_func)(inp)
-    elif nn_type == const.GRU:
-        ls = GRU(nodes_in_layer, activation=activation_func)(inp)
-    else:
-        ls = JordanRNNCell(nodes_in_layer, activation=activation_func)(inp)
+    if type(nodes_in_layer) == int:
+        if nn_type == const.LSTM:
+            ls = LSTM(nodes_in_layer, activation=activation_func)(inp)
+        elif nn_type == const.ELMAN_RNN:
+            ls = SimpleRNN(nodes_in_layer, activation=activation_func)(inp)
+        elif nn_type == const.GRU:
+            ls = GRU(nodes_in_layer, activation=activation_func)(inp)
+        else:
+            ls = JordanRNNCell(nodes_in_layer, activation=activation_func)(inp)
+    elif type(nodes_in_layer) == list:
+        rnn_func_ptr = None
+        if nn_type == const.LSTM:
+            rnn_func_ptr = LSTM
+        elif nn_type == const.ELMAN_RNN:
+            rnn_func_ptr = SimpleRNN
+        elif nn_type == const.GRU:
+            rnn_func_ptr = GRU
+        else:
+            rnn_func_ptr = JordanRNNCell
+
+        if len(nodes_in_layer) > 1:
+            ls = rnn_func_ptr(nodes_in_layer[0], activation=activation_func, return_sequences=True)(inp)
+            for n in range(1, len(nodes_in_layer) - 1):
+                ls = rnn_func_ptr(nodes_in_layer[n], activation=activation_func, return_sequences=True)(ls)
+            ls = rnn_func_ptr(nodes_in_layer[len(nodes_in_layer) - 1], activation=activation_func)(ls)
+        else:
+            ls = rnn_func_ptr(nodes_in_layer[0], activation=activation_func)(inp)
+
     #
     output = Dense(nodes_in_out_layer)(ls)
     #
@@ -111,7 +130,7 @@ def train_test_neural_net_architecture(x_train, y_train,
     model.fit(x_train, y_train,
               validation_split=.2,
               callbacks=[reduce_lr, recurrent_models.earlystop2],
-              epochs=1000,
+              epochs=10,
               batch_size=batch_size,
               verbose=verbose)
     #

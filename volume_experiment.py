@@ -116,6 +116,35 @@ def search_in_range(parameters, nn_type, activation_func, max_elements_to_count=
                 + str(largest_retained) + "," + str(smallest_not_retained) + ",processing")
     return score_after_training_net, largest_retained, smallest_not_retained
 
+def set_check_point(thread, runner, experiment, parameters, architecture, neural_network_type):
+    check_point_file = "danny_masters"
+    check_point_file = check_point_file + "/" + str(thread) + "_" + str(runner) + "_" + experiment + ".txt"
+    check_point_file = os.path.abspath(check_point_file)
+    line = str(parameters) + ";" + str(architecture) + ";" + str(neural_network_type)
+    f = open(check_point_file, "w")
+    f.write(line)
+    f.close()
+
+def load_check_point(thread, runner, experiment):
+    check_point_file = "danny_masters"
+    check_point_file = check_point_file + "/" + str(thread) + "_" + str(runner) + "_" + experiment + ".txt"
+    check_point_file = os.path.abspath(check_point_file)
+
+    f = open(check_point_file, "r")
+    checkpoint = []
+    line = f.readline()
+    while line:
+        checkpoint.append(line)
+        line = f.readline()
+    f.close()
+
+    checkpoint = checkpoint[0].split(";")
+    parameters = eval(checkpoint[0])
+    architecture = eval(checkpoint[1])
+    neural_network_type = checkpoint[2]
+
+    return parameters, architecture, neural_network_type
+
 def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
