@@ -86,7 +86,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
     start = 2
     prev = 1
     steps = 0
-    smallest_not_retained = 10000
+    smallest_not_retained = 100000
     largest_retained = 0
     nodes_in_layer = 2
     activation_func = "sigmoid"

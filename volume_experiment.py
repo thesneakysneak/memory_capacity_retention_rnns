@@ -124,7 +124,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     logfile_location = "danny_masters"
     logfile = logfile_location + "/" + str(thread) + "_" + str(runner) + "_volume_experiment.log"
     logfile = os.path.abspath(logfile)
-
+    print(logfile)
     if not os.path.exists(logfile):
         f = open(logfile, "w")
         f.write("nn_type; activation_func; parameters; nodes_in_layer; largest_retained; smallest_not_retained; " +
