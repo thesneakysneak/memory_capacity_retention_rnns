@@ -80,7 +80,7 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
     prev = 1
     steps = 0
     score_after_training_net = 0.0
-    smallest_not_retained = 300000
+    smallest_not_retained = 30000
     largest_retained = 0
 
     while (smallest_not_retained - largest_retained) > 1:
@@ -113,13 +113,17 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
                 + str(largest_retained) + "," + str(smallest_not_retained) + ",processing")
     return score_after_training_net, largest_retained, smallest_not_retained
 
-def parse_log(log_name):
+def log_contains(log_name, nn_type, activation_func, parameters, nodes_in_layer):
     # TODO
 
     import pandas as pd
-    log = pd.read_csv(log_name, header=True, delimiter=";")
-
-
+    log = pd.read_csv(log_name, delimiter=";")
+    df = pd.read_csv(log, delimiter=";")
+    df_found =   df[(df["nn_type"] == nn_type) & (df["activation_func"] == activation_func) & (df["parameters"] == parameters) & (
+            df["nodes_in_layer"] == nodes_in_layer)]
+    if df_found.empty:
+        return False
+    return True
 
 def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
@@ -132,8 +136,8 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     print(logfile)
     if not os.path.exists(logfile):
         f = open(logfile, "w")
-        f.write("nn_type; activation_func; parameters; nodes_in_layer; largest_retained; smallest_not_retained; "
-                                    + "; largest_len_retained; smallest_len_not_retained")
+        f.write("nn_type; activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;"
+                                    + ";largest_len_retained;smallest_len_not_retained;status")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO, format='%(message)s')

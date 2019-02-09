@@ -91,7 +91,7 @@ def train_test_neural_net_architecture(x_train, y_train,
                                        nn_type="lstm", activation_func="sigmoid",
                                        verbose=0):
     #
-    batch_size = 10
+    batch_size = int(len(x_train)*0.10)
     #
     inp = Input(shape=(len(x_train[0]), 1))
     if type(nodes_in_layer) == int:
@@ -131,7 +131,7 @@ def train_test_neural_net_architecture(x_train, y_train,
     model.fit(x_train, y_train,
               validation_split=.2,
               callbacks=[reduce_lr, recurrent_models.earlystop2],
-              epochs=10,
+              epochs=1000,
               batch_size=batch_size,
               verbose=verbose)
     #
