@@ -126,11 +126,12 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     logfile = os.path.abspath(logfile)
 
     if not os.path.exists(logfile):
-        f = open(logfile, "a")
-        f.write("")
+        f = open(logfile, "w")
+        f.write("nn_type; activation_func; parameters; nodes_in_layer; largest_retained; smallest_not_retained; " +
+                                    + "; largest_len_retained; smallest_len_not_retained")
         f.close()
 
-    logging.basicConfig(filename=logfile, level=logging.INFO)
+    logging.basicConfig(filename=logfile, level=logging.INFO, format='%(message)s')
 
     start = 2
     prev = 1
@@ -178,9 +179,9 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
                     print(" length to count largest_retained", largest_len_retained)
                     print(" score", score_after_training_net)
 
-                logging.log(logging.INFO, str(nn_type) + "," + str(activation_func) + "," + str(parameters) + "," + str(
-                    nodes_in_layer) + "," + str(largest_retained) + "," + str(smallest_not_retained)
-                                    + "," + str(largest_len_retained) + "," + str(smallest_len_not_retained)+ ",found")
+                logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                    nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained)
+                                    + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found")
 
 
 def sample():

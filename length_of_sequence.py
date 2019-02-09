@@ -77,11 +77,11 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
     logfile = os.path.abspath(logfile)
 
     if not os.path.exists(logfile):
-        f = open(logfile, "a")
-        f.write("")
+        f = open(logfile, "w")
+        f.write("nn_type; activation_func; parameters; nodes_in_layer; largest_retained; smallest_not_retained")
         f.close()
 
-    logging.basicConfig(filename=logfile, level=logging.INFO)
+    logging.basicConfig(filename=logfile, level=logging.INFO, format='%(message)s')
 
     start = 2
     prev = 1
@@ -120,8 +120,8 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
                     print(" largest_retained", largest_retained)
                     print(" score", score_after_training_net)
 
-                logging.log(logging.INFO, str(nn_type) + "," + str(activation_func) + "," + str(parameters) + "," + str(
-                    nodes_in_layer) + "," + str(largest_retained) + "," + str(smallest_not_retained))
+                logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                    nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained))
 
 
 def sample():

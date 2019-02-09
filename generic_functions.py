@@ -145,7 +145,7 @@ def set_check_point(thread, runner, experiment, parameters, architecture, neural
     check_point_file = check_point_file + "/" + str(thread) + "_" + str(runner) + "_" + experiment + ".txt"
     check_point_file = os.path.abspath(check_point_file)
     line = str(parameters) + ";" + str(architecture) + ";" + str(neural_network_type)
-    f = open(check_point_file, "w")
+    f = open(check_point_file, "a")
     f.write(line)
     f.close()
 
