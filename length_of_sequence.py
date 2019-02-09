@@ -110,32 +110,36 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
                     smallest_not_retained = 100000
                     largest_retained = 0
                     print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
-                    while (smallest_not_retained - largest_retained) > 1:
-                        score_after_training_net = run_experiment(max_count=start,
-                                                                  nodes_in_layer=nodes_in_layer,
-                                                                  nn_type=nn_type,
-                                                                  activation_func=activation_func)
-                        #
-                        if score_after_training_net > 0.98:
-                            print("   -> ", start)
-                            largest_retained = start
-                            prev = start
-                            start *= 2
-                            if start > smallest_not_retained:
-                                start = smallest_not_retained - 1
-                        else:
-                            print("   <- ", start)
-                            smallest_not_retained = start
-                            start = int((start + prev) / 2)
-                        print(" Current Num patterns", start)
-                        print(" diff", str((smallest_not_retained - largest_retained)))
-                        print(" smallest_not_retained", smallest_not_retained)
-                        print(" largest_retained", largest_retained)
-                        print(" score", score_after_training_net)
+                    if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
+                                           parameters=parameters,
+                                           nodes_in_layer=str(nodes_in_layer)):
+                        while (smallest_not_retained - largest_retained) > 1:
+                            score_after_training_net = run_experiment(max_count=start,
+                                                                      nodes_in_layer=nodes_in_layer,
+                                                                      nn_type=nn_type,
+                                                                      activation_func=activation_func)
+                            #
+                            if score_after_training_net > 0.98:
+                                print("   -> ", start)
+                                largest_retained = start
+                                prev = start
+                                start *= 2
+                                if start > smallest_not_retained:
+                                    start = smallest_not_retained - 1
+                            else:
+                                print("   <- ", start)
+                                smallest_not_retained = start
+                                start = int((start + prev) / 2)
+                            print(" Current Num patterns", start)
+                            print(" diff", str((smallest_not_retained - largest_retained)))
+                            print(" smallest_not_retained", smallest_not_retained)
+                            print(" largest_retained", largest_retained)
+                            print(" score", score_after_training_net)
 
-                    logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                        nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained))
-
+                        logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                            nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained))
+                    else:
+                        print("Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))
 
 def sample():
     x, y = generate_count_set(sequence_length_=300, max_count=10, total_num_patterns=100)

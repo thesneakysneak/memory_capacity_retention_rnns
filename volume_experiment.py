@@ -113,17 +113,6 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
                 + str(largest_retained) + "," + str(smallest_not_retained) + ",processing")
     return score_after_training_net, largest_retained, smallest_not_retained
 
-def log_contains(log_name, nn_type, activation_func, parameters, nodes_in_layer):
-    # TODO
-
-    import pandas as pd
-    log = pd.read_csv(log_name, delimiter=";")
-    df = pd.read_csv(log, delimiter=";")
-    df_found =   df[(df["nn_type"] == nn_type) & (df["activation_func"] == activation_func) & (df["parameters"] == parameters) & (
-            df["nodes_in_layer"] == nodes_in_layer)]
-    if df_found.empty:
-        return False
-    return True
 
 def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
@@ -174,38 +163,42 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
                     largest_len_retained = 0
                     largest_retained = 0
                     print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
-                    while (smallest_not_retained - largest_retained) > 1:
-                        score_after_training_net, largest_len_retained, smallest_len_not_retained =  search_in_range(   nodes_in_layer=nodes_in_layer,
-                                                                                                                            parameters=parameters,
-                                                                                                                                nn_type=nn_type,
-                                                                                                                                activation_func=activation_func,
-                                                                                                                                max_elements_to_count=start,)
+                    if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
+                                           parameters=parameters,
+                                           nodes_in_layer=str(nodes_in_layer)):
+                        while (smallest_not_retained - largest_retained) > 1:
+                            score_after_training_net, largest_len_retained, smallest_len_not_retained =  search_in_range(   nodes_in_layer=nodes_in_layer,
+                                                                                                                                parameters=parameters,
+                                                                                                                                    nn_type=nn_type,
+                                                                                                                                    activation_func=activation_func,
+                                                                                                                                    max_elements_to_count=start,)
 
-                        print(" ==================================== ", score_after_training_net)
-                        #
-                        if score_after_training_net > 0.98:
-                            print("   -> ", start)
-                            largest_retained = start
-                            prev = start
-                            start *= 2
-                            if start > smallest_not_retained:
-                                start = smallest_not_retained - 1
-                        else:
-                            print("   <- ", start)
-                            smallest_not_retained = start
-                            start = int((start + prev) / 2)
-                        print(" Current Num patterns", start)
-                        print(" diff", str((smallest_not_retained - largest_retained)))
-                        print(" max elements to count smallest_not_retained", smallest_not_retained)
-                        print(" max elements to count largest_retained", largest_retained)
-                        print(" length to count smallest_not_retained", smallest_len_not_retained)
-                        print(" length to count largest_retained", largest_len_retained)
-                        print(" score", score_after_training_net)
+                            print(" ==================================== ", score_after_training_net)
+                            #
+                            if score_after_training_net > 0.98:
+                                print("   -> ", start)
+                                largest_retained = start
+                                prev = start
+                                start *= 2
+                                if start > smallest_not_retained:
+                                    start = smallest_not_retained - 1
+                            else:
+                                print("   <- ", start)
+                                smallest_not_retained = start
+                                start = int((start + prev) / 2)
+                            print(" Current Num patterns", start)
+                            print(" diff", str((smallest_not_retained - largest_retained)))
+                            print(" max elements to count smallest_not_retained", smallest_not_retained)
+                            print(" max elements to count largest_retained", largest_retained)
+                            print(" length to count smallest_not_retained", smallest_len_not_retained)
+                            print(" length to count largest_retained", largest_len_retained)
+                            print(" score", score_after_training_net)
 
-                    logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                        nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained)
-                                        + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found")
-
+                        logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                            nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained)
+                                            + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found")
+                    else:
+                        print("Already ran", str(nn_type), str(activation_func),str(parameters), str(nodes_in_layer))
 
 def sample():
     x, y = generate_volume_set(sequence_length_=300, max_count=20, total_num_patterns=100, total_num_to_count=10)

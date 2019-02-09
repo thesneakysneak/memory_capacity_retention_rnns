@@ -140,6 +140,19 @@ def train_test_neural_net_architecture(x_train, y_train,
     return determine_f_score(y_predict, y_test)
 
 
+
+def log_contains(log_name, nn_type, activation_func, parameters, nodes_in_layer):
+    # TODO
+
+    import pandas as pd
+    log = pd.read_csv(log_name, delimiter=";")
+    df = pd.read_csv(log, delimiter=";")
+    df_found =   df[(df["nn_type"] == nn_type) & (df["activation_func"] == activation_func) & (df["parameters"] == parameters) & (
+            df["nodes_in_layer"] == nodes_in_layer)]
+    if df_found.empty:
+        return False
+    return True
+
 def set_check_point(thread, runner, experiment, parameters, architecture, neural_network_type):
     check_point_file = "danny_masters"
     check_point_file = check_point_file + "/" + str(thread) + "_" + str(runner) + "_" + experiment + ".txt"

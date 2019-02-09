@@ -196,38 +196,43 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
                 smallest_not_retained = 10000
                 largest_retained = 0
                 print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
-                while (smallest_not_retained - largest_retained) > 1:
-                    x_train, y_train, x_test, y_test = generate_sets(start)
-                    score_after_training_net = gf.train_test_neural_net_architecture(
-                        x_train, y_train,
-                        x_test, y_test,
-                        nodes_in_layer=nodes_in_layer,
-                        nodes_in_out_layer=1,
-                        nn_type=nn_type,
-                        activation_func=activation_func,
-                        verbose=1)
+                if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
+                                       parameters=parameters,
+                                       nodes_in_layer=str(nodes_in_layer)):
 
-                    #
-                    if score_after_training_net > 0.98:
-                        print("   -> ", start)
-                        largest_retained = start
-                        prev = start
-                        start *= 2
-                        if start > smallest_not_retained:
-                            start = smallest_not_retained - 1
-                    else:
-                        print("   <- ", start)
-                        smallest_not_retained = start
-                        start = int((start + prev) / 2)
-                    print(" Current Num patterns", start)
-                    print(" diff", str((smallest_not_retained - largest_retained)))
-                    print(" smallest_not_retained", smallest_not_retained)
-                    print(" largest_retained", largest_retained)
-                    print(" score", score_after_training_net)
+                    while (smallest_not_retained - largest_retained) > 1:
+                        x_train, y_train, x_test, y_test = generate_sets(start)
+                        score_after_training_net = gf.train_test_neural_net_architecture(
+                            x_train, y_train,
+                            x_test, y_test,
+                            nodes_in_layer=nodes_in_layer,
+                            nodes_in_out_layer=1,
+                            nn_type=nn_type,
+                            activation_func=activation_func,
+                            verbose=1)
 
-                logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                    nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained))
+                        #
+                        if score_after_training_net > 0.98:
+                            print("   -> ", start)
+                            largest_retained = start
+                            prev = start
+                            start *= 2
+                            if start > smallest_not_retained:
+                                start = smallest_not_retained - 1
+                        else:
+                            print("   <- ", start)
+                            smallest_not_retained = start
+                            start = int((start + prev) / 2)
+                        print(" Current Num patterns", start)
+                        print(" diff", str((smallest_not_retained - largest_retained)))
+                        print(" smallest_not_retained", smallest_not_retained)
+                        print(" largest_retained", largest_retained)
+                        print(" score", score_after_training_net)
 
+                    logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                        nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained))
+                else:
+                    print("Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))
 
 # if __name__ == "__main__":
 #     main()
