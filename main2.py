@@ -57,14 +57,14 @@ if __name__ == "__main__":
                           + ' ' + str(runner) + ' ' + str(i) + '" & '
             print("starting ", command_str)
             os.system(command_str)
-            time.sleep(5000)
+            time.sleep(5)
 
             command_str = 'bash -c "python num_patterns.py ' + \
                           str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
                           + ' ' + str(runner) + ' ' + str(i) + '" & '
             print("starting ", command_str)
             os.system(command_str)
-            time.sleep(5000)
+            time.sleep(5)
 
             command_str = 'bash -c "python volume_experiment.py ' + \
                           str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
@@ -73,5 +73,5 @@ if __name__ == "__main__":
             os.system(command_str)
 
         while True:
-            time.sleep(1000)
+            time.sleep(10)
             print("=============== STILL HERE ======================")
