@@ -77,11 +77,8 @@ def determine_f_score(predicted, test, f_only=True):
     :return: performance of the network, which is either only the fscore or
                                         precision, recall, fbeta_score, beta
     """
-    p_categories = 1/predicted
-    t_categories = 1/test
-
-    p_categories = [int(x) for x in p_categories]
-    t_categories = [int(x) for x in t_categories]
+    p_categories = [int(1/x) if x > 0.0000001 else 0 for x in predicted ]
+    t_categories = [int(1/x) if x > 0.0000001 else 0 for x in test]
 
     # for i in range(len(p_categories)):
     #     if p_categories[i] != t_categories[i]:
@@ -93,6 +90,11 @@ def determine_f_score(predicted, test, f_only=True):
         return fbeta_score
     return precision, recall, fbeta_score, conf_mat
 
+def determine_ave_f_score(predicted, test, f_only=True):
+    fscore = 0.0
+    for i in range(len(predicted)):
+        fscore += determine_f_score(predicted[i], test[i])
+    return fscore/len(predicted)
 
 def get_nodes_in_layer(num_parameters, nn_type):
     if nn_type == const.LSTM:
