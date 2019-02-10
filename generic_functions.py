@@ -137,13 +137,14 @@ def train_test_neural_net_architecture(x_train, y_train,
         elif nn_type == const.GRU:
             rnn_func_ptr = GRU
         else:
-            rnn_func_ptr = JordanRNNCell
+            # TODO Figure this out
+            rnn_func_ptr = SimpleRNN
 
         if len(nodes_in_layer) > 1:
             ls = rnn_func_ptr(nodes_in_layer[0], activation=activation_func, return_sequences=True)(inp)
             for n in range(1, len(nodes_in_layer) - 1):
                 ls = rnn_func_ptr(nodes_in_layer[n], activation=activation_func, return_sequences=True)(ls)
-            ls = rnn_func_ptr(nodes_in_layer[len(nodes_in_layer) - 1], activation=activation_func)(ls)
+            ls = rnn_func_ptr(nodes_in_layer[-1], activation=activation_func)(ls)
         else:
             ls = rnn_func_ptr(nodes_in_layer[0], activation=activation_func)(inp)
 
@@ -162,7 +163,9 @@ def train_test_neural_net_architecture(x_train, y_train,
     #
     y_predict = model.predict(x_test)
     #
-    if type(y_predict[0]) == list:
+
+    if len(y_predict[0]) > 1:
+        print(y_predict)
         return determine_ave_f_score(y_predict, y_test)
     return determine_f_score(y_predict, y_test)
 
