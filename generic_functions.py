@@ -157,7 +157,7 @@ def train_test_neural_net_architecture(x_train, y_train,
     model.fit(x_train, y_train,
               validation_split=.2,
               callbacks=[reduce_lr, recurrent_models.earlystop],
-              epochs=10,
+              epochs=1000,
               batch_size=batch_size,
               verbose=verbose)
     #
