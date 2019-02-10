@@ -156,7 +156,7 @@ def train_test_neural_net_architecture(x_train, y_train,
     model.compile(optimizer='adam', loss='mean_squared_error')
     model.fit(x_train, y_train,
               validation_split=.2,
-              callbacks=[reduce_lr, recurrent_models.earlystop2],
+              callbacks=[reduce_lr, recurrent_models.earlystop],
               epochs=10,
               batch_size=batch_size,
               verbose=verbose)

@@ -1,4 +1,3 @@
-
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
 import keras
@@ -8,19 +7,20 @@ from keras.layers import LSTM
 from keras.layers import GRU
 from keras.layers import SimpleRNN
 
-
-
+import generic_functions as gf
 
 from keras.layers.core import Dense, Dropout, Activation
 from keras.models import Sequential
 
 import tensorflow as tf
 import numpy as np
+
 global x_train, y_train, x_test, y_test
-x_train  = []
+x_train = []
 y_train = []
-x_test= []
+x_test = []
 y_test = []
+
 
 def determine_score(predicted, test, f_only=True):
     predicted = predicted.round()
@@ -39,20 +39,34 @@ def determine_score(predicted, test, f_only=True):
 
 
 class EarlyStopByF1(keras.callbacks.Callback):
-    def __init__(self, value = 0, verbose = 0):
+    def __init__(self, value=0, verbose=0):
         super(keras.callbacks.Callback, self).__init__()
         self.value = value
         self.verbose = verbose
-
+        self.prev_delta_score = 0.0
+        self.delta_score = 0.0
+        self.patience = 0
 
     def on_epoch_end(self, epoch, logs={}):
-         predict = np.asarray(self.model.predict(self.validation_data[0], batch_size=10))
-         target = self.validation_data[1]
-         score = determine_score(target, predict, f_only=True)
-         if score >= 0.99:
-            if self.verbose >0:
+
+        predict = np.asarray(self.model.predict(self.validation_data[0], batch_size=10))
+        target = self.validation_data[1]
+        score = 0.0
+        if len(predict[0]) > 1:
+            score = gf.determine_ave_f_score(predict, target)
+        else:
+            score = gf.determine_f_score(predict, target)
+        self.delta_score = score - self.prev_delta_score
+        self.prev_delta_score = score
+
+        print("Epoch %05d: early stopping delta_score" % epoch, self.delta_score)
+        if np.abs(self.delta_score) < 0.05:
+            self.patience += 1
+        if self.patience >= 10:
+            if self.verbose > 0:
                 print("Epoch %05d: early stopping Threshold" % epoch)
             self.model.stop_training = True
+
 
 class ResetState(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
@@ -78,6 +92,7 @@ class ResetState(keras.callbacks.Callback):
 
         return
 
+
 # Place holder
 def data():
     from recurrent_models import data
@@ -87,6 +102,7 @@ def data():
     x_test = data.x_train
     y_test = data.y_train
     return x_train, y_train, x_test, y_test
+
 
 def get_model(architecture=[2, 1, 1, 1],
               batch_size=10,
@@ -102,18 +118,22 @@ def get_model(architecture=[2, 1, 1, 1],
         unroll = False
     if network_type == "lstm":
         model.add(LSTM(architecture[1], batch_input_shape=(batch_size, timesteps, architecture[0]),
-                       stateful=True, unroll=unroll, return_sequences=return_sequences, activation=activation_function, name="layer1"))
+                       stateful=True, unroll=unroll, return_sequences=return_sequences, activation=activation_function,
+                       name="layer1"))
     elif network_type == "gru":
         model.add(GRU(architecture[1], batch_input_shape=(batch_size, timesteps, architecture[0]),
-                      stateful=True, unroll=unroll, return_sequences=return_sequences, activation=activation_function, name="layer1"))
+                      stateful=True, unroll=unroll, return_sequences=return_sequences, activation=activation_function,
+                      name="layer1"))
     elif network_type == "elman_rnn":
         model.add(
             SimpleRNN(architecture[1], batch_input_shape=(batch_size, timesteps, architecture[0]),
-                      stateful=True, unroll=unroll, return_sequences=return_sequences, activation=activation_function, name="layer1"))
+                      stateful=True, unroll=unroll, return_sequences=return_sequences, activation=activation_function,
+                      name="layer1"))
     elif network_type == "jordan_rnn":
         model.add(
             SimpleRNN(architecture[1], batch_input_shape=(batch_size, timesteps, architecture[0]),
-                      stateful=True, unroll=unroll, return_sequences=return_sequences, activation=activation_function, name="layer1"))
+                      stateful=True, unroll=unroll, return_sequences=return_sequences, activation=activation_function,
+                      name="layer1"))
 
     # Hidden layer how many ever
     for h in range(2, len(architecture) - 1):
@@ -123,12 +143,15 @@ def get_model(architecture=[2, 1, 1, 1],
         if h < len(architecture) - 2:
             return_sequences = True
         if network_type == "lstm":
-            model.add(LSTM(architecture[h], return_sequences=return_sequences, activation=activation_function, name="layer"+str(h+1)))
+            model.add(LSTM(architecture[h], return_sequences=return_sequences, activation=activation_function,
+                           name="layer" + str(h + 1)))
 
         elif network_type == "gru":
-            model.add(GRU(architecture[h], return_sequences=return_sequences, activation=activation_function, name="layer"+str(h+1)))
+            model.add(GRU(architecture[h], return_sequences=return_sequences, activation=activation_function,
+                          name="layer" + str(h + 1)))
         elif network_type == "elman_rnn":
-            model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function, name="layer"+str(h+1)))
+            model.add(SimpleRNN(architecture[h], return_sequences=return_sequences, activation=activation_function,
+                                name="layer" + str(h + 1)))
 
     model.add(Dense(architecture[-1], activation="softmax", name="output_layer"))
     return model
@@ -181,15 +204,12 @@ def test():
         print(model.summary())
 
 
-
-
 earlystop2 = EarlyStopping(monitor='val_loss',
-                              min_delta=0,
-                              patience=10,
-                              verbose=0, mode='auto')
+                           min_delta=0,
+                           patience=10,
+                           verbose=0, mode='auto')
 
-earlystop = EarlyStopByF1(value = .99, verbose =1)
-
+earlystop = EarlyStopByF1(value=.99, verbose=1)
 
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', patience=5, cooldown=1)
 
