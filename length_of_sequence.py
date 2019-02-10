@@ -70,7 +70,7 @@ def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_fun
 def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
-    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.JORDAN_RNN]  # "jordan_rnn"
+    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN]  # "jordan_rnn" const.JORDAN_RNN
 
     logfile_location = "danny_masters"
     logfile = logfile_location + "/" + str(thread) + "_" + str(runner) + "_longest_sequence.log"
@@ -107,7 +107,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
                 for activation_func in activation_functions:
                     start = 1
                     prev = 0
-                    smallest_not_retained = 100000
+                    smallest_not_retained = 10000
                     largest_retained = 0
                     print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
                     if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
