@@ -183,17 +183,15 @@ def test():
 
 
 
-earlystop2 = EarlyStopping(monitor='loss',  # loss
-                          patience=100,
-                          verbose=1,
-                          min_delta=0.002,
-                          mode='auto')
+earlystop2 = EarlyStopping(monitor='val_loss',
+                              min_delta=0,
+                              patience=10,
+                              verbose=0, mode='auto')
 
 earlystop = EarlyStopByF1(value = .99, verbose =1)
 
 
-reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,
-                              patience=5, min_lr=0.0000001)
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', patience=5, cooldown=1)
 
 reset_state = ResetState()
 
