@@ -117,7 +117,7 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
 def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
-    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.JORDAN_RNN]  # "jordan_rnn"
+    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN]  # "jordan_rnn" const.JORDAN_RNN
 
     logfile_location = "danny_masters"
     logfile = logfile_location + "/" + str(thread) + "_" + str(runner) + "_volume_experiment.log"
