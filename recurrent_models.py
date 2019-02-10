@@ -62,7 +62,7 @@ class EarlyStopByF1(keras.callbacks.Callback):
         print("Epoch %05d: early stopping delta_score" % epoch, self.delta_score)
         if np.abs(self.delta_score) < 0.05:
             self.patience += 1
-        if self.patience >= 10:
+        if self.patience >= 25:
             if self.verbose > 0:
                 print("Epoch %05d: early stopping Threshold" % epoch)
             self.model.stop_training = True
