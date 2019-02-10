@@ -49,8 +49,7 @@ def divisible_by_all(n):
             j += 1
     return y
 
-
-def determine_f_score(predicted_one_hot, test_one_hot, f_only=True):
+def determine_f_score_one_hot(predicted_one_hot, test_one_hot, f_only=True):
     """
     :param predicted_one_hot: Output produced by the network which is one hot encoded
     :param test_one_hot: Output expected which is one hot encoded
@@ -60,6 +59,30 @@ def determine_f_score(predicted_one_hot, test_one_hot, f_only=True):
     """
     p_categories = [np.argmax(x) for x in predicted_one_hot]
     t_categories = [np.argmax(x) for x in test_one_hot]
+    # for i in range(len(p_categories)):
+    #     if p_categories[i] != t_categories[i]:
+    #         print("Class not correct", p_categories[i], t_categories[i])
+    conf_mat = confusion_matrix(t_categories, p_categories)
+    precision, recall, fbeta_score, beta = precision_recall_fscore_support(t_categories, p_categories, average="micro")
+    # print(conf_mat)
+    if f_only:
+        return fbeta_score
+    return precision, recall, fbeta_score, conf_mat
+
+def determine_f_score(predicted, test, f_only=True):
+    """
+    :param predicted_one_hot: Output produced by the network which is one hot encoded
+    :param test_one_hot: Output expected which is one hot encoded
+    :param f_only: Boolean flag indicating whether only the score is required
+    :return: performance of the network, which is either only the fscore or
+                                        precision, recall, fbeta_score, beta
+    """
+    p_categories = 1/predicted
+    t_categories = 1/test
+
+    p_categories = [int(x) for x in p_categories]
+    t_categories = [int(x) for x in t_categories]
+
     # for i in range(len(p_categories)):
     #     if p_categories[i] != t_categories[i]:
     #         print("Class not correct", p_categories[i], t_categories[i])
