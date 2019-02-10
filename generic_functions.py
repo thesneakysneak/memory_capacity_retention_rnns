@@ -162,6 +162,8 @@ def train_test_neural_net_architecture(x_train, y_train,
     #
     y_predict = model.predict(x_test)
     #
+    if type(y_predict[0]) == list:
+        return determine_ave_f_score(y_predict, y_test)
     return determine_f_score(y_predict, y_test)
 
 
