@@ -193,7 +193,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
                 for activation_func in activation_functions:
                     start = 1
                     prev = 0
-                    smallest_not_retained = 10000
+                    smallest_not_retained = 300
                     largest_retained = 0
                     print("Thread", thread, "nodes_in_layer", nodes_in_layer, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
                     if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
