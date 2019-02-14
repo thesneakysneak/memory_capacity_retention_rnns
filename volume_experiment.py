@@ -80,7 +80,7 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
     prev = 1
     steps = 0
     score_after_training_net = 0.0
-    smallest_not_retained = 30000
+    smallest_not_retained = 30
     largest_retained = 0
 
     while (smallest_not_retained - largest_retained) > 1:
@@ -158,7 +158,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
                 for activation_func in activation_functions:
                     start = 1
                     prev = 0
-                    smallest_not_retained = 300
+                    smallest_not_retained = 30
                     smallest_len_not_retained = 0
                     largest_len_retained = 0
                     largest_retained = 0

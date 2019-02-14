@@ -107,7 +107,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
                 for activation_func in activation_functions:
                     start = 1
                     prev = 0
-                    smallest_not_retained = 1000
+                    smallest_not_retained = 100
                     largest_retained = 0
                     print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
                     if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
