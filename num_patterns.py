@@ -34,7 +34,11 @@ def generate_sets(num_patterns):
     while correlated:
         x = random.sample(range(1, num_patterns + 1), num_patterns)
         y = random.sample(range(1, num_patterns + 1), num_patterns)
-        correlated = gf.are_sets_correlated(x, y)
+        # print(x, y)
+        if num_patterns == 1:
+            correlated = False
+        else:
+            correlated = gf.are_sets_correlated(x, y)
 
     #
     x = [1.0 / z for z in x]
@@ -197,7 +201,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
                 extra_layers.append(nodes_in_layer)
                 nodes_in_layer = extra_layers
                 for activation_func in activation_functions:
-                    start = 1
+                    start = 2
                     prev = 0
                     smallest_not_retained = 30
                     largest_retained = 0

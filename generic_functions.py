@@ -34,7 +34,7 @@ def true_accuracy(y_predict, y_true):
 
 
 def convert_to_closest(predicted_value, possible_values):
-    print(possible_values, predicted_value)
+    # print(possible_values, predicted_value)
     return min(possible_values, key=lambda x: abs(x - predicted_value))
 
 
@@ -79,6 +79,10 @@ def determine_f_score(predicted, test, f_only=True):
     """
     p_categories = [int(1/x) if x > 0.0000001 else 0 for x in predicted ]
     t_categories = [int(1/x) if x > 0.0000001 else 0 for x in test]
+    # print(p_categories)
+    # print(t_categories)
+
+    p_categories = [convert_to_closest(x, list(set(t_categories))) for x in p_categories]
 
     # for i in range(len(p_categories)):
     #     if p_categories[i] != t_categories[i]:
@@ -116,8 +120,8 @@ def are_sets_correlated(set1, set2):
     print('Spearmans correlation coefficient: %.3f' % coef)
     # interpret the significance
     alpha = 0.05
-    if p > alpha:
-        print('Samples are uncorrelated (fail to reject H0) p=%.3f' % p)
+    if p > alpha or (coef <= 0.1 and coef >= -1):
+        print('Samples are uncorrelated (fail to reject H0) p=%.3f' % p, coef)
         return False
     else:
         print('Samples are correlated (reject H0) p=%.3f' % p)
