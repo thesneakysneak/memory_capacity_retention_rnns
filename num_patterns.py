@@ -28,8 +28,14 @@ from scratch_space.jordan_rnn import JordanRNNCell
 
 
 def generate_sets(num_patterns):
-    x = random.sample(range(1, num_patterns + 1), num_patterns)
-    y = random.sample(range(1, num_patterns + 1), num_patterns)
+
+    correlated = True
+    x = y = None
+    while correlated:
+        x = random.sample(range(1, num_patterns + 1), num_patterns)
+        y = random.sample(range(1, num_patterns + 1), num_patterns)
+        correlated = gf.are_sets_correlated(x, y)
+
     #
     x = [1.0 / z for z in x]
     y = [1.0 / z for z in y]
