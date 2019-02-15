@@ -110,6 +110,19 @@ def get_runner_experiments(runner, total_num_parameters, num_workers=5):
     return total[runner - 1]
 
 
+def are_sets_correlated(set1, set2):
+    from scipy.stats import spearmanr
+    coef, p = spearmanr(set1, set2)
+    print('Spearmans correlation coefficient: %.3f' % coef)
+    # interpret the significance
+    alpha = 0.05
+    if p > alpha:
+        print('Samples are uncorrelated (fail to reject H0) p=%.3f' % p)
+        return False
+    else:
+        print('Samples are correlated (reject H0) p=%.3f' % p)
+        return True
+
 def train_test_neural_net_architecture(x_train, y_train,
                                        x_test, y_test,
                                        nodes_in_layer=2, nodes_in_out_layer=1,
