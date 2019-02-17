@@ -33,7 +33,7 @@ if __name__ == "__main__":
         runner = 4
         runner = sys.argv[1:][0]
         print("runner ", runner )
-
+    for runner in range(1, 6):
         random.seed(1000)
         total_num_parameters = gf.divisible_by_all(15)
         print(total_num_parameters)
@@ -56,22 +56,22 @@ if __name__ == "__main__":
                           str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
                           + ' ' + str(runner) + ' ' + str(i) + '" & '
             print("starting ", command_str)
-            os.system(command_str)
-            time.sleep(5)
+            # os.system(command_str)
+            # time.sleep(5)
 
             command_str = 'bash -c "python num_patterns.py ' + \
                           str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
                           + ' ' + str(runner) + ' ' + str(i) + '" & '
             print("starting ", command_str)
-            os.system(command_str)
-            time.sleep(5)
+            # os.system(command_str)
+            # time.sleep(5)
 
             command_str = 'bash -c "python volume_experiment.py ' + \
                           str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
                           + ' ' + str(runner) + ' ' + str(i) + '" & '
             print("starting ", command_str)
-            os.system(command_str)
+            # os.system(command_str)
 
-        while True:
-            time.sleep(10)
-            print("=============== STILL HERE ======================")
+        # while True:
+        #     time.sleep(10)
+        #     print("=============== STILL HERE ======================")
