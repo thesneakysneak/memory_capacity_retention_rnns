@@ -111,10 +111,10 @@ class SimpleJordanRNNCell(SimpleRNNCell):
 
         if self.next_layer != None:
             self.output_layer_kernel = self.add_weight(shape=(self.next_layer.shape[-1].value, self.units),
-                                          name='jordan_kernel',
-                                          initializer=self.kernel_initializer,
-                                          regularizer=self.kernel_regularizer,
-                                          constraint=self.kernel_constraint)
+                                                       name='jordan_kernel',
+                                                       initializer=self.kernel_initializer,
+                                                       regularizer=self.kernel_regularizer,
+                                                       constraint=self.kernel_constraint)
         else:
             self.output_layer_kernel = None
 
@@ -164,7 +164,9 @@ class SimpleJordanRNNCell(SimpleRNNCell):
         # Jordan specific output calculation
         if self.next_layer != None:
             # print("Jordan activate", prev_output.shape, self.output_layer_kernel.shape, self.next_layer.shape)
-            output = h + K.dot(prev_output, self.recurrent_kernel) + keras.backend.batch_dot(self.next_layer, self.output_layer_kernel, axes=None) #K.dot()
+            output = h + K.dot(prev_output, self.recurrent_kernel) + keras.backend.batch_dot(self.next_layer,
+                                                                                             self.output_layer_kernel,
+                                                                                             axes=None)  # K.dot()
         else:
             print("Jordan not activate")
             output = h + K.dot(prev_output, self.recurrent_kernel)
@@ -202,56 +204,50 @@ class SimpleJordanRNNCell(SimpleRNNCell):
         return dict(list(base_config.items()) + list(config.items()))
 
 
+def test():
+    num_inputs = 1
+    num_output_layer_outputs = 1
+    x = [random.random() for i in range(10)]
+    y = [random.random() for i in range(10)]
+    x = y
 
+    x = numpy.array(x).reshape(-1, 1, 1).astype(np.float32)
+    y = numpy.array(y).reshape(-1, 1).astype(np.float32)
 
+    num_cells_in_hidden_layer = 10
 
+    input_layer = keras.Input((None, num_inputs))
 
-num_inputs = 1
-num_output_layer_outputs = 1
-x = [random.random() for i in range(10)]
-y = [random.random() for i in range(10)]
-x =y
+    n = K.variable([[-0.0]])
 
-x = numpy.array(x).reshape(-1, 1, 1).astype(np.float32)
-y = numpy.array(y).reshape(-1, 1).astype(np.float32)
+    output_layer = keras.Input(tensor=n)
 
-num_cells_in_hidden_layer = 10
+    cells = [SimpleJordanRNNCell(num_inputs, next_layer=output_layer, activation="elu") for _ in
+             range(num_cells_in_hidden_layer)]
 
-input_layer = keras.Input((None, num_inputs))
+    layer = keras.layers.RNN(cells)
+    hidden_layer = layer(input_layer)
+    output_layer = Dense(1)(hidden_layer)
+    
+    for i in cells:
+        i.next_layer = output_layer
 
-n = K.variable([[-0.0]])
+    model = Model([input_layer], output_layer)
 
-output_layer = keras.Input(tensor=n)
+    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
+                                  patience=20, min_lr=0.000000001, verbose=1, cooldown=1)
 
-cells = [SimpleJordanRNNCell(num_inputs, next_layer=output_layer, activation="elu") for _ in range(num_cells_in_hidden_layer )]
+    model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
-layer = keras.layers.RNN(cells)
-hidden_layer = layer(input_layer)
-output_layer = Dense(1)(hidden_layer)
+    callbacks = [
+        ModelCheckpoint(
+            filepath="/home/danielp/Documents/Masters/Code/memory_capacity_retention_rnns/scratch_space/weights/weights-improvement-{epoch:02d}.hdf5",
+            monitor="val_loss", verbose=1, save_best_only=False),
+        ReduceLROnPlateau(monitor='loss', factor=0.5, patience=2)
+    ]
 
-for i in cells:
-    i.next_layer = output_layer
+    model.fit(x, y, epochs=1000, verbose=1, callbacks=callbacks)
 
-
-
-model = Model([input_layer], output_layer)
-
-reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
-                              patience=20, min_lr=0.000000001, verbose=1, cooldown=1)
-
-model.compile(loss='mse', optimizer='adam',  metrics=['accuracy'])
-
-callbacks = [
-		ModelCheckpoint(filepath="/home/danielp/Documents/Masters/Code/memory_capacity_retention_rnns/scratch_space/weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5",
-                        monitor="loss", verbose=1, save_best_only=False),
-		ReduceLROnPlateau(monitor='loss', factor=0.5, patience=2)
-	]
-
-model.fit(x, y, epochs=1000, verbose=1, callbacks=[reduce_lr])
-
-
-y_predict = model.predict(x)
-for i in range(len(y)):
-    print(y_predict[i], y[i])
-
-
+    y_predict = model.predict(x)
+    for i in range(len(y)):
+        print(y_predict[i], y[i])
