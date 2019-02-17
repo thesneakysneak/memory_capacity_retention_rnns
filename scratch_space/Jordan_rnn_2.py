@@ -203,6 +203,44 @@ class SimpleJordanRNNCell(SimpleRNNCell):
         base_config = super(SimpleRNNCell, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
+def build_jordan_layer(prev_layer, output_size_of_output_layer):
+    # input_layer = prev_layer
+    #
+    # n = K.variable([[-0.0]*output_size_of_output_layer])
+    #
+    # output_layer = keras.Input(tensor=n)
+    #
+    # cells = [SimpleJordanRNNCell(num_inputs, next_layer=output_layer, activation="elu") for _ in
+    #          range(num_cells_in_hidden_layer)]
+    #
+    # layer = keras.layers.RNN(cells)
+    # hidden_layer = layer(input_layer)
+    
+    return None
+
+def build_jordan_model(architecture=[],activation="tanh"):
+    input_layer = keras.Input((None, architecture[0]))
+    cells = []
+    next_middel_layer = None
+    for i in range(len(architecture) - 2):
+        n = K.variable([[-0.0]*architecture[i+1]])
+        middel_layer = keras.Input(tensor=n)
+        cells = [SimpleJordanRNNCell(architecture[i], next_layer=middel_layer, activation="elu") for _ in range(architecture[i+1])]
+        if next_middel_layer == None:
+            next_middel_layer = keras.layers.RNN(cells)
+            next_middel_layer = next_middel_layer(input_layer)
+        else:
+            next_middel_layer_ = keras.layers.RNN(cells)
+            next_middel_layer
+
+    layer = keras.layers.RNN(cells)
+    hidden_layer = layer(input_layer)
+    output_layer = Dense(1)(hidden_layer)
+
+    for i in cells:
+        i.next_layer = output_layer
+
+    model = Model([input_layer], output_layer)
 
 def test():
     num_inputs = 1
@@ -228,7 +266,7 @@ def test():
     layer = keras.layers.RNN(cells)
     hidden_layer = layer(input_layer)
     output_layer = Dense(1)(hidden_layer)
-    
+
     for i in cells:
         i.next_layer = output_layer
 
