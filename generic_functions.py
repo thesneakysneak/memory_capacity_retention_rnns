@@ -79,8 +79,8 @@ def determine_f_score(predicted, test, f_only=True):
     """
     p_categories = [int(1/x) if x > 0.0000001 else 0 for x in predicted ]
     t_categories = [int(1/x) if x > 0.0000001 else 0 for x in test]
-    # print(p_categories)
-    # print(t_categories)
+    print(p_categories)
+    print(t_categories)
 
     p_categories = [convert_to_closest(x, list(set(t_categories))) for x in p_categories]
 

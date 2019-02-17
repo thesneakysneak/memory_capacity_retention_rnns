@@ -22,20 +22,20 @@ x_test = []
 y_test = []
 
 
-def determine_score(predicted, test, f_only=True):
-    predicted = predicted.round()
-    test = test.round()
-    p_categories = [np.argmax(x) for x in predicted]
-    t_categories = [np.argmax(x) for x in test]
-    # for i in range(len(p_categories)):
-    #     if p_categories[i] != t_categories[i]:
-    #         print("Class not correct", p_categories[i], t_categories[i])
-    conf_mat = confusion_matrix(t_categories, p_categories)
-    precision, recall, fbeta_score, beta = precision_recall_fscore_support(t_categories, p_categories, average="micro")
-    # print(conf_mat)
-    if f_only:
-        return fbeta_score
-    return precision, recall, fbeta_score, conf_mat
+# def determine_score(predicted, test, f_only=True):
+#     predicted = predicted.round()
+#     test = test.round()
+#     p_categories = [np.argmax(x) for x in predicted]
+#     t_categories = [np.argmax(x) for x in test]
+#     # for i in range(len(p_categories)):
+#     #     if p_categories[i] != t_categories[i]:
+#     #         print("Class not correct", p_categories[i], t_categories[i])
+#     conf_mat = confusion_matrix(t_categories, p_categories)
+#     precision, recall, fbeta_score, beta = precision_recall_fscore_support(t_categories, p_categories, average="micro")
+#     # print(conf_mat)
+#     if f_only:
+#         return fbeta_score
+#     return precision, recall, fbeta_score, conf_mat
 
 
 class EarlyStopByF1(keras.callbacks.Callback):
@@ -65,7 +65,7 @@ class EarlyStopByF1(keras.callbacks.Callback):
         else:
             self.patience = 0
 
-        if self.patience >= 100 or score > 0.98:
+        if self.patience >= 200 or score > 0.98:
             if self.verbose > 0:
                 print("Epoch %05d: early stopping Threshold" % epoch)
             self.model.stop_training = True
@@ -214,7 +214,7 @@ earlystop2 = EarlyStopping(monitor='val_loss',
 
 earlystop = EarlyStopByF1(value=.99, verbose=1)
 
-reduce_lr = ReduceLROnPlateau(monitor='val_loss', patience=5, cooldown=1)
+reduce_lr = ReduceLROnPlateau(monitor='accuracy', factor=0.2, patience=3, min_lr=0.000001)
 
 reset_state = ResetState()
 
