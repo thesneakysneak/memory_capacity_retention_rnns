@@ -215,7 +215,7 @@ def build_jordan_layer(prev_layer, output_size_of_output_layer):
     #
     # layer = keras.layers.RNN(cells)
     # hidden_layer = layer(input_layer)
-    
+
     return None
 
 def build_jordan_model(architecture=[],activation="tanh"):
