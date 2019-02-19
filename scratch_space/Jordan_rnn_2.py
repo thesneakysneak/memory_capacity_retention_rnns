@@ -219,29 +219,35 @@ def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer)
 def build_jordan_model(architecture=[],activation="tanh"):
     input_layer = keras.Input((None, architecture[0]))
     layers = []
+    cells_list = []
     next_middle_layer = None
     for i in range(1, len(architecture) - 1):
         if next_middle_layer == None:
             # input layer
-            # TODO Keep Track of cells
             layer, cells = build_jordan_layer(previous_layer=input_layer,
                                                    num_nodes_in_layer=architecture[i],
                                                    num_nodes_next_layer=architecture[i+1])
+            layers.append(layer)
+            cells_list.append(cells)
             layers[0] = layers[0](input_layer)
         else:
-            layers.append(build_jordan_layer(previous_layer=next_middle_layer,
+            layer, cells = build_jordan_layer(previous_layer=next_middle_layer,
                                                    num_nodes_in_layer=architecture[i],
-                                                   num_nodes_next_layer=architecture[i+1]))
+                                                   num_nodes_next_layer=architecture[i+1])
+
+            layers.append(layer)
+            cells_list.append(cells)
             layers[i] = layers[i](layers[i-1])
 
 
     output_layer = Dense(architecture[-1])(layers[-1])
-    for l in range(len(layers)):
-        for i in cells:
-            i.next_layer = output_layer
+    for l in range(len(layers)-1):
+        for i in cells_list[l]:
+            i.next_layer = layers[l]
 
     model = Model([input_layer], output_layer)
-
+    #TODO Test this
+    
 def test():
     num_inputs = 1
     num_output_layer_outputs = 1
