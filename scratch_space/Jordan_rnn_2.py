@@ -11,7 +11,6 @@ from keras import backend as K
 from keras.layers.recurrent import _generate_dropout_mask
 from keras.legacy import interfaces
 from keras.engine.base_layer import InputSpec
-from tensorboard.backend.event_processing.event_file_inspector import FLAGS
 from tensorflow.python.keras.callbacks import TensorBoard
 
 
@@ -203,42 +202,43 @@ class SimpleJordanRNNCell(SimpleRNNCell):
         base_config = super(SimpleRNNCell, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
-def build_jordan_layer(prev_layer, output_size_of_output_layer):
-    # input_layer = prev_layer
-    #
-    # n = K.variable([[-0.0]*output_size_of_output_layer])
-    #
-    # output_layer = keras.Input(tensor=n)
-    #
-    # cells = [SimpleJordanRNNCell(num_inputs, next_layer=output_layer, activation="elu") for _ in
-    #          range(num_cells_in_hidden_layer)]
-    #
-    # layer = keras.layers.RNN(cells)
-    # hidden_layer = layer(input_layer)
+def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer):
+    n = K.variable([[-0.0]*num_nodes_next_layer])
 
-    return None
+    output_layer = keras.Input(tensor=n)
+
+    cells = [SimpleJordanRNNCell(previous_layer.get_shape()[-1].value, next_layer=output_layer, activation="elu") for _ in
+             range(num_nodes_in_layer)]
+
+    layer = keras.layers.RNN(cells)
+    hidden_layer = layer(previous_layer)
+
+    return hidden_layer, cells
+
 
 def build_jordan_model(architecture=[],activation="tanh"):
     input_layer = keras.Input((None, architecture[0]))
-    cells = []
-    next_middel_layer = None
-    for i in range(len(architecture) - 2):
-        n = K.variable([[-0.0]*architecture[i+1]])
-        middel_layer = keras.Input(tensor=n)
-        cells = [SimpleJordanRNNCell(architecture[i], next_layer=middel_layer, activation="elu") for _ in range(architecture[i+1])]
-        if next_middel_layer == None:
-            next_middel_layer = keras.layers.RNN(cells)
-            next_middel_layer = next_middel_layer(input_layer)
+    layers = []
+    next_middle_layer = None
+    for i in range(1, len(architecture) - 1):
+        if next_middle_layer == None:
+            # input layer
+            # TODO Keep Track of cells
+            layer, cells = build_jordan_layer(previous_layer=input_layer,
+                                                   num_nodes_in_layer=architecture[i],
+                                                   num_nodes_next_layer=architecture[i+1])
+            layers[0] = layers[0](input_layer)
         else:
-            next_middel_layer_ = keras.layers.RNN(cells)
-            next_middel_layer
+            layers.append(build_jordan_layer(previous_layer=next_middle_layer,
+                                                   num_nodes_in_layer=architecture[i],
+                                                   num_nodes_next_layer=architecture[i+1]))
+            layers[i] = layers[i](layers[i-1])
 
-    layer = keras.layers.RNN(cells)
-    hidden_layer = layer(input_layer)
-    output_layer = Dense(1)(hidden_layer)
 
-    for i in cells:
-        i.next_layer = output_layer
+    output_layer = Dense(architecture[-1])(layers[-1])
+    for l in range(len(layers)):
+        for i in cells:
+            i.next_layer = output_layer
 
     model = Model([input_layer], output_layer)
 
