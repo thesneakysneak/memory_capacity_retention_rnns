@@ -3,7 +3,7 @@ import random
 import numpy
 import numpy as np
 from keras import Input, Model
-from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint
+from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, Callback
 from keras.layers import SimpleRNN, Dense, Concatenate, SimpleRNNCell, constraints, regularizers, initializers
 import keras
 from keras.engine.base_layer import Layer
@@ -202,12 +202,12 @@ class SimpleJordanRNNCell(SimpleRNNCell):
         base_config = super(SimpleRNNCell, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
-def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer):
+def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer, activation="tanh"):
     n = K.variable([[-0.0]*num_nodes_next_layer])
 
     output_layer = keras.Input(tensor=n)
 
-    cells = [SimpleJordanRNNCell(previous_layer.get_shape()[-1].value, next_layer=output_layer, activation="elu") for _ in
+    cells = [SimpleJordanRNNCell(previous_layer.get_shape()[-1].value, next_layer=output_layer, activation=activation) for _ in
              range(num_nodes_in_layer)]
 
     layer = keras.layers.RNN(cells)
@@ -215,6 +215,19 @@ def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer)
 
     return hidden_layer, cells
 
+class JordanCallback(Callback):
+    def __init__(self, layers, cells_list, output_layer):
+        self.layers = layers
+        self.cells_list = cells_list
+        self.output_layer = output_layer
+    # customize your behavior
+    def on_epoch_end(self, epoch, logs={}):
+        for l in range(len(self.layers) - 1):
+            for i in self.cells_list[l]:
+                K.tf.assign(i.next_layer, self.layers[l + 1])
+
+        for i in self.cells_list[-1]:
+            K.tf.assign(i.next_layer, self.output_layer)
 
 def build_jordan_model(architecture=[],activation="tanh"):
     input_layer = keras.Input((None, architecture[0]))
@@ -222,32 +235,36 @@ def build_jordan_model(architecture=[],activation="tanh"):
     cells_list = []
     next_middle_layer = None
     for i in range(1, len(architecture) - 1):
-        if next_middle_layer == None:
+        if not next_middle_layer:
             # input layer
             layer, cells = build_jordan_layer(previous_layer=input_layer,
                                                    num_nodes_in_layer=architecture[i],
-                                                   num_nodes_next_layer=architecture[i+1])
+                                                   num_nodes_next_layer=architecture[i+1], activation=activation)
             layers.append(layer)
             cells_list.append(cells)
-            layers[0] = layers[0](input_layer)
         else:
             layer, cells = build_jordan_layer(previous_layer=next_middle_layer,
                                                    num_nodes_in_layer=architecture[i],
-                                                   num_nodes_next_layer=architecture[i+1])
+                                                   num_nodes_next_layer=architecture[i+1], activation=activation)
 
             layers.append(layer)
             cells_list.append(cells)
-            layers[i] = layers[i](layers[i-1])
 
 
     output_layer = Dense(architecture[-1])(layers[-1])
     for l in range(len(layers)-1):
         for i in cells_list[l]:
-            i.next_layer = layers[l]
+            K.tf.assign(i.next_layer, layers[l+1], use_locking=True)
+
+    for i in cells_list[-1]:
+        K.tf.assign(i.next_layer, output_layer, use_locking=True)
 
     model = Model([input_layer], output_layer)
+    model.Callback_var = JordanCallback(layers=layers, cells_list=cells_list, output_layer=output_layer)
     #TODO Test this
-    
+    return model
+
+
 def test():
     num_inputs = 1
     num_output_layer_outputs = 1
@@ -284,8 +301,9 @@ def test():
     model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
     callbacks = [
+        model.Callback_var,
         ModelCheckpoint(
-            filepath="/home/danielp/Documents/Masters/Code/memory_capacity_retention_rnns/scratch_space/weights/weights-improvement-{epoch:02d}.hdf5",
+            filepath="/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/scratch_space/weights/weights-improvement-{epoch:02d}.hdf5",
             monitor="val_loss", verbose=1, save_best_only=False),
         ReduceLROnPlateau(monitor='loss', factor=0.5, patience=2)
     ]
@@ -295,3 +313,42 @@ def test():
     y_predict = model.predict(x)
     for i in range(len(y)):
         print(y_predict[i], y[i])
+
+
+def test2():
+    num_inputs = 1
+    num_output_layer_outputs = 1
+    x = [random.random() for i in range(100)]
+    y = [random.random() for i in range(100)]
+    x = y
+
+    x = numpy.array(x).reshape(-1, 1, 1).astype(np.float32)
+    y = numpy.array(y).reshape(-1, 1).astype(np.float32)
+
+    num_cells_in_hidden_layer = 10
+
+    model = build_jordan_model([num_inputs, num_cells_in_hidden_layer, num_output_layer_outputs])
+
+    model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
+
+    callbacks = [
+        ModelCheckpoint(
+            filepath="/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/scratch_space/weights/weights-improvement-{epoch:02d}.hdf5",
+            monitor="val_loss", verbose=1, save_best_only=False),
+        ReduceLROnPlateau(monitor='loss', factor=0.5, patience=2)
+    ]
+
+    model.fit(x, y, epochs=10, verbose=1, callbacks=callbacks)
+
+    y_predict = model.predict(x)
+    for i in range(len(y)):
+        print(y_predict[i], y[i])
+
+
+
+
+test2()
+
+
+
+
