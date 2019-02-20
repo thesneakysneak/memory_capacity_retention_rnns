@@ -216,18 +216,26 @@ def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer,
     return hidden_layer, cells
 
 class JordanCallback(Callback):
-    def __init__(self, layers, cells_list, output_layer):
+    def __init__(self, layers, cells_list, output_layer, model):
         self.layers = layers
         self.cells_list = cells_list
         self.output_layer = output_layer
+        self.model = model
     # customize your behavior
     def on_batch_end(self, batch, logs=None):
+        print("Assign", len(self.layers), len(self.cells_list))
+        # print(K.eval(self.output_layer).reshape(-1,1,1).shape)
+        print(self.output_layer.dtype)
+
         for l in range(len(self.layers) - 1):
             for i in self.cells_list[l]:
                 K.tf.assign(i.next_layer, self.layers[l + 1])
+                print("HAY", batch, K.get_value(i.next_layer), K.get_value(self.output_layer))
 
         for i in self.cells_list[-1]:
-            K.tf.assign(i.next_layer, self.output_layer)
+            K.tf.assign(i.next_layer, self.model.layers[-1].output)
+            # print("HAY", batch, K.get_value(self.output_layer.output))
+
 
 def build_jordan_model(architecture=[],activation="tanh"):
     input_layer = keras.Input((None, architecture[0]))
@@ -254,13 +262,13 @@ def build_jordan_model(architecture=[],activation="tanh"):
     output_layer = Dense(architecture[-1])(layers[-1])
     for l in range(len(layers)-1):
         for i in cells_list[l]:
-            K.tf.assign(i.next_layer, layers[l+1], use_locking=True)
+            K.set_value(i.next_layer, np.array([[0]]))
 
     for i in cells_list[-1]:
-        K.tf.assign(i.next_layer, output_layer, use_locking=True)
+        K.tf.assign(i.next_layer, np.array([[0]]))
 
     model = Model([input_layer], output_layer)
-    model.Callback_var = JordanCallback(layers=layers, cells_list=cells_list, output_layer=output_layer)
+    model.Callback_var = JordanCallback(layers=layers, cells_list=cells_list, output_layer=output_layer, model=model)
     #TODO Test this
     return model
 
@@ -332,6 +340,7 @@ def test2():
     model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
     callbacks = [
+        model.Callback_var,
         ModelCheckpoint(
             filepath="/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/scratch_space/weights/weights-improvement-{epoch:02d}.hdf5",
             monitor="val_loss", verbose=1, save_best_only=False),
