@@ -225,7 +225,7 @@ class JordanCallback(Callback):
     def on_batch_end(self, batch, logs=None):
         print("Assign", len(self.layers), len(self.cells_list))
         # print(K.eval(self.output_layer).reshape(-1,1,1).shape)
-        print(self.output_layer.dtype)
+        print(self.output_layer.dtype, K.eval(self.model.outputs[0]))
 
         for l in range(len(self.layers) - 1):
             for i in self.cells_list[l]:
@@ -233,7 +233,7 @@ class JordanCallback(Callback):
                 print("HAY", batch, K.get_value(i.next_layer), K.get_value(self.output_layer))
 
         for i in self.cells_list[-1]:
-            K.tf.assign(i.next_layer, self.model.layers[-1].output)
+            K.tf.assign(i.next_layer, self.model.outputs)
             # print("HAY", batch, K.get_value(self.output_layer.output))
 
 
