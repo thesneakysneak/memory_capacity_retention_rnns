@@ -221,7 +221,7 @@ class JordanCallback(Callback):
         self.cells_list = cells_list
         self.output_layer = output_layer
     # customize your behavior
-    def on_epoch_end(self, epoch, logs={}):
+    def on_batch_end(self, batch, logs=None):
         for l in range(len(self.layers) - 1):
             for i in self.cells_list[l]:
                 K.tf.assign(i.next_layer, self.layers[l + 1])
