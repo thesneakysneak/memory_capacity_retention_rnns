@@ -3,7 +3,7 @@ import random
 import numpy
 import numpy as np
 from keras import Input, Model
-from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, Callback
+from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, Callback, LambdaCallback
 from keras.layers import SimpleRNN, Dense, Concatenate, SimpleRNNCell, constraints, regularizers, initializers
 import keras
 from keras.engine.base_layer import Layer
@@ -108,14 +108,11 @@ class SimpleJordanRNNCell(SimpleRNNCell):
                                       regularizer=self.kernel_regularizer,
                                       constraint=self.kernel_constraint)
 
-        if self.next_layer != None:
-            self.output_layer_kernel = self.add_weight(shape=(self.next_layer.shape[-1].value, self.units),
+        self.output_layer_kernel = self.add_weight(shape=(self.next_layer.shape[-1].value, self.units),
                                                        name='jordan_kernel',
                                                        initializer=self.kernel_initializer,
                                                        regularizer=self.kernel_regularizer,
                                                        constraint=self.kernel_constraint)
-        else:
-            self.output_layer_kernel = None
 
         self.recurrent_kernel = self.add_weight(
             shape=(self.units, self.units),
@@ -132,6 +129,9 @@ class SimpleJordanRNNCell(SimpleRNNCell):
         else:
             self.bias = None
         self.built = True
+
+    def set_next_layer(self, layer):
+        K.tf.assign(self.next_layer, layer)
 
     def call(self, inputs, states, training=None):
         prev_output = states[0]
@@ -162,7 +162,7 @@ class SimpleJordanRNNCell(SimpleRNNCell):
 
         # Jordan specific output calculation
         if self.next_layer != None:
-            # print("Jordan activate", prev_output.shape, self.output_layer_kernel.shape, self.next_layer.shape)
+            print("Jordan activate", prev_output.shape, self.output_layer_kernel.shape, self.next_layer)
             output = h + K.dot(prev_output, self.recurrent_kernel) + keras.backend.batch_dot(self.next_layer,
                                                                                              self.output_layer_kernel,
                                                                                              axes=None)  # K.dot()
@@ -178,6 +178,23 @@ class SimpleJordanRNNCell(SimpleRNNCell):
             if training is None:
                 output._uses_learning_phase = True
         return output, [output]
+
+    def set_next_layer(self, next_layer):
+        """Returns the current weights of the layer.
+
+        # Returns
+            Weights values as a list of numpy arrays.
+        """
+        K.tf.assign(self.next_layer, next_layer)
+
+    def get_next_layer_output(self):
+        """Returns the current weights of the layer.
+
+        # Returns
+            Weights values as a list of numpy arrays.
+        """
+        params = self.next_layer
+        return K.batch_get_value(params)
 
     def get_config(self):
         config = {'units': self.units,
@@ -203,9 +220,9 @@ class SimpleJordanRNNCell(SimpleRNNCell):
         return dict(list(base_config.items()) + list(config.items()))
 
 def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer, activation="tanh"):
-    n = K.variable([[-0.0]*num_nodes_next_layer])
+    n = K.variable([[-1.0]*num_nodes_next_layer], name="next_jordan_val")
 
-    output_layer = keras.Input(tensor=n)
+    output_layer = keras.Input(tensor=n, name="next_jordan_val_1")
 
     cells = [SimpleJordanRNNCell(previous_layer.get_shape()[-1].value, next_layer=output_layer, activation=activation) for _ in
              range(num_nodes_in_layer)]
@@ -225,15 +242,20 @@ class JordanCallback(Callback):
     def on_batch_end(self, batch, logs=None):
         print("Assign", len(self.layers), len(self.cells_list))
         # print(K.eval(self.output_layer).reshape(-1,1,1).shape)
-        print(self.output_layer.dtype, K.eval(self.model.outputs[0]))
+        # print(self.output_layer.dtype, K.eval(self.model.outputs[0]))
 
-        for l in range(len(self.layers) - 1):
-            for i in self.cells_list[l]:
-                K.tf.assign(i.next_layer, self.layers[l + 1])
-                print("HAY", batch, K.get_value(i.next_layer), K.get_value(self.output_layer))
-
+        # for l in range(len(self.layers) - 1):
+        #     for i in self.cells_list[l]:
+        #         K.tf.assign(i.next_layer, self.layers[l + 1])
+        #         print("HAY", batch, K.get_value(i.next_layer), K.get_value(self.output_layer))
+        #
         for i in self.cells_list[-1]:
-            K.tf.assign(i.next_layer, self.model.outputs)
+            if self.model.outputs:
+                K.set_value(i.next_layer, np.array([[random.random()]]))
+            else:
+                print("NANI")
+            # K.set_value(i.next_layer, np.array(K.batch_get_value(self.output_layer)).reshape(-1, 1))
+
             # print("HAY", batch, K.get_value(self.output_layer.output))
 
 
@@ -260,12 +282,12 @@ def build_jordan_model(architecture=[],activation="tanh"):
 
 
     output_layer = Dense(architecture[-1])(layers[-1])
-    for l in range(len(layers)-1):
+    for l in range(len(layers) - 1):
         for i in cells_list[l]:
-            K.set_value(i.next_layer, np.array([[0]]))
+            K.tf.assign(i.next_layer, layers[l + 1])
 
-    for i in cells_list[-1]:
-        K.tf.assign(i.next_layer, np.array([[0]]))
+
+    K.tf.assign(cells_list[-1][0].next_layer, output_layer)
 
     model = Model([input_layer], output_layer)
     model.Callback_var = JordanCallback(layers=layers, cells_list=cells_list, output_layer=output_layer, model=model)
@@ -340,6 +362,7 @@ def test2():
     model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
     callbacks = [
+        LambdaCallback(on_epoch_end=lambda batch, logs: print(model.layers[1].cell.cells[0].get_next_layer_output())),
         model.Callback_var,
         ModelCheckpoint(
             filepath="/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/scratch_space/weights/weights-improvement-{epoch:02d}.hdf5",
