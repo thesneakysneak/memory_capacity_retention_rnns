@@ -28,7 +28,6 @@ from scratch_space.jordan_rnn import JordanRNNCell
 
 
 def generate_sets(num_patterns):
-
     correlated = True
     x = y = None
     while correlated:
@@ -98,9 +97,7 @@ def generate_sets_class(num_patterns):
     return x_train, y_train, x_test, y_test
 
 
-
 def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
-
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
     network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.BIDIRECTIONAL_LSTM]  # "jordan_rnn" const.JORDAN_RNN
@@ -111,7 +108,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
 
     if not os.path.exists(logfile):
         f = open(logfile, "w")
-        f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;model_params")
+        f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;model_params;num_epochs")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO)
@@ -124,7 +121,6 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
     nodes_in_layer = 2
     activation_func = "sigmoid"
     nn_type = "lstm"
-
 
     num_divisible_by_all = 216
     model = None
@@ -142,7 +138,8 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
                     prev = 0
                     smallest_not_retained = 30
                     largest_retained = 0
-                    print("Thread", thread, "nodes_in_layer", nodes_in_layer, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
+                    print("Thread", thread, "nodes_in_layer", nodes_in_layer, "parameters", parameters, "nn_type",
+                          nn_type, "activation_func", activation_func)
                     if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
                                            parameters=parameters,
                                            nodes_in_layer=str(nodes_in_layer)):
@@ -176,10 +173,14 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
                             print(" largest_retained", largest_retained)
                             print(" score", score_after_training_net)
 
-                        logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                            nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained) + ";" + str(model.count_params()))
+                        logging.log(logging.INFO,
+                                    str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                                        nodes_in_layer) + ";" + str(largest_retained) + ";" + str(
+                                        smallest_not_retained) + ";" + str(model.count_params()) + ";" + str(
+                                        model.history.epoch[-1]))
                     else:
                         print("Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))
+
 
 # if __name__ == "__main__":
 #     main()

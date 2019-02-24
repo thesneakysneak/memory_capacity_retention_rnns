@@ -55,22 +55,20 @@ def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_fun
                                         max_count=max_count,
                                         total_num_patterns=300)
 
-
     result = gf.train_test_neural_net_architecture(x_train, y_train,
-                                       x_test, y_test,
-                                       nodes_in_layer=nodes_in_layer,
-                                       nodes_in_out_layer=1,
-                                       nn_type=nn_type, activation_func=activation_func,
-                                       verbose=1)
+                                                   x_test, y_test,
+                                                   nodes_in_layer=nodes_in_layer,
+                                                   nodes_in_out_layer=1,
+                                                   nn_type=nn_type, activation_func=activation_func,
+                                                   verbose=1)
 
     return result
-
 
 
 def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
-    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN. const.BIDIRECTIONAL_LSTM]  # "jordan_rnn" const.JORDAN_RNN
+    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN.const.BIDIRECTIONAL_LSTM]  # "jordan_rnn" const.JORDAN_RNN
 
     logfile_location = "danny_masters"
     logfile = logfile_location + "/" + str(thread) + "_" + str(runner) + "_longest_sequence.log"
@@ -78,7 +76,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
 
     if not os.path.exists(logfile):
         f = open(logfile, "w")
-        f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;model_params")
+        f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;model_params;num_epochs")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO, format='%(message)s')
@@ -91,7 +89,6 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
     nodes_in_layer = 2
     activation_func = "sigmoid"
     nn_type = "lstm"
-
 
     num_divisible_by_all = 216
     model = None
@@ -109,15 +106,16 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
                     prev = 0
                     smallest_not_retained = 30
                     largest_retained = 0
-                    print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
+                    print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func",
+                          activation_func)
                     if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
                                            parameters=parameters,
                                            nodes_in_layer=str(nodes_in_layer)):
                         while (smallest_not_retained - largest_retained) > 1:
                             score_after_training_net, model = run_experiment(max_count=start,
-                                                                      nodes_in_layer=nodes_in_layer,
-                                                                      nn_type=nn_type,
-                                                                      activation_func=activation_func)
+                                                                             nodes_in_layer=nodes_in_layer,
+                                                                             nn_type=nn_type,
+                                                                             activation_func=activation_func)
                             #
                             if score_after_training_net > 0.98:
                                 print("   -> ", start)
@@ -136,10 +134,14 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
                             print(" largest_retained", largest_retained)
                             print(" score", score_after_training_net)
 
-                        logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                            nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained)+";"+str(model.count_params()))
+                        logging.log(logging.INFO,
+                                    str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                                        nodes_in_layer) + ";" + str(largest_retained) + ";" + str(
+                                        smallest_not_retained) + ";" + str(model.count_params()) + ";" + str(
+                                        model.history.epoch[-1]))
                     else:
                         print("Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))
+
 
 def sample():
     x, y = generate_count_set(sequence_length_=300, max_count=10, total_num_patterns=100)

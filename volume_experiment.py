@@ -126,7 +126,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     if not os.path.exists(logfile):
         f = open(logfile, "w")
         f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;"
-                                    + ";largest_len_retained;smallest_len_not_retained;status;model_params")
+                                    + ";largest_len_retained;smallest_len_not_retained;status;model_params;num_epochs")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO, format='%(message)s')
@@ -196,7 +196,8 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
 
                         logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
                             nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained)
-                                            + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found;" + str(model))
+                                            + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found;" \
+                                    + str(model) + ";" +str(model.history.epoch[-1]))
                     else:
                         print("Already ran", str(nn_type), str(activation_func),str(parameters), str(nodes_in_layer))
 

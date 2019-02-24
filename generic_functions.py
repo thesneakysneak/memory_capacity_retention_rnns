@@ -206,14 +206,19 @@ def simple_bidirectional():
     activation_func="sigmoid"
     batch_size = 10
 
-    inp = Input(shape=(1, 1))
+    x = [random.random() for i in range(100)]
+    y = [random.random() for i in range(100)]
+    # x = y
+    x = np.array(x).reshape(-1, 1, 1).astype(np.float32)
+    y = np.array(y).reshape(-1, 1).astype(np.float32)
+
+    inp = Input(shape=(None, len(x[0])))
     ls = Bidirectional(LSTM(nodes_in_layer, activation=activation_func))(inp)
     output = Dense(nodes_in_out_layer)(ls)
 
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
     model = Model(inputs=[inp], outputs=[output])
     model.compile(loss='mse', optimizer='adam')
-
 
     model.fit(x, y, epochs=2200, verbose=2, callbacks=[reduce_lr])
 
