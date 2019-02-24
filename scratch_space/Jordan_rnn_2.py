@@ -333,7 +333,7 @@ def test():
     callbacks = [
         model.Callback_var,
         ModelCheckpoint(
-            filepath="/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/scratch_space/weights/weights-improvement-{epoch:02d}.hdf5",
+            filepath="weights/weights-improvement-{epoch:02d}.hdf5",
             monitor="val_loss", verbose=1, save_best_only=False),
         ReduceLROnPlateau(monitor='loss', factor=0.5, patience=2)
     ]
@@ -365,7 +365,7 @@ def test2():
         LambdaCallback(on_epoch_end=lambda batch, logs: print(model.layers[1].cell.cells[0].get_next_layer_output())),
         model.Callback_var,
         ModelCheckpoint(
-            filepath="/home/known/Desktop/Masters/Code/Actual/memory_capacity_retention_rnns/scratch_space/weights/weights-improvement-{epoch:02d}.hdf5",
+            filepath="weights/weights-improvement-{epoch:02d}.hdf5",
             monitor="val_loss", verbose=1, save_best_only=False),
         ReduceLROnPlateau(monitor='loss', factor=0.5, patience=2)
     ]
