@@ -100,7 +100,10 @@ def generate_sets_class(num_patterns):
 def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
-    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.BIDIRECTIONAL_LSTM]  # "jordan_rnn" const.JORDAN_RNN
+    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN,
+                     const.BIDIRECTIONAL_RNN, const.BIDIRECTIONAL_LSTM,
+                     const.BIDIRECTIONAL_GRU]  # "jordan_rnn" const.JORDAN_RNN
+
     run = runner
     logfile_location = "danny_masters"
     logfile = logfile_location + "/" + str(thread) + "_" + str(run) + "_num_patterns.log"
@@ -108,7 +111,8 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
 
     if not os.path.exists(logfile):
         f = open(logfile, "w")
-        f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;model_params;num_epochs")
+        f.write(
+            "nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;model_params;num_epochs")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO)

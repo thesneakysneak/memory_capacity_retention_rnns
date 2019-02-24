@@ -133,7 +133,7 @@ def train_test_neural_net_architecture(x_train, y_train,
                                        x_test, y_test,
                                        nodes_in_layer=2, nodes_in_out_layer=1,
                                        nn_type="lstm", activation_func="sigmoid",
-                                       verbose=0):
+                                       verbose=0, epocs=1000):
     #
     batch_size = int(len(x_train)*0.10)
     #
@@ -147,27 +147,69 @@ def train_test_neural_net_architecture(x_train, y_train,
             ls = GRU(nodes_in_layer, activation=activation_func)(inp)
         elif nn_type == const.BIDIRECTIONAL_LSTM:
             ls = Bidirectional(LSTM(nodes_in_layer, activation=activation_func))(inp)
+        elif nn_type == const.BIDIRECTIONAL_GRU:
+            ls = Bidirectional(GRU(nodes_in_layer, activation=activation_func))(inp)
+        elif nn_type == const.BIDIRECTIONAL_RNN:
+            ls = Bidirectional(SimpleRNN(nodes_in_layer, activation=activation_func))(inp)
     elif type(nodes_in_layer) == list:
-        rnn_func_ptr = None
-        if nn_type == const.LSTM:
-            rnn_func_ptr = LSTM
-        elif nn_type == const.ELMAN_RNN:
-            rnn_func_ptr = SimpleRNN
-        elif nn_type == const.GRU:
-            rnn_func_ptr = GRU
-        else:
-            # TODO Figure this out
-            rnn_func_ptr = SimpleRNN
-
         if len(nodes_in_layer) > 1:
-            ls = rnn_func_ptr(nodes_in_layer[0], activation=activation_func, return_sequences=True)(inp)
-            for n in range(1, len(nodes_in_layer) - 1):
-                ls = rnn_func_ptr(nodes_in_layer[n], activation=activation_func, return_sequences=True)(ls)
-            ls = rnn_func_ptr(nodes_in_layer[-1], activation=activation_func)(ls)
-        else:
-            ls = rnn_func_ptr(nodes_in_layer[0], activation=activation_func)(inp)
+            in_layer = inp
+            if nn_type == const.LSTM:
+                ls = LSTM(nodes_in_layer[0], activation=activation_func, return_sequences=True)(inp)
+            elif nn_type == const.ELMAN_RNN:
+                ls = SimpleRNN(nodes_in_layer[0], activation=activation_func, return_sequences=True)(inp)
+            elif nn_type == const.GRU:
+                ls = GRU(nodes_in_layer[0], activation=activation_func, return_sequences=True)(inp)
+            elif nn_type == const.BIDIRECTIONAL_LSTM:
+                ls = Bidirectional(LSTM(nodes_in_layer[0], activation=activation_func, return_sequences=True))(inp)
+            elif nn_type == const.BIDIRECTIONAL_GRU:
+                ls = Bidirectional(GRU(nodes_in_layer[0], activation=activation_func, return_sequences=True))(inp)
+            elif nn_type == const.BIDIRECTIONAL_RNN:
+                ls = Bidirectional(SimpleRNN(nodes_in_layer[0], activation=activation_func, return_sequences=True))(inp)
 
-    #
+
+            for n in range(1, len(nodes_in_layer) - 1):
+                if nn_type == const.LSTM:
+                    ls = LSTM(nodes_in_layer[0], activation=activation_func, return_sequences=True)(ls)
+                elif nn_type == const.ELMAN_RNN:
+                    ls = SimpleRNN(nodes_in_layer[0], activation=activation_func, return_sequences=True)(ls)
+                elif nn_type == const.GRU:
+                    ls = GRU(nodes_in_layer[0], activation=activation_func, return_sequences=True)(ls)
+                elif nn_type == const.BIDIRECTIONAL_LSTM:
+                    ls = Bidirectional(LSTM(nodes_in_layer[0], activation=activation_func, return_sequences=True))(ls)
+                elif nn_type == const.BIDIRECTIONAL_GRU:
+                    ls = Bidirectional(GRU(nodes_in_layer[0], activation=activation_func, return_sequences=True))(ls)
+                elif nn_type == const.BIDIRECTIONAL_RNN:
+                    ls = Bidirectional(SimpleRNN(nodes_in_layer[0], activation=activation_func, return_sequences=True))(ls)
+
+            if nn_type == const.LSTM:
+                ls = LSTM(nodes_in_layer[-1], activation=activation_func)(ls)
+            elif nn_type == const.ELMAN_RNN:
+                ls = SimpleRNN(nodes_in_layer[-1], activation=activation_func)(ls)
+            elif nn_type == const.GRU:
+                ls = GRU(nodes_in_layer[-1], activation=activation_func)(ls)
+            elif nn_type == const.BIDIRECTIONAL_LSTM:
+                ls = Bidirectional(LSTM(nodes_in_layer[-1], activation=activation_func))(ls)
+            elif nn_type == const.BIDIRECTIONAL_GRU:
+                ls = Bidirectional(GRU(nodes_in_layer[-1], activation=activation_func))(ls)
+            elif nn_type == const.BIDIRECTIONAL_RNN:
+                ls = Bidirectional(SimpleRNN(nodes_in_layer[-1], activation=activation_func))(ls)
+
+        else:
+            if nn_type == const.LSTM:
+                ls = LSTM(nodes_in_layer[0], activation=activation_func)(inp)
+            elif nn_type == const.ELMAN_RNN:
+                ls = SimpleRNN(nodes_in_layer[0], activation=activation_func)(inp)
+            elif nn_type == const.GRU:
+                ls = GRU(nodes_in_layer[0], activation=activation_func)(inp)
+            elif nn_type == const.BIDIRECTIONAL_LSTM:
+                ls = Bidirectional(LSTM(nodes_in_layer[0], activation=activation_func))(inp)
+            elif nn_type == const.BIDIRECTIONAL_GRU:
+                ls = Bidirectional(GRU(nodes_in_layer[0], activation=activation_func))(inp)
+            elif nn_type == const.BIDIRECTIONAL_RNN:
+                ls = Bidirectional(SimpleRNN(nodes_in_layer[0], activation=activation_func))(inp)
+
+                #
     output = Dense(nodes_in_out_layer)(ls)
     #
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
@@ -176,7 +218,7 @@ def train_test_neural_net_architecture(x_train, y_train,
     model.fit(x_train, y_train,
               validation_split=.2,
               callbacks=[reduce_lr, recurrent_models.earlystop],
-              epochs=1000,
+              epochs=epocs,
               batch_size=batch_size,
               verbose=verbose)
     #
@@ -187,6 +229,42 @@ def train_test_neural_net_architecture(x_train, y_train,
         print(y_predict)
         return determine_ave_f_score(y_predict, y_test), model
     return determine_f_score(y_predict, y_test), model
+
+def test_train_nn():
+    x_train =[random.random() for i in range(100)]
+    y_train = [random.random() for i in range(100)]
+
+    x_train= np.array(x_train).reshape(-1, 1, 1).astype(np.float32)
+    y_train = np.array(y_train).reshape(-1, 1).astype(np.float32)
+
+
+    x_test = x_train
+    y_test = y_train
+
+    activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
+                            "linear"]
+    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.BIDIRECTIONAL_RNN, const.BIDIRECTIONAL_LSTM, const.BIDIRECTIONAL_GRU]  # "jordan_rnn" const.JORDAN_RNN
+
+    for a in activation_functions:
+        for n in network_types:
+            print("             ", n)
+            score, model = train_test_neural_net_architecture(x_train, y_train,
+                                               x_test, y_test,
+                                               nodes_in_layer=2, nodes_in_out_layer=1,
+                                               nn_type=n, activation_func=a,
+                                               verbose=0, epocs=2)
+            score, model = train_test_neural_net_architecture(x_train, y_train,
+                                                              x_test, y_test,
+                                                              nodes_in_layer=[2], nodes_in_out_layer=1,
+                                                              nn_type=n, activation_func=a,
+                                                              verbose=0, epocs=2)
+
+            score, model = train_test_neural_net_architecture(x_train, y_train,
+                                                              x_test, y_test,
+                                                              nodes_in_layer=[2, 2, 2, 2], nodes_in_out_layer=1,
+                                                              nn_type=n, activation_func=a,
+                                                              verbose=0, epocs=2)
+            print(model.summary())
 
 def simple_bidirectional():
     import os
@@ -213,10 +291,10 @@ def simple_bidirectional():
     y = np.array(y).reshape(-1, 1).astype(np.float32)
 
     inp = Input(shape=(None, len(x[0])))
-    ls = Bidirectional(LSTM(nodes_in_layer, activation=activation_func))(inp)
+    ls = Bidirectional(SimpleRNN(nodes_in_layer, activation=activation_func))(inp)
     output = Dense(nodes_in_out_layer)(ls)
 
-    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
+    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, patience=10, min_lr=0.0000001)
     model = Model(inputs=[inp], outputs=[output])
     model.compile(loss='mse', optimizer='adam')
 
