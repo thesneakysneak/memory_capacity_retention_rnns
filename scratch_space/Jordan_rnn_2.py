@@ -220,7 +220,7 @@ class SimpleJordanRNNCell(SimpleRNNCell):
         return dict(list(base_config.items()) + list(config.items()))
 
 def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer, activation="tanh"):
-    n = K.variable([[-1.0]*num_nodes_next_layer], name="next_jordan_val")
+    n = K.variable([[0.5]*num_nodes_next_layer], name="next_jordan_val")
 
     output_layer = keras.Input(tensor=n, name="next_jordan_val_1")
 
@@ -251,7 +251,7 @@ class JordanCallback(Callback):
         #
         for i in self.cells_list[-1]:
             if self.model.outputs:
-                K.set_value(i.next_layer, np.array([[random.random()]]))
+                K.set_value(i.next_layer, np.array([[0.5]]))
             else:
                 print("NANI")
             # K.set_value(i.next_layer, np.array(K.batch_get_value(self.output_layer)).reshape(-1, 1))
@@ -298,8 +298,8 @@ def build_jordan_model(architecture=[],activation="tanh"):
 def test():
     num_inputs = 1
     num_output_layer_outputs = 1
-    x = [random.random() for i in range(10)]
-    y = [random.random() for i in range(10)]
+    x = [random.random() for i in range(2)]
+    y = [random.random() for i in range(2)]
     x = y
 
     x = numpy.array(x).reshape(-1, 1, 1).astype(np.float32)
@@ -309,7 +309,7 @@ def test():
 
     input_layer = keras.Input((None, num_inputs))
 
-    n = K.variable([[-0.0]])
+    n = K.variable([[0.5]])
 
     output_layer = keras.Input(tensor=n)
 
@@ -350,14 +350,14 @@ def test2():
     num_output_layer_outputs = 1
     x = [random.random() for i in range(100)]
     y = [random.random() for i in range(100)]
-    x = y
+    # x = y
 
     x = numpy.array(x).reshape(-1, 1, 1).astype(np.float32)
     y = numpy.array(y).reshape(-1, 1).astype(np.float32)
 
     num_cells_in_hidden_layer = 10
 
-    model = build_jordan_model([num_inputs, num_cells_in_hidden_layer, num_output_layer_outputs])
+    model = build_jordan_model([num_inputs, num_cells_in_hidden_layer, num_output_layer_outputs], activation="tanh")
 
     model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
@@ -367,14 +367,14 @@ def test2():
         ModelCheckpoint(
             filepath="weights/weights-improvement-{epoch:02d}.hdf5",
             monitor="val_loss", verbose=1, save_best_only=False),
-        ReduceLROnPlateau(monitor='loss', factor=0.5, patience=2)
+        ReduceLROnPlateau(monitor='loss', factor=0.2, patience=5, min_lr=0.00000001)
     ]
 
-    model.fit(x, y, epochs=10, verbose=1, callbacks=callbacks)
+    model.fit(x, y, epochs=100, verbose=1, callbacks=callbacks, batch_size=10)
 
     y_predict = model.predict(x)
     for i in range(len(y)):
-        print(y_predict[i], y[i])
+        print(x[i], y_predict[i], y[i])
 
 
 
