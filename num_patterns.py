@@ -97,70 +97,7 @@ def generate_sets_class(num_patterns):
     #
     return x_train, y_train, x_test, y_test
 
-def jordan_rnn(num_patterns=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", prev_model=None):
-    inp = Input(shape=(1, 1))
-    ls = SimpleRNN(nodes_in_layer)(inp)
-    #
-    output = Dense(num_patterns)(ls)
-    #
-    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
-    model = Model(inputs=[inp], outputs=[output])
 
-    if prev_model != None:
-        out = prev_model.get_layer('output_layer').output
-        layer1_prev_out = Concatenate()([inp, out])
-
-
-    layer1_inputs = Input(shape=(None, 1), name='layer1_input')
-
-
-    if prev_model:
-        prev_output_layer = prev_model.layers[1].output
-    else:
-        prev_output_layer = Input(shape=(None, num_patterns), name='layer1_input_2')
-    layer1_prev_out = Concatenate()([layer1_inputs, prev_output_layer])
-    # Layer 1
-
-    layer1 = SimpleRNN(nodes_in_layer, return_state=True, return_sequences=True, name='layer1')
-    layer1_outputs, layer1_state_h = layer1(layer1_prev_out)
-
-    output = Dense(num_patterns)(layer1_outputs)
-
-    model = Model([layer1_inputs, prev_output_layer], output)
-
-    if prev_model:
-        model.set_weights(prev_model.get_weights())
-    return model
-
-
-
-
-# def train_test_neural_net_architecture(num_patterns=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0):
-#     x_train, y_train, x_test, y_test = generate_sets(num_patterns)  # generate_sets(50)
-#     #
-#     batch_size = 10
-#     #
-#     inp = Input(shape=(1, 1))
-#     if nn_type == const.LSTM:
-#         ls = LSTM(nodes_in_layer, activation=activation_func)(inp)
-#     elif nn_type == const.ELMAN_RNN:
-#         ls = SimpleRNN(nodes_in_layer, activation=activation_func)(inp)
-#     elif nn_type == const.GRU:
-#         ls = GRU(nodes_in_layer, activation=activation_func)(inp)
-#     else:
-#         ls = JordanRNNCell(nodes_in_layer, activation=activation_func)(inp)
-#     #
-#     output = Dense(1)(ls)
-#     #
-#     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
-#     model = Model(inputs=[inp], outputs=[output])
-#     model.compile(optimizer='adam', loss='mean_squared_error')
-#     model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr, recurrent_models.earlystop2], epochs=1000, verbose=verbose)
-#     #
-#     y_predict = model.predict(x_test)
-#     y_predict = [[gf.convert_to_closest(a, set(y_test))] for a in y_predict ]
-#     #
-#     return gf.determine_f_score(y_predict, y_test)
 
 def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
 
@@ -174,7 +111,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
 
     if not os.path.exists(logfile):
         f = open(logfile, "w")
-        f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained")
+        f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;model_params")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO)
@@ -190,7 +127,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
 
 
     num_divisible_by_all = 216
-
+    model = None
     for i in range(0, 5):
         for parameters in total_num_parameters:
             for nn_type in network_types:
@@ -212,7 +149,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
 
                         while (smallest_not_retained - largest_retained) > 1:
                             x_train, y_train, x_test, y_test = generate_sets(start)
-                            score_after_training_net = gf.train_test_neural_net_architecture(
+                            score_after_training_net, model = gf.train_test_neural_net_architecture(
                                 x_train, y_train,
                                 x_test, y_test,
                                 nodes_in_layer=nodes_in_layer,
@@ -240,7 +177,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
                             print(" score", score_after_training_net)
 
                         logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                            nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained))
+                            nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained) + ";" + str(model.count_params()))
                     else:
                         print("Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))
 

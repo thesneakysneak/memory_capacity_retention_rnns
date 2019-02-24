@@ -185,8 +185,8 @@ def train_test_neural_net_architecture(x_train, y_train,
 
     if len(y_predict[0]) > 1:
         print(y_predict)
-        return determine_ave_f_score(y_predict, y_test)
-    return determine_f_score(y_predict, y_test)
+        return determine_ave_f_score(y_predict, y_test), model
+    return determine_f_score(y_predict, y_test), model
 
 def simple_bidirectional():
     import os

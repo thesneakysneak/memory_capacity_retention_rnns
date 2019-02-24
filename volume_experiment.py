@@ -82,9 +82,9 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
     score_after_training_net = 0.0
     smallest_not_retained = 30
     largest_retained = 0
-
+    model = None
     while (smallest_not_retained - largest_retained) > 1:
-        score_after_training_net = run_experiment(max_count=start,
+        score_after_training_net, model = run_experiment(max_count=start,
                                                   max_elements_to_count=max_elements_to_count,
                                                   nodes_in_layer=nodes_in_layer,
                                                   nn_type=nn_type,
@@ -111,7 +111,7 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
     logging.log(logging.INFO, str(nn_type) + "," + str(activation_func) + "," + str(parameters) + "," + str(
         nodes_in_layer) + "," + str(max_elements_to_count) + "," + str(max_elements_to_count)
                 + str(largest_retained) + "," + str(smallest_not_retained) + ",processing")
-    return score_after_training_net, largest_retained, smallest_not_retained
+    return score_after_training_net, largest_retained, smallest_not_retained, model
 
 
 def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
@@ -126,7 +126,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     if not os.path.exists(logfile):
         f = open(logfile, "w")
         f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;"
-                                    + ";largest_len_retained;smallest_len_not_retained;status")
+                                    + ";largest_len_retained;smallest_len_not_retained;status;model_params")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO, format='%(message)s')
@@ -145,7 +145,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     layer_depth = 4
 
     num_divisible_by_all = 216
-
+    model = None
     for i in range(0, 5):
         for parameters in total_num_parameters:
             for nn_type in network_types:
@@ -158,7 +158,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
                 for activation_func in activation_functions:
                     start = 1
                     prev = 0
-                    smallest_not_retained = 30
+                    smallest_not_retained = 10
                     smallest_len_not_retained = 0
                     largest_len_retained = 0
                     largest_retained = 0
@@ -167,7 +167,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
                                            parameters=parameters,
                                            nodes_in_layer=str(nodes_in_layer)):
                         while (smallest_not_retained - largest_retained) > 1:
-                            score_after_training_net, largest_len_retained, smallest_len_not_retained =  search_in_range(   nodes_in_layer=nodes_in_layer,
+                            score_after_training_net, largest_len_retained, smallest_len_not_retained, model =  search_in_range(   nodes_in_layer=nodes_in_layer,
                                                                                                                                 parameters=parameters,
                                                                                                                                     nn_type=nn_type,
                                                                                                                                     activation_func=activation_func,
@@ -196,7 +196,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
 
                         logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
                             nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained)
-                                            + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found")
+                                            + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found;" + str(model))
                     else:
                         print("Already ran", str(nn_type), str(activation_func),str(parameters), str(nodes_in_layer))
 

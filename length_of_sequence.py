@@ -78,7 +78,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
 
     if not os.path.exists(logfile):
         f = open(logfile, "w")
-        f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained")
+        f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;model_params")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO, format='%(message)s')
@@ -94,7 +94,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
 
 
     num_divisible_by_all = 216
-
+    model = None
     for i in range(0, 5):
         for parameters in total_num_parameters:
             for nn_type in network_types:
@@ -107,14 +107,14 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
                 for activation_func in activation_functions:
                     start = 1
                     prev = 0
-                    smallest_not_retained = 100
+                    smallest_not_retained = 30
                     largest_retained = 0
                     print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
                     if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
                                            parameters=parameters,
                                            nodes_in_layer=str(nodes_in_layer)):
                         while (smallest_not_retained - largest_retained) > 1:
-                            score_after_training_net = run_experiment(max_count=start,
+                            score_after_training_net, model = run_experiment(max_count=start,
                                                                       nodes_in_layer=nodes_in_layer,
                                                                       nn_type=nn_type,
                                                                       activation_func=activation_func)
@@ -137,7 +137,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
                             print(" score", score_after_training_net)
 
                         logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                            nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained))
+                            nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained)+";"+str(model.count_params()))
                     else:
                         print("Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))
 
