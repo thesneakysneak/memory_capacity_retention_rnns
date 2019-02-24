@@ -127,7 +127,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     if not os.path.exists(logfile):
         f = open(logfile, "w")
         f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;"
-                                    + ";largest_len_retained;smallest_len_not_retained;status;model_params;num_epochs")
+                                    + ";largest_len_retained;smallest_len_not_retained;status;model_params;num_epochs\n")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO, format='%(message)s')

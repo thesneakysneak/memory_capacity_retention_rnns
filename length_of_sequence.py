@@ -76,7 +76,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
 
     if not os.path.exists(logfile):
         f = open(logfile, "w")
-        f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;model_params;num_epochs")
+        f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;model_params;num_epochs\n")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO, format='%(message)s')
