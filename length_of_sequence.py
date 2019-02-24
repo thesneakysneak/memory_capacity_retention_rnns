@@ -90,7 +90,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
     activation_func = "sigmoid"
     nn_type = "lstm"
 
-    num_divisible_by_all = 216
+    num_divisible_by_all = 5040
     model = None
     for i in range(0, 5):
         for parameters in total_num_parameters:

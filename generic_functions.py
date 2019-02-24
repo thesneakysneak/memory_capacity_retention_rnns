@@ -44,7 +44,7 @@ def divisible_by_all(n):
     while j < n:
         i += 1
         x = 24 * i
-        if x % 9 == 0 and x % 12 == 0:
+        if x % 9 == 0 and x % 12 == 0 and x % 21 == 0:
             y.append(x)
             j += 1
     return y
@@ -101,6 +101,10 @@ def determine_ave_f_score(predicted, test, f_only=True):
     return fscore/len(predicted)
 
 def get_nodes_in_layer(num_parameters, nn_type):
+    if nn_type == const.BIDIRECTIONAL_RNN:
+        return int(num_parameters / 6)
+    if nn_type == const.BIDIRECTIONAL_GRU:
+        return int(num_parameters / 21)
     if nn_type == const.BIDIRECTIONAL_LSTM:
         return int(num_parameters / 24)
     if nn_type == const.LSTM:

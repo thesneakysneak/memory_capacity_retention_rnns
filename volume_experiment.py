@@ -145,7 +145,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
     nn_type = "lstm"
     layer_depth = 4
 
-    num_divisible_by_all = 216
+    num_divisible_by_all = 5040
     model = None
     for i in range(0, 5):
         for parameters in total_num_parameters:
