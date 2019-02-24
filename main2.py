@@ -52,21 +52,21 @@ if __name__ == "__main__":
             #
             # t = threading.Thread(name='Running volume of patterns experiment ' + str(i), target=run_volume_exp)
             # t.start()
-            command_str = 'bash -c "python length_of_sequence.py ' + \
+            command_str = 'bash -c "python3 length_of_sequence.py ' + \
                           str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
                           + ' ' + str(runner) + ' ' + str(i) + '" & '
             print("starting ", command_str)
             os.system(command_str)
             time.sleep(5)
 
-            command_str = 'bash -c "python num_patterns.py ' + \
+            command_str = 'bash -c "python3 num_patterns.py ' + \
                           str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
                           + ' ' + str(runner) + ' ' + str(i) + '" & '
             print("starting ", command_str)
             os.system(command_str)
             time.sleep(5)
 
-            command_str = 'bash -c "python volume_experiment.py ' + \
+            command_str = 'bash -c "python3 volume_experiment.py ' + \
                           str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
                           + ' ' + str(runner) + ' ' + str(i) + '" & '
             print("starting ", command_str)
