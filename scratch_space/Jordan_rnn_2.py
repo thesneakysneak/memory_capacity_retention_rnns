@@ -13,6 +13,7 @@ from keras.legacy import interfaces
 from keras.engine.base_layer import InputSpec
 from tensorflow.python.keras.callbacks import TensorBoard
 
+import tensorflow as tf
 
 class SimpleJordanRNNCell(SimpleRNNCell):
     """Cell class for SimpleRNN.
@@ -161,14 +162,16 @@ class SimpleJordanRNNCell(SimpleRNNCell):
             prev_output *= rec_dp_mask
 
         # Jordan specific output calculation
-        if self.next_layer != None:
-            print("Jordan activate", prev_output.shape, self.output_layer_kernel.shape, self.next_layer)
-            output = h + K.dot(prev_output, self.recurrent_kernel) + keras.backend.batch_dot(self.next_layer,
-                                                                                             self.output_layer_kernel,
-                                                                                             axes=None)  # K.dot()
-        else:
-            print("Jordan not activate")
-            output = h + K.dot(prev_output, self.recurrent_kernel)
+        # if self.next_layer != None:
+        print("Jordan activate", prev_output.shape, self.output_layer_kernel.shape, self.next_layer, keras.backend.batch_dot(self.next_layer,
+                                                                                         self.output_layer_kernel,
+                                                                                         axes=None) )
+        output = h + K.dot(prev_output, self.recurrent_kernel) + keras.backend.batch_dot(self.next_layer,
+                                                                                         self.output_layer_kernel,
+                                                                                         axes=None)  # K.dot()
+        # else:
+        #     print("Jordan not activate")
+        #     output = h + K.dot(prev_output, self.recurrent_kernel)
 
         if self.activation is not None:
             output = self.activation(output)
@@ -219,19 +222,6 @@ class SimpleJordanRNNCell(SimpleRNNCell):
         base_config = super(SimpleRNNCell, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
-def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer, activation="tanh"):
-    n = K.variable([[0.5]*num_nodes_next_layer], name="next_jordan_val")
-
-    output_layer = keras.Input(tensor=n, name="next_jordan_val_1")
-
-    cells = [SimpleJordanRNNCell(previous_layer.get_shape()[-1].value, next_layer=output_layer, activation=activation) for _ in
-             range(num_nodes_in_layer)]
-
-    layer = keras.layers.RNN(cells)
-    hidden_layer = layer(previous_layer)
-
-    return hidden_layer, cells
-
 class JordanCallback(Callback):
     def __init__(self, layers, cells_list, output_layer, model):
         self.layers = layers
@@ -249,15 +239,40 @@ class JordanCallback(Callback):
         #         K.tf.assign(i.next_layer, self.layers[l + 1])
         #         print("HAY", batch, K.get_value(i.next_layer), K.get_value(self.output_layer))
         #
-        for i in self.cells_list[-1]:
-            if self.model.outputs:
-                K.set_value(i.next_layer, np.array([[0.5]]))
-            else:
-                print("NANI")
+        # for i in self.cells_list[-1]:
+        #     if self.model.outputs:
+        #         # K.set_value(i.next_layer, np.array([[0.5]]))
+        #         i.set_next_layer(self.output_layer)
+        #         i.build((None, 1))
+        #     else:
+        #         print("NANI")
             # K.set_value(i.next_layer, np.array(K.batch_get_value(self.output_layer)).reshape(-1, 1))
 
             # print("HAY", batch, K.get_value(self.output_layer.output))
 
+        # for i in self.cells_list[-1]:
+        #     # print("Rebuilding")
+        #     i.set_next_layer(self.output_layer)
+        #     # i.build((None, 1))
+        a = K.get_value(self.output_layer)
+        print("AAAAAAAAAAAAAAAAAAAAAAA ", a)
+        self.model.layers[1].cell.cells[0].set_next_layer(self.output_layer)
+
+
+
+def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer, activation="tanh"):
+    # n = tf.placeholder(tf.float32, shape=(None, num_nodes_next_layer), name="next_jordan_val")
+    n = K.variable([[-1.0] * num_nodes_next_layer], name="next_jordan_val")
+
+    output_layer = keras.Input(tensor=n, name="next_jordan_val_1")
+
+    cells = [SimpleJordanRNNCell(previous_layer.get_shape()[-1].value, next_layer=output_layer, activation=activation) for _ in
+             range(num_nodes_in_layer)]
+
+    layer = keras.layers.RNN(cells)
+    hidden_layer = layer(previous_layer)
+
+    return hidden_layer, cells
 
 def build_jordan_model(architecture=[],activation="tanh"):
     input_layer = keras.Input((None, architecture[0]))
@@ -287,7 +302,7 @@ def build_jordan_model(architecture=[],activation="tanh"):
             K.tf.assign(i.next_layer, layers[l + 1])
 
 
-    K.tf.assign(cells_list[-1][0].next_layer, output_layer)
+    # K.tf.assign(cells_list[-1][0].next_layer, output_layer)
 
     model = Model([input_layer], output_layer)
     model.Callback_var = JordanCallback(layers=layers, cells_list=cells_list, output_layer=output_layer, model=model)
@@ -346,6 +361,10 @@ def test():
 
 
 def test2():
+    # sess = tf.Session()
+    #
+    # K.set_session(sess)
+
     num_inputs = 1
     num_output_layer_outputs = 1
     x = [random.random() for i in range(100)]

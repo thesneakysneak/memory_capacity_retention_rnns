@@ -166,7 +166,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
 
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
-    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN]  # "jordan_rnn" const.JORDAN_RNN
+    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.BIDIRECTIONAL_LSTM]  # "jordan_rnn" const.JORDAN_RNN
     run = runner
     logfile_location = "danny_masters"
     logfile = logfile_location + "/" + str(thread) + "_" + str(run) + "_num_patterns.log"

@@ -4,7 +4,7 @@ import random
 import numpy as np
 from keras import Input, Model
 from keras.callbacks import ReduceLROnPlateau
-from keras.layers import LSTM, SimpleRNN, GRU, Dense
+from keras.layers import LSTM, SimpleRNN, GRU, Dense, Bidirectional
 from sklearn.metrics import r2_score, confusion_matrix, precision_recall_fscore_support
 
 import experiment_constants as const
@@ -43,8 +43,8 @@ def divisible_by_all(n):
     y = []
     while j < n:
         i += 1
-        x = 12 * i
-        if x % 9 == 0:
+        x = 24 * i
+        if x % 9 == 0 and x % 12 == 0:
             y.append(x)
             j += 1
     return y
@@ -101,6 +101,8 @@ def determine_ave_f_score(predicted, test, f_only=True):
     return fscore/len(predicted)
 
 def get_nodes_in_layer(num_parameters, nn_type):
+    if nn_type == const.BIDIRECTIONAL_LSTM:
+        return int(num_parameters / 24)
     if nn_type == const.LSTM:
         return int(num_parameters / 12)
     if nn_type == const.GRU:
@@ -143,8 +145,8 @@ def train_test_neural_net_architecture(x_train, y_train,
             ls = SimpleRNN(nodes_in_layer, activation=activation_func)(inp)
         elif nn_type == const.GRU:
             ls = GRU(nodes_in_layer, activation=activation_func)(inp)
-        else:
-            ls = JordanRNNCell(nodes_in_layer, activation=activation_func)(inp)
+        elif nn_type == const.BIDIRECTIONAL_LSTM:
+            ls = Bidirectional(LSTM(nodes_in_layer, activation=activation_func))(inp)
     elif type(nodes_in_layer) == list:
         rnn_func_ptr = None
         if nn_type == const.LSTM:
@@ -186,6 +188,34 @@ def train_test_neural_net_architecture(x_train, y_train,
         return determine_ave_f_score(y_predict, y_test)
     return determine_f_score(y_predict, y_test)
 
+def simple_bidirectional():
+    import os
+    import random
+
+    import numpy as np
+    from keras import Input, Model
+    from keras.callbacks import ReduceLROnPlateau
+    from keras.layers import LSTM, SimpleRNN, GRU, Dense, Bidirectional
+    from sklearn.metrics import r2_score, confusion_matrix, precision_recall_fscore_support
+
+    import experiment_constants as const
+    import recurrent_models
+
+    nodes_in_out_layer = 1
+    nodes_in_layer = 1
+    activation_func="sigmoid"
+    batch_size = 10
+
+    inp = Input(shape=(1, 1))
+    ls = Bidirectional(LSTM(nodes_in_layer, activation=activation_func))(inp)
+    output = Dense(nodes_in_out_layer)(ls)
+
+    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
+    model = Model(inputs=[inp], outputs=[output])
+    model.compile(loss='mse', optimizer='adam')
+
+
+    model.fit(x, y, epochs=2200, verbose=2, callbacks=[reduce_lr])
 
 
 def log_contains(log_name, nn_type, activation_func, parameters, nodes_in_layer):
