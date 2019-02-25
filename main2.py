@@ -72,7 +72,7 @@ if __name__ == "__main__":
                       str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "") .replace(" ", ",") \
                       + ' ' + str(runner) + ' ' + str(100) + '" & '
         print("starting ", command_str)
-            # os.system(command_str)
+        os.system(command_str)
 
         # while True:
         #     time.sleep(10)
