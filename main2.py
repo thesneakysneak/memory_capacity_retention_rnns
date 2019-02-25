@@ -33,44 +33,46 @@ if __name__ == "__main__":
         runner = 4
         runner = sys.argv[1:][0]
         print("runner ", runner )
-    for runner in range(1, 6):
+    for runner in range(1, 4):
         random.seed(1000)
-        total_num_parameters = gf.divisible_by_all(10)
+        total_num_parameters = gf.divisible_by_all(9)
         print(total_num_parameters)
-        total_num_parameters = gf.get_runner_experiments(int(runner), total_num_parameters, num_workers=5)
-        print(total_num_parameters)
-        for i in range(len(total_num_parameters)):
-            run_volume_exp.runner = run_length_exp.runner = run_num_exp.runner = runner
-            run_volume_exp.thread = run_length_exp.thread = run_num_exp.thread = i
-            run_volume_exp.total_num_parameters = run_length_exp.total_num_parameters  = run_num_exp.total_num_parameters = [total_num_parameters[i]]
-            # t = threading.Thread(name='Running number of patterns experiment ' + str(i), target=run_num_exp)
-            # t.start()
-            #
-            # t = threading.Thread(name='Running length of patterns experiment ' + str(i), target=run_length_exp)
-            # t.start()
-            #
-            #
-            # t = threading.Thread(name='Running volume of patterns experiment ' + str(i), target=run_volume_exp)
-            # t.start()
-            command_str = 'bash -c "python3 length_of_sequence.py ' + \
-                          str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
-                          + ' ' + str(runner) + ' ' + str(i) + '" & '
-            print("starting ", command_str)
-            os.system(command_str)
-            time.sleep(5)
+        total_num_parameters = gf.get_runner_experiments(int(runner), total_num_parameters, num_workers=3)
+        print(str(total_num_parameters).strip(), total_num_parameters[0])
+        if total_num_parameters[0] is None or total_num_parameters[0] == "":
+            total_num_parameters = total_num_parameters[1:]
+        # for i in range(len(total_num_parameters)):
+        run_volume_exp.runner = run_length_exp.runner = run_num_exp.runner = runner
+        run_volume_exp.thread = run_length_exp.thread = run_num_exp.thread = 100
+        run_volume_exp.total_num_parameters = run_length_exp.total_num_parameters  = run_num_exp.total_num_parameters = total_num_parameters
+        # t = threading.Thread(name='Running number of patterns experiment ' + str(i), target=run_num_exp)
+        # t.start()
+        #
+        # t = threading.Thread(name='Running length of patterns experiment ' + str(i), target=run_length_exp)
+        # t.start()
+        #
+        #
+        # t = threading.Thread(name='Running volume of patterns experiment ' + str(i), target=run_volume_exp)
+        # t.start()
+        command_str = 'bash -c "python3 length_of_sequence.py ' + \
+                      str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "") .replace(" ", ",")\
+                      + ' ' + str(runner) + ' ' + str(100) + '" & '
+        print("starting ", command_str)
+        os.system(command_str)
+        time.sleep(5)
 
-            command_str = 'bash -c "python3 num_patterns.py ' + \
-                          str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
-                          + ' ' + str(runner) + ' ' + str(i) + '" & '
-            print("starting ", command_str)
-            os.system(command_str)
-            time.sleep(5)
+        command_str = 'bash -c "python3 num_patterns.py ' + \
+                      str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "") .replace(" ", ",")\
+                      + ' ' + str(runner) + ' ' + str(100) + '" & '
+        print("starting ", command_str)
+        os.system(command_str)
+        time.sleep(5)
 
-            command_str = 'bash -c "python3 volume_experiment.py ' + \
-                          str([total_num_parameters[i]]).replace(" ", "").replace("[", "").replace("]", "") \
-                          + ' ' + str(runner) + ' ' + str(i) + '" & '
-            print("starting ", command_str)
-            os.system(command_str)
+        command_str = 'bash -c "python3 volume_experiment.py ' + \
+                      str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "") .replace(" ", ",") \
+                      + ' ' + str(runner) + ' ' + str(100) + '" & '
+        print("starting ", command_str)
+            # os.system(command_str)
 
         # while True:
         #     time.sleep(10)
