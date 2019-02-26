@@ -156,10 +156,11 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
                                 x_train, y_train,
                                 x_test, y_test,
                                 nodes_in_layer=nodes_in_layer,
-                                nodes_in_out_layer=1,
+                                nodes_in_out_layer=start,
                                 nn_type=nn_type,
                                 activation_func=activation_func,
-                                verbose=1)
+                                verbose=1,
+                                one_hot=True)
 
                             #
                             if score_after_training_net > 0.98:
