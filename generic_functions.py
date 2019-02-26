@@ -1,9 +1,10 @@
 import os
 import random
 
+import keras
 import numpy as np
 from keras import Input, Model
-from keras.callbacks import ReduceLROnPlateau
+from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from keras.layers import LSTM, SimpleRNN, GRU, Dense, Bidirectional
 from sklearn.metrics import r2_score, confusion_matrix, precision_recall_fscore_support
 
@@ -12,6 +13,97 @@ import recurrent_models
 from scratch_space.jordan_rnn import JordanRNNCell
 
 
+
+class EarlyStopByF1(keras.callbacks.Callback):
+    def __init__(self, value=0, verbose=0):
+        super(keras.callbacks.Callback, self).__init__()
+        self.value = value
+        self.verbose = verbose
+        self.prev_delta_score = 0.0
+        self.delta_score = 0.0
+        self.patience = 0
+
+    def on_epoch_end(self, epoch, logs={}):
+
+        predict = np.asarray(self.model.predict(self.validation_data[0], batch_size=10))
+        target = self.validation_data[1]
+        score = 0.0
+        if len(predict[0]) > 1:
+            score = determine_ave_f_score(predict, target)
+        else:
+            score = determine_f_score(predict, target)
+        self.delta_score = score - self.prev_delta_score
+        self.prev_delta_score = score
+
+        print("Epoch %05d: delta_score" % epoch, score, self.delta_score, self.patience)
+        if np.abs(self.delta_score) < 0.05:
+            self.patience += 1
+        else:
+            self.patience = 0
+
+        if self.patience >= 700 or score > 0.98:
+            if self.verbose > 0:
+                print("Epoch %05d: early stopping Threshold" % epoch)
+            self.model.stop_training = True
+
+
+class EarlyStopByF1OneHot(keras.callbacks.Callback):
+    def __init__(self, value=0, verbose=0):
+        super(keras.callbacks.Callback, self).__init__()
+        self.value = value
+        self.verbose = verbose
+        self.prev_delta_score = 0.0
+        self.delta_score = 0.0
+        self.patience = 0
+
+    def on_epoch_end(self, epoch, logs={}):
+
+        predict = np.asarray(self.model.predict(self.validation_data[0], batch_size=10))
+        target = self.validation_data[1]
+        score = 0.0
+
+        y_true = [np.argmax(x) for x in target]
+        y_predict_unscaled = [np.argmax(x) for x in predict]
+        score = determine_f_score(y_predict_unscaled, y_true)
+        self.delta_score = score - self.prev_delta_score
+        self.prev_delta_score = score
+
+        print("Epoch %05d: delta_score" % epoch, score, self.delta_score, self.patience)
+        if np.abs(self.delta_score) < 0.05:
+            self.patience += 1
+        else:
+            self.patience = 0
+
+        if self.patience >= 700 or score > 0.98:
+            if self.verbose > 0:
+                print("Epoch %05d: early stopping Threshold" % epoch)
+            self.model.stop_training = True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###########################################################
+#
+#######################################################
 def get_runner_experiments(runner, total_num_parameters):
     total_num_parameters = np.array(total_num_parameters).reshape(-1, 5)
     for i in range(5):
@@ -136,7 +228,8 @@ def train_test_neural_net_architecture(x_train, y_train,
                                        x_test, y_test,
                                        nodes_in_layer=2, nodes_in_out_layer=1,
                                        nn_type="lstm", activation_func="sigmoid",
-                                       verbose=0, epocs=10000):
+                                       verbose=0, epocs=10000,
+                                       one_hot=False):
     #
     batch_size = int(len(x_train)*0.10)
     #
@@ -215,12 +308,23 @@ def train_test_neural_net_architecture(x_train, y_train,
                 #
     output = Dense(nodes_in_out_layer)(ls)
     #
-    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.05, patience=10, min_lr=0.0000001)
+    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
+                                  patience=5, min_lr=0.001)
+
+    if one_hot:
+        earlystop = EarlyStopByF1OneHot(value=.95, verbose=1)  # EarlyStopByF1(value=.99, verbose=1)
+    else:
+        earlystop = EarlyStopping(monitor='val_loss',
+                                   min_delta=0,
+                                   patience=200,
+                                   verbose=0, mode='auto')
+
+
     model = Model(inputs=[inp], outputs=[output])
     model.compile(optimizer='adam', loss='mean_squared_error')
     model.fit(x_train, y_train,
               validation_split=.2,
-              callbacks=[reduce_lr, recurrent_models.earlystop],
+              callbacks=[reduce_lr, earlystop],
               epochs=epocs,
               batch_size=batch_size,
               verbose=verbose)
