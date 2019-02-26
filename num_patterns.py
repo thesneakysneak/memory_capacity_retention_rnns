@@ -27,7 +27,7 @@ from scratch_space.jordan_rnn import JordanRNNCell
 '''
 
 
-def generate_sets(num_patterns):
+def generate_sets(num_patterns, scaled=True):
     correlated = True
     x = y = None
     while correlated:
@@ -40,8 +40,10 @@ def generate_sets(num_patterns):
             correlated = gf.are_sets_correlated(x, y)
 
     #
-    x = [1.0 / z for z in x]
-    y = [1.0 / z for z in y]
+    if scaled:
+        x = [1.0 / z for z in x]
+        y = [1.0 / z for z in y]
+
     #
     training_set = list(zip(x, y))
     training_set = training_set * 100
@@ -138,7 +140,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
                 extra_layers.append(nodes_in_layer)
                 nodes_in_layer = extra_layers
                 for activation_func in activation_functions:
-                    start = 2
+                    start = 5
                     prev = 0
                     smallest_not_retained = 30
                     largest_retained = 0
@@ -149,12 +151,12 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
                                            nodes_in_layer=str(nodes_in_layer)):
 
                         while (smallest_not_retained - largest_retained) > 1:
-                            x_train, y_train, x_test, y_test = generate_sets(start)
+                            x_train, y_train, x_test, y_test = generate_sets_class(start)
                             score_after_training_net, model = gf.train_test_neural_net_architecture(
                                 x_train, y_train,
                                 x_test, y_test,
                                 nodes_in_layer=nodes_in_layer,
-                                nodes_in_out_layer=1,
+                                nodes_in_out_layer=start,
                                 nn_type=nn_type,
                                 activation_func=activation_func,
                                 verbose=1)

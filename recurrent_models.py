@@ -59,13 +59,46 @@ class EarlyStopByF1(keras.callbacks.Callback):
         self.delta_score = score - self.prev_delta_score
         self.prev_delta_score = score
 
-        print("Epoch %05d: delta_score" % epoch, self.delta_score, self.patience)
+        print("Epoch %05d: delta_score" % epoch, score, self.delta_score, self.patience)
         if np.abs(self.delta_score) < 0.05:
             self.patience += 1
         else:
             self.patience = 0
 
-        if self.patience >= 200 or score > 0.98:
+        if self.patience >= 700 or score > 0.98:
+            if self.verbose > 0:
+                print("Epoch %05d: early stopping Threshold" % epoch)
+            self.model.stop_training = True
+
+
+class EarlyStopByF1OneHot(keras.callbacks.Callback):
+    def __init__(self, value=0, verbose=0):
+        super(keras.callbacks.Callback, self).__init__()
+        self.value = value
+        self.verbose = verbose
+        self.prev_delta_score = 0.0
+        self.delta_score = 0.0
+        self.patience = 0
+
+    def on_epoch_end(self, epoch, logs={}):
+
+        predict = np.asarray(self.model.predict(self.validation_data[0], batch_size=10))
+        target = self.validation_data[1]
+        score = 0.0
+
+        y_true = [np.argmax(x) for x in target]
+        y_predict_unscaled = [np.argmax(x) for x in predict]
+        score = gf.determine_f_score(y_predict_unscaled, y_true)
+        self.delta_score = score - self.prev_delta_score
+        self.prev_delta_score = score
+
+        print("Epoch %05d: delta_score" % epoch, score, self.delta_score, self.patience)
+        if np.abs(self.delta_score) < 0.05:
+            self.patience += 1
+        else:
+            self.patience = 0
+
+        if self.patience >= 700 or score > 0.98:
             if self.verbose > 0:
                 print("Epoch %05d: early stopping Threshold" % epoch)
             self.model.stop_training = True
@@ -212,9 +245,10 @@ earlystop2 = EarlyStopping(monitor='val_loss',
                            patience=10,
                            verbose=0, mode='auto')
 
-earlystop = EarlyStopByF1(value=.99, verbose=1)
+earlystop = EarlyStopByF1OneHot(value=.99, verbose=1) #EarlyStopByF1(value=.99, verbose=1)
 
-reduce_lr = ReduceLROnPlateau(monitor='accuracy', factor=0.2, patience=3, min_lr=0.000001)
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
+                              patience=5, min_lr=0.001)
 
 reset_state = ResetState()
 

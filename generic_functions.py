@@ -32,10 +32,9 @@ def true_accuracy(y_predict, y_true):
     y_predict_unscaled = [round(x) for x in y_predict]
     return r2_score(y_predict_unscaled, y_true)
 
-
 def convert_to_closest(predicted_value, possible_values):
-    # print(possible_values, predicted_value)
-    return min(possible_values, key=lambda x: abs(x - predicted_value))
+    return min(possible_values, key=lambda x: abs(np.linalg.norm(x - predicted_value)))
+
 
 
 def divisible_by_all(n):
@@ -79,8 +78,8 @@ def determine_f_score(predicted, test, f_only=True):
     """
     p_categories = [int(1/x) if x > 0.0000001 else 0 for x in predicted ]
     t_categories = [int(1/x) if x > 0.0000001 else 0 for x in test]
-    print(p_categories)
-    print(t_categories)
+    # print(p_categories)
+    # print(t_categories)
 
     p_categories = [convert_to_closest(x, list(set(t_categories))) for x in p_categories]
 
@@ -137,7 +136,7 @@ def train_test_neural_net_architecture(x_train, y_train,
                                        x_test, y_test,
                                        nodes_in_layer=2, nodes_in_out_layer=1,
                                        nn_type="lstm", activation_func="sigmoid",
-                                       verbose=0, epocs=1000):
+                                       verbose=0, epocs=10000):
     #
     batch_size = int(len(x_train)*0.10)
     #
