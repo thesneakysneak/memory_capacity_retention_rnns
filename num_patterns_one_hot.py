@@ -108,7 +108,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
 
     run = runner
     logfile_location = "danny_masters"
-    logfile = logfile_location + "/" + str(thread) + "_" + str(run) + "_num_patterns.log"
+    logfile = logfile_location + "/" + str(thread) + "_" + str(run) + "_num_patterns_one_hot.log"
     logfile = os.path.abspath(logfile)
 
     if not os.path.exists(logfile):
