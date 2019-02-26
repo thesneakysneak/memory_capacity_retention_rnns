@@ -314,10 +314,11 @@ def train_test_neural_net_architecture(x_train, y_train,
     if one_hot:
         earlystop = EarlyStopByF1OneHot(value=.95, verbose=1)  # EarlyStopByF1(value=.99, verbose=1)
     else:
-        earlystop = EarlyStopping(monitor='val_loss',
-                                   min_delta=0,
-                                   patience=200,
-                                   verbose=0, mode='auto')
+        earlystop = EarlyStopByF1(value=.95, verbose=1)
+        # earlystop = EarlyStopping(monitor='val_loss',
+        #                            min_delta=0,
+        #                            patience=200,
+        #                            verbose=0, mode='auto')
 
 
     model = Model(inputs=[inp], outputs=[output])
