@@ -36,7 +36,7 @@ class EarlyStopByF1(keras.callbacks.Callback):
         self.prev_delta_score = score
 
         print("Epoch %05d: delta_score" % epoch, score, self.delta_score, self.patience)
-        if np.abs(self.delta_score) < 0.05:
+        if np.abs(self.delta_score) < 0.05 or self.prev_delta_score >= score:
             self.patience += 1
         else:
             self.patience = 0
@@ -69,7 +69,7 @@ class EarlyStopByF1OneHot(keras.callbacks.Callback):
         self.prev_delta_score = score
 
         print("Epoch %05d: delta_score" % epoch, score, self.delta_score, self.patience)
-        if np.abs(self.delta_score) < 0.05:
+        if np.abs(self.delta_score) < 0.05 or self.prev_delta_score >= score:
             self.patience += 1
         else:
             self.patience = 0
@@ -309,7 +309,7 @@ def train_test_neural_net_architecture(x_train, y_train,
     output = Dense(nodes_in_out_layer)(ls)
     #
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
-                                  patience=5, min_lr=0.001)
+                                  patience=10, min_lr=0.0000000000001)
 
     if one_hot:
         earlystop = EarlyStopByF1OneHot(value=.95, verbose=1)  # EarlyStopByF1(value=.99, verbose=1)
