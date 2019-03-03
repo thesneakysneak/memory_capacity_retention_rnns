@@ -22,8 +22,8 @@ def true_accuracy(y_predict, y_true):
     return r2_score(y_predict_unscaled, y_true)
 
 def generate_volume_set(sequence_length_=3000, max_count=10, total_num_patterns=100, total_num_to_count=10):
-    x = [0] * total_num_patterns
-    y = [0] * total_num_patterns
+    x = []
+    y = []
     #
     assert max_count*total_num_to_count < sequence_length_
     for i in range(total_num_patterns):
@@ -35,12 +35,16 @@ def generate_volume_set(sequence_length_=3000, max_count=10, total_num_patterns=
 
         set_of_nums = random.sample([1, 2] * sequence_length_, (sequence_length_ - k)) + array_to_add
         random.shuffle(set_of_nums)
-        x[i] = numpy.array(set_of_nums).reshape(-1, 1).astype(np.float32)
-        y[i] = numpy.array([1. / p for p in random_lengths]).astype(np.float32)
+        x.append(numpy.array(set_of_nums).reshape(-1, 1).astype(np.float32))
+        y.append(numpy.array([1. / p for p in random_lengths]).astype(np.float32))
     #
     single_list = list(zip(x, y))
     random.shuffle(single_list)
     x, y = zip(*single_list)
+
+    x = list(x)
+    y = list(y)
+
     #
     x = numpy.array(x)
     y = numpy.array(y)

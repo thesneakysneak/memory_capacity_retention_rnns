@@ -44,7 +44,7 @@ def generate_count_set(sequence_length_=100, max_count=10, total_num_patterns=10
 
     x = list(x)
     y = list(y)
-    
+
     x = numpy.asarray(x)
     y = numpy.asarray(y)
     return x, y
