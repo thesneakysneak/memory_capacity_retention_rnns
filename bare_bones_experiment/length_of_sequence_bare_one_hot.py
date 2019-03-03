@@ -59,7 +59,7 @@ for i in range(500):
     print(k)
     set_of_nums = random.sample([0]*sequence_len,(sequence_len-k)) + [1]*k
     random.shuffle(set_of_nums)
-    x.append([[float(i)] for i in set_of_nums])
+    x.append([[i] for i in set_of_nums])
     y.append([1/k])
     y_unscaled.append(k)
 
@@ -68,50 +68,38 @@ random.shuffle(single_list)
 
 x, y, y_unscaled = zip(*single_list)
 
+
+
 x = numpy.asarray(x)
 y = numpy.asarray(y)
+y = numpy.asarray(pd.get_dummies(y_unscaled))
 
-#
-# length_ = 50
-#
-# x = [0] * length_
-# y = [0] * length_
-#
-# possible = []
-# for i in range(50):
-#     k = random.randint(1, 5)
-#     possible.append(k)
-#     set_of_nums = random.sample([1, 2] * length_, (length_ - k)) + [3] * k
-#     random.shuffle(set_of_nums)
-#     x[i] = numpy.array(set_of_nums).reshape(-1, 1).astype(np.float32)
-#     y[i] = numpy.array(1. / k).astype(np.float32)
-#
-# x = numpy.array(x)
-# y = numpy.array(y)
 
 
 inp = Input(shape=(None, 1))
-ls = LSTM(1, activation="sigmoid")(inp)
-output = Dense(1)(ls)
+ls = LSTM(10, activation="sigmoid")(inp)
+output = Dense(y.shape[1])(ls)
 model = Model(inputs=[inp], outputs=[output])
-model.compile(optimizer='adam', loss='mean_squared_logarithmic_error')
+
+model.compile(optimizer="adam", loss='mse' )
 
 
 
-early_stp = EarlyStopping(monitor="val_loss", patience=20)
-reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
-                              patience=1, min_lr=0.00000001)
+# early_stp = EarlyStopping(monitor="val_loss", patience=10)
+# reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.9,
+#                               patience=1, min_lr=0.00000001)
 
-model.fit(x, y, callbacks=[early_stp, reduce_lr], batch_size=3, epochs=100)
+# one_hot_stop = EarlyStopByF1OneHot()
+
+model.fit(x, y, validation_split=0.1, batch_size=10, epochs=1000)
 
 y_predicted = model.predict(x)
 
 for i in range(y_predicted.shape[0]):
-    p = convert_to_closest(1/y_predicted[i][0], set([x for x in range(1, max_count+1)]))
-    y_e = convert_to_closest(1/y[i], set([x for x in range(1, max_count+1)]))
-    print(p, y_predicted[i][0],
+    p = np.argmax(y_predicted[i])+1
+    y_e = np.argmax(y[i])+1
+    print(p, y_predicted[i],
           y_e, y[i], (y_e == p),
           y_unscaled[i])
     # print( "     ", y_predicted[i][0], y[i], y_unscaled[i])
-
 
