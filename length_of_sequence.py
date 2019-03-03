@@ -42,6 +42,9 @@ def generate_count_set(sequence_length_=100, max_count=10, total_num_patterns=10
     x, y = zip(*single_list)
     #
 
+    x = list(x)
+    y = list(y)
+    
     x = numpy.asarray(x)
     y = numpy.asarray(y)
     return x, y
@@ -67,6 +70,10 @@ def generate_count_set_one_hot(sequence_length_=100, max_count=10, total_num_pat
     x, y, y_unscaled = zip(*single_list)
     #
 
+    x = list(x)
+    y = list(y)
+    y_unscaled = list(y_unscaled)
+    
     x = numpy.asarray(x)
     y = numpy.asarray(y)
 
