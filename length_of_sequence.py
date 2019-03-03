@@ -13,7 +13,7 @@ import random
 import experiment_constants as const
 import recurrent_models
 import generic_functions as gf
-
+import pandas as pd
 length_of_series = 1000
 
 
@@ -26,23 +26,51 @@ def convert_to_closest(predicted_value, possible_values):
     return min(possible_values, key=lambda x: abs(x - predicted_value))
 
 
-def generate_count_set(sequence_length_=3000, max_count=10, total_num_patterns=100):
-    x = [0] * total_num_patterns
-    y = [0] * total_num_patterns
+def generate_count_set(sequence_length_=100, max_count=10, total_num_patterns=100):
+    x = []
+    y = []
     #
     for i in range(total_num_patterns):
         k = i % max_count + 1
-        set_of_nums = random.sample([1, 2] * sequence_length_, (sequence_length_ - k)) + [3] * k
+        set_of_nums = random.sample([0.0] * sequence_length_, (sequence_length_- k)) + [1.0] * k
         random.shuffle(set_of_nums)
-        x[i] = numpy.array(set_of_nums).reshape(-1, 1).astype(np.float32)
-        y[i] = numpy.array(1. / k).astype(np.float32)
+        x.append([[i] for i in set_of_nums])
+        y.append([1 / k])
     #
     single_list = list(zip(x, y))
     random.shuffle(single_list)
     x, y = zip(*single_list)
     #
-    x = numpy.array(x)
-    y = numpy.array(y)
+
+    x = numpy.asarray(x)
+    y = numpy.asarray(y)
+    return x, y
+
+
+def generate_count_set_one_hot(sequence_length_=100, max_count=10, total_num_patterns=100):
+    x = []
+    y = []
+    y_unscaled = []
+    #
+    for i in range(total_num_patterns):
+        k = i % max_count + 1
+        set_of_nums = random.sample([0.0] * sequence_length_,
+                                    (sequence_length_- k)) + [1.0] * k
+        random.shuffle(set_of_nums)
+        x.append([[i] for i in set_of_nums])
+        y.append([1 / k])
+        y_unscaled.append(k)
+    #
+
+    single_list = list(zip(x, y, y_unscaled))
+    random.shuffle(single_list)
+    x, y, y_unscaled = zip(*single_list)
+    #
+
+    x = numpy.asarray(x)
+    y = numpy.asarray(y)
+
+    y = numpy.asarray(pd.get_dummies(y_unscaled))
     return x, y
 
 

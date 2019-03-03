@@ -55,6 +55,15 @@ def generate_sets(num_patterns, scaled=True):
     #
     x_train, y_train = zip(*training_set)
     x_test, y_test = zip(*test_set)
+
+
+    # Numpy does not know how to deal with tuples
+    x_train = list(x_train)
+    y_train = list(y_train)
+
+    x_test = list(x_test)
+    y_test = list(y_test)
+
     #
     x_train = np.array(x_train)
     y_train = np.array(y_train)
