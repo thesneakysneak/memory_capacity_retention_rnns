@@ -36,46 +36,98 @@ def true_accuracy(y_predict, y_true):
     return r2_score(y_predict_unscaled, y_true)
 
 
-num_patterns = 10
-correlated = True
-x = y = None
-while correlated:
+
+
+def generate_sets(num_patterns, scaled=True):
+    correlated = True
+    x = y = None
+    while correlated:
+        x = random.sample(range(1, num_patterns + 1), num_patterns)
+        y = random.sample(range(1, num_patterns + 1), num_patterns)
+        # print(x, y)
+        if num_patterns == 1:
+            correlated = False
+        else:
+            correlated = gf.are_sets_correlated(x, y)
+
+    #
+    if scaled:
+        x = [z / num_patterns for z in x]
+        y = [z / num_patterns for z in y]
+
+    #
+    training_set = list(zip(x, y))
+    training_set = training_set * 100
+    random.shuffle(training_set)
+    #
+    test_set = list(zip(x, y))
+    test_set = test_set * 10
+    random.shuffle(test_set)
+    #
+    x_train, y_train = zip(*training_set)
+    x_test, y_test = zip(*test_set)
+
+    # Numpy does not know how to deal with tuples
+    x_train = list(x_train)
+    y_train = list(y_train)
+
+    x_test = list(x_test)
+    y_test = list(y_test)
+
+    #
+    x_train = np.array(x_train)
+    y_train = np.array(y_train)
+    x_train = x_train.reshape(-1, 1, 1).astype(np.float32)
+    y_train = y_train.reshape(-1, 1).astype(np.float32)
+    #
+    x_test = np.array(x_test)
+    y_test = np.array(y_test)
+    x_test = x_test.reshape(-1, 1, 1).astype(np.float32)
+    y_train = y_train.reshape(-1, 1).astype(np.float32)
+    #
+    return x_train, y_train, x_test, y_test
+
+
+def generate_sets_one_hot(num_patterns):
     x = random.sample(range(1, num_patterns + 1), num_patterns)
-    y = random.sample(range(1, num_patterns + 1), num_patterns)
-    # print(x, y)
-    if num_patterns == 1:
-        correlated = False
-    else:
-        correlated = gf.are_sets_correlated(x, y)
-
-scaled = True
-#
-if scaled:
+    y = np.eye(num_patterns)
+    #
     x = [1.0 / z for z in x]
-    y = [1.0 / z for z in y]
+    #
+    training_set = list(zip(x, y))
+    training_set = training_set * 100
+    random.shuffle(training_set)
+    #
+    test_set = list(zip(x, y))
+    test_set = test_set * 10
+    random.shuffle(test_set)
+    #
+    x_train, y_train = zip(*training_set)
+    x_test, y_test = zip(*test_set)
 
-#
-training_set = list(zip(x, y))
-training_set = training_set * 100
-random.shuffle(training_set)
-#
-test_set = list(zip(x, y))
-test_set = test_set * 10
-random.shuffle(test_set)
-#
-x_train, y_train = zip(*training_set)
-x_test, y_test = zip(*test_set)
-#
-x_train = np.array(x_train)
-y_train = np.array(y_train)
-x_train = x_train.reshape(-1, 1, 1).astype(np.float32)
-y_train = y_train.reshape(-1, 1).astype(np.float32)
-#
-x_test = np.array(x_test)
-y_test = np.array(y_test)
-x_test = x_test.reshape(-1, 1, 1).astype(np.float32)
-y_test = y_test.reshape(-1, 1).astype(np.float32)
+    # Numpy does not know how to deal with tuples
+    x_train = list(x_train)
+    y_train = list(y_train)
 
+    x_test = list(x_test)
+    y_test = list(y_test)
+
+    #
+    x_train = np.array(x_train)
+    y_train = np.array(y_train)
+    x_train = x_train.reshape(-1, 1, 1).astype(np.float32)
+    y_train = y_train.reshape(-1, num_patterns).astype(np.float32)
+    #
+    x_test = np.array(x_test)
+    y_test = np.array(y_test)
+    x_test = x_test.reshape(-1, 1, 1).astype(np.float32)
+    y_train = y_train.reshape(-1, num_patterns).astype(np.float32)
+    #
+    return x_train, y_train, x_test, y_test
+
+
+
+x_train, y_train, x_test, y_test = generate_sets(10, scaled=True)
 #
 
 inp = Input(shape=(None, 1))
@@ -88,7 +140,7 @@ reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,
 model = Model(inputs=[inp], outputs=[output])
 model.compile(optimizer='adam', loss='mean_squared_error')
 
-model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr], epochs=100000)
+model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr], epochs=1000)
 
 y_predicted = model.predict(x_test)
 

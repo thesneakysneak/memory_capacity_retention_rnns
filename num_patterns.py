@@ -41,8 +41,8 @@ def generate_sets(num_patterns, scaled=True):
 
     #
     if scaled:
-        x = [1.0 / z for z in x]
-        y = [1.0 / z for z in y]
+        x = [z / num_patterns for z in x]
+        y = [z / num_patterns for z in y]
 
     #
     training_set = list(zip(x, y))
@@ -81,7 +81,8 @@ def generate_sets_one_hot(num_patterns):
     x = random.sample(range(1, num_patterns + 1), num_patterns)
     y = np.eye(num_patterns)
     #
-    x = [1.0 / z for z in x]
+    x = [z / num_patterns for z in x]
+
     #
     training_set = list(zip(x, y))
     training_set = training_set * 100

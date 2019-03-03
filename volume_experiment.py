@@ -24,16 +24,17 @@ def true_accuracy(y_predict, y_true):
 def generate_volume_set(sequence_length_=3000, max_count=10, total_num_patterns=100, total_num_to_count=10):
     x = []
     y = []
-    #
+    # TODO Validate this
     assert max_count*total_num_to_count < sequence_length_
     for i in range(total_num_patterns):
         random_lengths = [random.randint(1, max_count) for p in range(total_num_to_count)]
         k = sum(random_lengths)
         array_to_add = []
         for l in range(total_num_to_count):
-            array_to_add.extend([l+3]*random_lengths[l])
+            array_to_add.extend([(l+3)/max_count]*random_lengths[l])
 
-        set_of_nums = random.sample([1, 2] * sequence_length_, (sequence_length_ - k)) + array_to_add
+        set_of_nums = random.sample([1.0/max_count] * sequence_length_,
+                                    (sequence_length_ - k)) + array_to_add
         random.shuffle(set_of_nums)
         x.append(numpy.array(set_of_nums).reshape(-1, 1).astype(np.float32))
         y.append(numpy.array([1. / p for p in random_lengths]).astype(np.float32))
