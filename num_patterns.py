@@ -27,7 +27,7 @@ from scratch_space.jordan_rnn import JordanRNNCell
 '''
 
 
-def generate_sets(num_patterns, scaled=True):
+def generate_sets(num_patterns):
     correlated = True
     x = y = None
     while correlated:
@@ -40,9 +40,8 @@ def generate_sets(num_patterns, scaled=True):
             correlated = gf.are_sets_correlated(x, y)
 
     #
-    if scaled:
-        x = [z / num_patterns for z in x]
-        y = [z / num_patterns for z in y]
+    x = [z / num_patterns for z in x]
+    y = [z / num_patterns for z in y]
 
     #
     training_set = list(zip(x, y))

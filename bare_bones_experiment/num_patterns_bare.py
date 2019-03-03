@@ -38,7 +38,7 @@ def true_accuracy(y_predict, y_true):
 
 
 
-def generate_sets(num_patterns, scaled=True):
+def generate_sets(num_patterns):
     correlated = True
     x = y = None
     while correlated:
@@ -51,9 +51,9 @@ def generate_sets(num_patterns, scaled=True):
             correlated = gf.are_sets_correlated(x, y)
 
     #
-    if scaled:
-        x = [z / num_patterns for z in x]
-        y = [z / num_patterns for z in y]
+
+    x = [z / num_patterns for z in x]
+    y = [z / num_patterns for z in y]
 
     #
     training_set = list(zip(x, y))
@@ -127,12 +127,12 @@ def generate_sets_one_hot(num_patterns):
 
 
 
-x_train, y_train, x_test, y_test = generate_sets(10, scaled=True)
+x_train, y_train, x_test, y_test = generate_sets_one_hot(10)
 #
 
 inp = Input(shape=(None, 1))
 ls = SimpleRNN(10)(inp)
-output = Dense(1)(ls)
+output = Dense(y_train.shape[-1])(ls)
 
 
 reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,
