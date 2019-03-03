@@ -127,11 +127,11 @@ def generate_sets_one_hot(num_patterns):
 
 
 
-x_train, y_train, x_test, y_test = generate_sets_one_hot(10)
+x_train, y_train, x_test, y_test = generate_sets_one_hot(5)
 #
 
 inp = Input(shape=(None, 1))
-ls = SimpleRNN(10)(inp)
+ls = SimpleRNN(1)(inp)
 output = Dense(y_train.shape[-1])(ls)
 
 
@@ -140,20 +140,17 @@ reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,
 model = Model(inputs=[inp], outputs=[output])
 model.compile(optimizer='adam', loss='mean_squared_error')
 
-model.fit(x_train, y_train, validation_split=.2, callbacks=[reduce_lr], epochs=1000)
+model.fit(x_train, y_train, batch_size=10, validation_split=.2, callbacks=[reduce_lr], epochs=1000)
 
 y_predicted = model.predict(x_test)
 
 
-y_predicted_ = [convert_to_closest(i, set([x[0] for x in list(y_test)])) for i in y_predicted ]
-y_test_ = [convert_to_closest(i, set([x[0] for x in list(y_test)])) for i in y_test ]
 
-gf.determine_f_score(y_predicted_, y_test_)
+# print(gf.true_accuracy_one_hot(y_predicted, y_test))
 
-
-# Even at 100000 epocs this does not have an effect
-for i in range(len(y_predicted_)):
-    print(y_predicted_[i], y_test_[i])
+# Even with the traditional orchestration and one hot encoding, it still fails
+for i in range(len(y_predicted)):
+    print(np.argmax(y_predicted[i]), np.argmax(y_test[i]))
 
 
 
@@ -241,9 +238,9 @@ model = Model(inputs=[inp], outputs=[output])
 
 
 # create and fit the LSTM network
-model = Sequential()
-model.add(SimpleRNN(100, input_shape=(None, 1)))
-model.add(Dense(len(y_train[0])))
+# model = Sequential()
+# model.add(SimpleRNN(100, input_shape=(None, 1)))
+# model.add(Dense(len(y_train[0])))
 
 model.compile(loss='mean_squared_error', optimizer='adam')
 
