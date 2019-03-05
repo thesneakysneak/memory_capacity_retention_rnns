@@ -27,9 +27,10 @@ from scratch_space.jordan_rnn import JordanRNNCell
 '''
 
 
-def generate_sets(num_patterns):
+def generate_sets(num_patterns, one_hot=False):
     correlated = True
     x = y = None
+
     while correlated:
         x = random.sample(range(1, num_patterns + 1), num_patterns)
         y = random.sample(range(1, num_patterns + 1), num_patterns)
@@ -41,8 +42,11 @@ def generate_sets(num_patterns):
 
     #
     x = [z / num_patterns for z in x]
-    y = [z / num_patterns for z in y]
 
+    if one_hot:
+        y = np.eye(num_patterns)
+    else:
+        y = [z / num_patterns for z in y]
     #
     training_set = list(zip(x, y))
     training_set = training_set * 100
@@ -66,56 +70,28 @@ def generate_sets(num_patterns):
     x_train = np.array(x_train)
     y_train = np.array(y_train)
     x_train = x_train.reshape(-1, 1, 1).astype(np.float32)
-    y_train = y_train.reshape(-1, 1).astype(np.float32)
+
+    if one_hot:
+        y_train = y_train.astype(np.float32)
+    else:
+        y_train = y_train.reshape(-1, 1).astype(np.float32)
     #
     x_test = np.array(x_test)
     y_test = np.array(y_test)
     x_test = x_test.reshape(-1, 1, 1).astype(np.float32)
-    y_train = y_train.reshape(-1, 1).astype(np.float32)
+
+
+    if one_hot:
+        y_test = y_test.astype(np.float32)
+    else:
+        y_test = y_test.reshape(-1, 1).astype(np.float32)
+
     #
     return x_train, y_train, x_test, y_test
 
 
-def generate_sets_one_hot(num_patterns):
-    x = random.sample(range(1, num_patterns + 1), num_patterns)
-    y = np.eye(num_patterns)
-    #
-    x = [z / num_patterns for z in x]
 
-    #
-    training_set = list(zip(x, y))
-    training_set = training_set * 100
-    random.shuffle(training_set)
-    #
-    test_set = list(zip(x, y))
-    test_set = test_set * 10
-    random.shuffle(test_set)
-    #
-    x_train, y_train = zip(*training_set)
-    x_test, y_test = zip(*test_set)
-
-    # Numpy does not know how to deal with tuples
-    x_train = list(x_train)
-    y_train = list(y_train)
-
-    x_test = list(x_test)
-    y_test = list(y_test)
-
-    #
-    x_train = np.array(x_train)
-    y_train = np.array(y_train)
-    x_train = x_train.reshape(-1, 1, 1).astype(np.float32)
-    y_train = y_train.reshape(-1, num_patterns).astype(np.float32)
-    #
-    x_test = np.array(x_test)
-    y_test = np.array(y_test)
-    x_test = x_test.reshape(-1, 1, 1).astype(np.float32)
-    y_train = y_train.reshape(-1, num_patterns).astype(np.float32)
-    #
-    return x_train, y_train, x_test, y_test
-
-
-def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
+def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=False):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
     network_types = [const.LSTM, const.GRU, const.ELMAN_RNN,
@@ -124,7 +100,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
 
     run = runner
     logfile_location = "danny_masters"
-    logfile = logfile_location + "/" + str(thread) + "_" + str(run) + "_num_patterns.log"
+    logfile = logfile_location + "/" + str(thread) + "_" + str(run) + "_" + str(one_hot)+ "_num_patterns.log"
     logfile = os.path.abspath(logfile)
 
     if not os.path.exists(logfile):
@@ -167,7 +143,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1):
                                            nodes_in_layer=str(nodes_in_layer)):
 
                         while (smallest_not_retained - largest_retained) > 1:
-                            x_train, y_train, x_test, y_test = generate_sets(start)
+                            x_train, y_train, x_test, y_test = generate_sets(start, one_hot=one_hot)
                             score_after_training_net, model = gf.train_test_neural_net_architecture(
                                 x_train, y_train,
                                 x_test, y_test,
@@ -222,4 +198,5 @@ if __name__ == "__main__":
         total_num_parameters = [int(x) for x in sys.argv[1:][0].split(",")]
         runner = int(sys.argv[1:][1])
         thread = int(sys.argv[1:][2])
-        run_num_patterns(total_num_parameters=total_num_parameters, runner=runner, thread=thread)
+        one_hot = bool(sys.argv[1:][2])
+        run_num_patterns(total_num_parameters=total_num_parameters, runner=runner, thread=thread, one_hot=one_hot)
