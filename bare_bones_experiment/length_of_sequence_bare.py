@@ -71,23 +71,6 @@ x, y, y_unscaled = zip(*single_list)
 x = numpy.asarray(x)
 y = numpy.asarray(y)
 
-#
-# length_ = 50
-#
-# x = [0] * length_
-# y = [0] * length_
-#
-# possible = []
-# for i in range(50):
-#     k = random.randint(1, 5)
-#     possible.append(k)
-#     set_of_nums = random.sample([1, 2] * length_, (length_ - k)) + [3] * k
-#     random.shuffle(set_of_nums)
-#     x[i] = numpy.array(set_of_nums).reshape(-1, 1).astype(np.float32)
-#     y[i] = numpy.array(1. / k).astype(np.float32)
-#
-# x = numpy.array(x)
-# y = numpy.array(y)
 
 
 inp = Input(shape=(None, 1))

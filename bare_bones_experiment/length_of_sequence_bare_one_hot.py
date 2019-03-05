@@ -54,7 +54,7 @@ max_count = 3
 
 sequence_len = max_count
 
-for i in range(500):
+for i in range(100):
     k = i % max_count + 1
     print(k)
     set_of_nums = random.sample([0]*sequence_len,(sequence_len-k)) + [1]*k
@@ -63,16 +63,31 @@ for i in range(500):
     y.append([1/k])
     y_unscaled.append(k)
 
-single_list = list(zip(x, y, y_unscaled))
-random.shuffle(single_list)
+one_hot = True
+if one_hot:
+    training_set = list(zip(x, np.asarray(pd.get_dummies(y_unscaled))))*100
+    test_set = list(zip(x, np.asarray(pd.get_dummies(y_unscaled))))*10
+else:
+    training_set = list(zip(x, y))*10
+    test_set = list(zip(x, y))
 
-x, y, y_unscaled = zip(*single_list)
+random.shuffle(training_set)
+random.shuffle(test_set)
+
+x_train, y_train = zip(*training_set)
+x_test, y_test = zip(*test_set)
 
 
+x_train = list(x_train)
+y_train = list(y_train)
+x_train = numpy.asarray(x_train)
+y_train = numpy.asarray(y_train)
 
-x = numpy.asarray(x)
-y = numpy.asarray(y)
-y = numpy.asarray(pd.get_dummies(y_unscaled))
+
+x_test = list(x_test)
+y_test = list(y_test)
+x_test = numpy.asarray(x_test)
+y_test = numpy.asarray(y_test)
 
 
 

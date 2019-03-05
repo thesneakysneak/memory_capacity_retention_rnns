@@ -26,87 +26,77 @@ def convert_to_closest(predicted_value, possible_values):
     return min(possible_values, key=lambda x: abs(x - predicted_value))
 
 
-def generate_count_set(sequence_length_=100, max_count=10, total_num_patterns=100):
-    x = []
-    y = []
-    #
-    for i in range(total_num_patterns):
-        k = i % max_count + 1
-        set_of_nums = random.sample([0.0] * sequence_length_, (sequence_length_- k)) + [1.0] * k
-        random.shuffle(set_of_nums)
-        x.append([[i] for i in set_of_nums])
-        y.append([1 / k])
-    #
-    single_list = list(zip(x, y))
-    random.shuffle(single_list)
-    x, y = zip(*single_list)
-    #
-
-    x = list(x)
-    y = list(y)
-
-    x = numpy.asarray(x)
-    y = numpy.asarray(y)
-    return x, y
-
-
-def generate_count_set_one_hot(sequence_length_=100, max_count=10, total_num_patterns=100):
+def generate_count_set(sequence_length_=100, max_count=10, total_num_patterns=100, one_hot=False):
     x = []
     y = []
     y_unscaled = []
-    #
-    for i in range(total_num_patterns):
+
+
+    for i in range(max_count):
         k = i % max_count + 1
-        set_of_nums = random.sample([0.0] * sequence_length_,
-                                    (sequence_length_- k)) + [1.0] * k
+        print(k)
+        set_of_nums = random.sample([0] * sequence_length_, (sequence_length_ - k)) + [1] * k
         random.shuffle(set_of_nums)
         x.append([[i] for i in set_of_nums])
         y.append([1 / k])
         y_unscaled.append(k)
-    #
 
-    single_list = list(zip(x, y, y_unscaled))
-    random.shuffle(single_list)
-    x, y, y_unscaled = zip(*single_list)
-    #
+    one_hot = True
+    if one_hot:
+        training_set = list(zip(x, np.asarray(pd.get_dummies(y_unscaled)))) * total_num_patterns
+        test_set = list(zip(x, np.asarray(pd.get_dummies(y_unscaled)))) * int(total_num_patterns/10)
+    else:
+        training_set = list(zip(x, y)) * total_num_patterns
+        test_set = list(zip(x, y)) * int(total_num_patterns/10)
 
-    x = list(x)
-    y = list(y)
-    y_unscaled = list(y_unscaled)
-    
-    x = numpy.asarray(x)
-    y = numpy.asarray(y)
+    random.shuffle(training_set)
+    random.shuffle(test_set)
 
-    y = numpy.asarray(pd.get_dummies(y_unscaled))
-    return x, y
+    x_train, y_train = zip(*training_set)
+    x_test, y_test = zip(*test_set)
+
+    x_train = list(x_train)
+    y_train = list(y_train)
+    x_train = numpy.asarray(x_train)
+    y_train = numpy.asarray(y_train)
+
+    x_test = list(x_test)
+    y_test = list(y_test)
+    x_test = numpy.asarray(x_test)
+    y_test = numpy.asarray(y_test)
+
+    return x_train, y_train, x_test, y_test
 
 
-def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0):
+def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0, one_hot=False):
     sequence_length = 1000
     x_train, y_train = generate_count_set(sequence_length_=sequence_length,
                                           max_count=max_count,
-                                          total_num_patterns=300)  # generate_sets(50)
+                                          total_num_patterns=300,
+                                          one_hot=one_hot)  # generate_sets(50)
     x_test, y_test = generate_count_set(sequence_length_=sequence_length,
                                         max_count=max_count,
-                                        total_num_patterns=300)
+                                        total_num_patterns=300, one_hot=one_hot)
 
     result = gf.train_test_neural_net_architecture(x_train, y_train,
                                                    x_test, y_test,
                                                    nodes_in_layer=nodes_in_layer,
                                                    nodes_in_out_layer=1,
-                                                   nn_type=nn_type, activation_func=activation_func,
+                                                   nn_type=nn_type,
+                                                   activation_func=activation_func,
                                                    verbose=1)
 
     return result
 
 
-def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
+def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=False):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
-    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.BIDIRECTIONAL_RNN, const.BIDIRECTIONAL_LSTM, const.BIDIRECTIONAL_GRU]  # "jordan_rnn" const.JORDAN_RNN
+    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN,
+                     const.BIDIRECTIONAL_RNN, const.BIDIRECTIONAL_LSTM, const.BIDIRECTIONAL_GRU]  # "jordan_rnn" const.JORDAN_RNN
 
     logfile_location = "danny_masters"
-    logfile = logfile_location + "/" + str(thread) + "_" + str(runner) + "_longest_sequence.log"
+    logfile = logfile_location + "/" + str(thread) + "_" + str(runner) + "_" + str(one_hot) + "_longest_sequence.log"
     logfile = os.path.abspath(logfile)
 
     if not os.path.exists(logfile):
@@ -147,10 +137,20 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1):
                                            parameters=parameters,
                                            nodes_in_layer=str(nodes_in_layer)):
                         while (smallest_not_retained - largest_retained) > 1:
-                            score_after_training_net, model = run_experiment(max_count=start,
-                                                                             nodes_in_layer=nodes_in_layer,
-                                                                             nn_type=nn_type,
-                                                                             activation_func=activation_func)
+                            x_train, y_train, x_test, y_test = generate_count_set(sequence_length_=100,
+                                                                                  max_count=start,
+                                                                                  total_num_parameters=100,
+                                                                                  one_hot=one_hot)
+                            score_after_training_net, model = gf.train_test_neural_net_architecture(
+                                x_train, y_train,
+                                x_test, y_test,
+                                nodes_in_layer=nodes_in_layer,
+                                nodes_in_out_layer=y_test.shape[1],
+                                nn_type=nn_type,
+                                activation_func=activation_func,
+                                verbose=1,
+                                one_hot=one_hot)
+
                             #
                             if score_after_training_net > 0.98:
                                 print("   -> ", start)
