@@ -93,7 +93,7 @@ y_test = numpy.asarray(y_test)
 
 inp = Input(shape=(None, 1))
 ls = LSTM(10, activation="sigmoid")(inp)
-output = Dense(y.shape[1])(ls)
+output = Dense(y_test.shape[1])(ls)
 model = Model(inputs=[inp], outputs=[output])
 
 model.compile(optimizer="adam", loss='mse' )
@@ -106,15 +106,15 @@ model.compile(optimizer="adam", loss='mse' )
 
 # one_hot_stop = EarlyStopByF1OneHot()
 
-model.fit(x, y, validation_split=0.1, batch_size=10, epochs=1000)
+model.fit(x_train, y_train, validation_split=0.1, batch_size=10, epochs=1000)
 
-y_predicted = model.predict(x)
+y_predicted = model.predict(x_test)
 
 for i in range(y_predicted.shape[0]):
     p = np.argmax(y_predicted[i])+1
-    y_e = np.argmax(y[i])+1
+    y_e = np.argmax(y_test[i])+1
     print(p, y_predicted[i],
-          y_e, y[i], (y_e == p),
+          y_e, y_test[i], (y_e == p),
           y_unscaled[i])
     # print( "     ", y_predicted[i][0], y[i], y_unscaled[i])
 
