@@ -16,6 +16,7 @@ import experiment_constants as const
 import recurrent_models
 import generic_functions as gf
 
+from keras import backend as K
 
 def true_accuracy(y_predict, y_true):
     y_predict_unscaled = [round(x) for x in y_predict]
@@ -204,6 +205,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
                             nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained)
                                             + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found;" \
                                     + str(model) + ";" +str(model.history.epoch[-1]))
+                        K.clear_session()
                     else:
                         print("Already ran", str(nn_type), str(activation_func),str(parameters), str(nodes_in_layer))
 

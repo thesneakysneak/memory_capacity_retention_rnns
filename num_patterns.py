@@ -7,7 +7,7 @@ import numpy as np
 from keras import Input, Model
 from keras.callbacks import ReduceLROnPlateau
 from keras.layers import Dense, SimpleRNN, GRU, Concatenate, LSTM
-
+from keras import backend as K
 import experiment_constants as const
 import recurrent_models
 import generic_functions as gf
@@ -176,6 +176,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=Fa
                                         nodes_in_layer) + ";" + str(largest_retained) + ";" + str(
                                         smallest_not_retained) + ";" + str(model.count_params()) + ";" + str(
                                         model.history.epoch[-1]))
+                        K.clear_session()
                     else:
                         print("Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))
 
