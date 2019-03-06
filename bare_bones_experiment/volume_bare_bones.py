@@ -61,31 +61,6 @@ max_count = 3
 sequence_len = max_count
 num_elements_to_count = 4
 
-for n in range(1, num_elements_to_count+1):
-    for i in range(100):
-        k = i % max_count + 1
-        x_temp = []
-        y_temp = []
-        y_temp_unscaled = []
-        for n_1 in range(1, num_elements_to_count+1):
-            if n_1 == n:
-                x_temp.extend([n_1/num_elements_to_count]*k)
-                y_temp.extend([k/max_count])
-                y_temp_unscaled.extend([k])
-            elif (n_1 == (n+1) or (n == num_elements_to_count and n_1 == 1)) and (max_count-k+1) != 0:
-                x_temp.extend([n_1 / num_elements_to_count] * (max_count-k+1))
-                y_temp.extend([1 / (max_count-k+1)])
-                y_temp_unscaled.extend([(max_count-k+1)])
-
-            else:
-                x_temp.extend([n_1 / num_elements_to_count] * (1))
-                y_temp.extend([1 / max_count])
-                y_temp_unscaled.extend([1])
-
-        x.append(x_temp)
-        y.append(y_temp)
-        y_unscaled.append(y_temp_unscaled)
-
 
 from itertools import permutations
 
@@ -108,11 +83,11 @@ for p in perm:
     x.append(x_temp)
     y.append(y_temp)
 
-one_hot = True
+one_hot = False
 if one_hot:
     y_temp = []
     for i in y:
-        y_temp.append(pd.get_dummies(i).values.reshape(-1,1))
+        y_temp.append(pd.get_dummies(i).values.reshape(-1,))
     y = y_temp
     training_set = list(zip(x, y))*100
     test_set = list(zip(x, y))*10
