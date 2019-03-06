@@ -110,8 +110,12 @@ for p in perm:
 
 one_hot = True
 if one_hot:
-    training_set = list(zip(x, np.asarray(pd.get_dummies(y_unscaled))))*100
-    test_set = list(zip(x, np.asarray(pd.get_dummies(y_unscaled))))*10
+    y_temp = []
+    for i in y:
+        y_temp.append(pd.get_dummies(i).values.reshape(-1,1))
+    y = y_temp
+    training_set = list(zip(x, y))*100
+    test_set = list(zip(x, y))*10
 else:
     training_set = list(zip(x, y))*10
     test_set = list(zip(x, y))
