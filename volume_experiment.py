@@ -74,24 +74,26 @@ def generate_volume_set(sequence_length_=3000, max_count=10, total_num_patterns=
     return x_train, y_train, x_test, y_test
 
 
-def run_experiment(max_count=2, max_elements_to_count=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0):
+def run_experiment(max_count=2, max_elements_to_count=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0, one_hot=False):
     sequence_length = 3000
     x_train, y_train, x_test, y_test = generate_volume_set(sequence_length_=sequence_length,
                                            max_count=max_count,
                                            total_num_patterns=100,
-                                           total_num_to_count=max_elements_to_count)  # generate_sets(50)
+                                           total_num_to_count=max_elements_to_count,
+                                                       one_hot=one_hot)  # generate_sets(50)
 
 
     result , model= gf.train_test_neural_net_architecture(x_train, y_train,
                                        x_test, y_test,
                                        nodes_in_layer=nodes_in_layer, nodes_in_out_layer=max_elements_to_count,
                                        nn_type=nn_type, activation_func=activation_func,
-                                       verbose=1)
+                                       verbose=1,
+                                      one_hot=one_hot)
 
     return result, model
 
 
-def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_elements_to_count=1):
+def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_elements_to_count=1,one_hot=False):
     """
     Function searches for the maximum length that can be counted for the given number of elements that need to be counted
     :param parameters:
@@ -112,7 +114,8 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
                                                   max_elements_to_count=max_elements_to_count,
                                                   nodes_in_layer=nodes_in_layer,
                                                   nn_type=nn_type,
-                                                  activation_func=activation_func)
+                                                  activation_func=activation_func,
+                                                         one_hot=one_hot)
         print("Score", score_after_training_net)
         #
         if score_after_training_net > 0.98:
@@ -138,14 +141,14 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
     return score_after_training_net, largest_retained, smallest_not_retained, model
 
 
-def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
+def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=False):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
     network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.BIDIRECTIONAL_RNN, const.BIDIRECTIONAL_LSTM,
                      const.BIDIRECTIONAL_GRU]  # "jordan_rnn" const.JORDAN_RNN
 
     logfile_location = "danny_masters"
-    logfile = logfile_location + "/" + str(thread) + "_" + str(runner) + "_volume_experiment.log"
+    logfile = logfile_location + "/" + str(thread) + "_" + str(runner)  + "_" + str(one_hot)+ "_volume_experiment.log"
     logfile = os.path.abspath(logfile)
     print(logfile)
     if not os.path.exists(logfile):
@@ -196,7 +199,8 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1):
                                                                                                                                 parameters=parameters,
                                                                                                                                     nn_type=nn_type,
                                                                                                                                     activation_func=activation_func,
-                                                                                                                                    max_elements_to_count=start,)
+                                                                                                                                    max_elements_to_count=start,
+                                                                                                                                   one_hot=one_hot)
 
                             print(" ==================================== ", score_after_training_net)
                             #
