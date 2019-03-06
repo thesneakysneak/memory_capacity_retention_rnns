@@ -21,55 +21,74 @@ def true_accuracy(y_predict, y_true):
     y_predict_unscaled = [round(x) for x in y_predict]
     return r2_score(y_predict_unscaled, y_true)
 
-def generate_volume_set(sequence_length_=3000, max_count=10, total_num_patterns=100, total_num_to_count=10):
+def generate_volume_set(sequence_length_=3000, max_count=10, total_num_patterns=100, total_num_to_count=10, one_hot = False):
+    from itertools import permutations
+
+    ordered_elements = [i / (total_num_to_count + 1) for i in range(1, total_num_to_count + 1)]
+    perm = permutations(ordered_elements)
+    perm = list(perm)
+
     x = []
     y = []
-    # TODO Validate this
-    assert max_count*total_num_to_count < sequence_length_
-    for i in range(total_num_patterns):
-        random_lengths = [random.randint(1, max_count) for p in range(total_num_to_count)]
-        k = sum(random_lengths)
-        array_to_add = []
-        for l in range(total_num_to_count):
-            array_to_add.extend([(l+3)/max_count]*random_lengths[l])
+    for p in perm:
+        x_temp = []
+        y_temp = []
+        i = max_count
+        for e in p:
+            x_temp.extend([[e]] * i)
+            if i > 1:
+                i -= 1
+        for e in ordered_elements:
+            y_temp.append(x_temp.count([e]))
+        x.append(x_temp)
+        y.append(y_temp)
 
-        set_of_nums = random.sample([1.0/max_count] * sequence_length_,
-                                    (sequence_length_ - k)) + array_to_add
-        random.shuffle(set_of_nums)
-        x.append(numpy.array(set_of_nums).reshape(-1, 1).astype(np.float32))
-        y.append(numpy.array([1. / p for p in random_lengths]).astype(np.float32))
-    #
-    single_list = list(zip(x, y))
-    random.shuffle(single_list)
-    x, y = zip(*single_list)
 
-    x = list(x)
-    y = list(y)
+    if one_hot:
+        y_temp = []
+        for i in y:
+            y_temp.append(pd.get_dummies(i).values.reshape(-1, ))
+        y = y_temp
+        training_set = list(zip(x, y)) * total_num_patterns
+        test_set = list(zip(x, y)) * int(total_num_patterns*0.30)
+    else:
+        training_set = list(zip(x, y)) * total_num_patterns
+        test_set = list(zip(x, y))* int(total_num_patterns*0.30)
 
-    #
-    x = numpy.array(x)
-    y = numpy.array(y)
-    return x, y
+    random.shuffle(training_set)
+    random.shuffle(test_set)
+
+    x_train, y_train = zip(*training_set)
+    x_test, y_test = zip(*test_set)
+
+    x_train = list(x_train)
+    y_train = list(y_train)
+    x_train = numpy.asarray(x_train)
+    y_train = numpy.asarray(y_train)
+
+    x_test = list(x_test)
+    y_test = list(y_test)
+    x_test = numpy.asarray(x_test)
+    y_test = numpy.asarray(y_test)
+
+    return x_train, y_train, x_test, y_test
 
 
 def run_experiment(max_count=2, max_elements_to_count=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0):
     sequence_length = 3000
-    x_train, y_train = generate_volume_set(sequence_length_=sequence_length,
+    x_train, y_train, x_test, y_test = generate_volume_set(sequence_length_=sequence_length,
                                            max_count=max_count,
                                            total_num_patterns=100,
                                            total_num_to_count=max_elements_to_count)  # generate_sets(50)
-    x_test, y_test = generate_volume_set(sequence_length_=sequence_length,
-                                         max_count=max_count,
-                                         total_num_patterns=100,
-                                         total_num_to_count=max_elements_to_count)
 
-    result = gf.train_test_neural_net_architecture(x_train, y_train,
+
+    result , model= gf.train_test_neural_net_architecture(x_train, y_train,
                                        x_test, y_test,
                                        nodes_in_layer=nodes_in_layer, nodes_in_out_layer=max_elements_to_count,
                                        nn_type=nn_type, activation_func=activation_func,
                                        verbose=1)
 
-    return result
+    return result, model
 
 
 def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_elements_to_count=1):
