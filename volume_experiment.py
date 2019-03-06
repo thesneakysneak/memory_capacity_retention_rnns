@@ -1,5 +1,4 @@
 
-# https://machinelearningmastery.com/sequence-prediction-problems-learning-lstm-recurrent-neural-networks/
 import sys
 
 import numpy
