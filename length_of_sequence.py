@@ -71,7 +71,7 @@ def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_fun
     sequence_length = 1000
     x_train, y_train, x_test, y_test  = generate_count_set(sequence_length_=sequence_length,
                                           max_count=max_count,
-                                          total_num_patterns=300,
+                                          total_num_patterns=1000,
                                           one_hot=one_hot)  # generate_sets(50)
 
 

@@ -40,11 +40,11 @@ if __name__ == "__main__":
         runner = 4
         runner = sys.argv[1:][0]
         print("runner ", runner)
-    for runner in range(1, 4):
+    for runner in range(0, 1):
         random.seed(1000)
         total_num_parameters = gf.divisible_by_all(9)
         print(total_num_parameters)
-        total_num_parameters = gf.get_runner_experiments(int(runner), total_num_parameters, num_workers=3)
+        total_num_parameters = gf.get_runner_experiments(int(runner), total_num_parameters, num_workers=1)
         print(str(total_num_parameters).strip(), total_num_parameters[0])
         if total_num_parameters[0] is None or total_num_parameters[0] == "":
             total_num_parameters = total_num_parameters[1:]
@@ -88,27 +88,24 @@ if __name__ == "__main__":
 
         command_str = 'bash -c "python3 num_patterns.py ' + \
                       str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
-                      + ' ' + str(runner) + ' ' + str(100) + ' ' + str(False) + '" & '
-        print("starting ", command_str)
-        # os.system(command_str)
-        # time.sleep(5)
-
-        command_str = 'bash -c "python3 num_patterns.py ' + \
-                      str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
                       + ' ' + str(runner) + ' ' + str(100) + ' ' + str(True) + '" & '
         print("starting ", command_str)
         # os.system(command_str)
         # time.sleep(5)
 
+
+
+
         command_str = 'bash -c "python3 volume_experiment.py ' + \
                       str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
-                      + ' ' + str(runner) + ' ' + str(100) + '" & '
+                      + ' ' + str(runner) + ' ' + str(100) + ' ' + str(True) + '" & '
         # print("starting ", command_str)
         # os.system(command_str)
 
-        command_str = 'bash -c "python3 num_patterns_one_hot.py ' + \
+
+        command_str = 'bash -c "python3 volume_experiment.py ' + \
                       str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
-                      + ' ' + str(runner) + ' ' + str(100) + '" & '
+                      + ' ' + str(runner) + ' ' + str(100) + ' ' + str(False) + + '" & '
         print("starting ", command_str)
         # os.system(command_str)
         # time.sleep(5)
