@@ -41,7 +41,6 @@ def generate_count_set(sequence_length_=100, max_count=10, total_num_patterns=10
         y.append([1 / k])
         y_unscaled.append(k)
 
-    one_hot = True
     if one_hot:
         training_set = list(zip(x, np.asarray(pd.get_dummies(y_unscaled)))) * total_num_patterns
         test_set = list(zip(x, np.asarray(pd.get_dummies(y_unscaled)))) * int(total_num_patterns/10)
@@ -70,13 +69,11 @@ def generate_count_set(sequence_length_=100, max_count=10, total_num_patterns=10
 
 def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0, one_hot=False):
     sequence_length = 1000
-    x_train, y_train = generate_count_set(sequence_length_=sequence_length,
+    x_train, y_train, x_test, y_test  = generate_count_set(sequence_length_=sequence_length,
                                           max_count=max_count,
                                           total_num_patterns=300,
                                           one_hot=one_hot)  # generate_sets(50)
-    x_test, y_test = generate_count_set(sequence_length_=sequence_length,
-                                        max_count=max_count,
-                                        total_num_patterns=300, one_hot=one_hot)
+
 
     result = gf.train_test_neural_net_architecture(x_train, y_train,
                                                    x_test, y_test,
@@ -141,7 +138,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1, one_h
                         while (smallest_not_retained - largest_retained) > 1:
                             x_train, y_train, x_test, y_test = generate_count_set(sequence_length_=100,
                                                                                   max_count=start,
-                                                                                  total_num_parameters=100,
+                                                                                  total_num_patterns=100,
                                                                                   one_hot=one_hot)
                             score_after_training_net, model = gf.train_test_neural_net_architecture(
                                 x_train, y_train,
