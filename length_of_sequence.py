@@ -208,6 +208,11 @@ if __name__ == "__main__":
         total_num_parameters = [int(x) for x in sys.argv[1:][0].split(",")]
         runner = int(sys.argv[1:][1])
         thread = int(sys.argv[1:][2])
-        run_length_experiment(total_num_parameters=total_num_parameters, runner=runner, thread=thread)
+        one_hot = False
+        if sys.argv[1:][3] == "False":
+            one_hot = False
+        else:
+            one_hot = True
+        run_length_experiment(total_num_parameters=total_num_parameters, runner=runner, thread=thread, one_hot=one_hot)
     else:
         sample()
