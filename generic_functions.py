@@ -320,7 +320,8 @@ def train_test_neural_net_architecture(x_train, y_train,
         #                            patience=200,
         #                            verbose=0, mode='auto')
 
-
+    if batch_size < 1:
+        batch_size = 1
     model = Model(inputs=[inp], outputs=[output])
     model.compile(optimizer='adam', loss='mean_squared_error')
     model.fit(x_train, y_train,

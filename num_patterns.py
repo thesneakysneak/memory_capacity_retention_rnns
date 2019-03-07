@@ -106,7 +106,9 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=Fa
     if not os.path.exists(logfile):
         f = open(logfile, "w")
         f.write(
-            "nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;model_params;num_epochs\n")
+            "nn_type;activation_func;parameters;nodes_in_layer;"
+            +"largest_retained;smallest_not_retained;model_params;"
+            +"num_epochs;model_score;highest_F1\n")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO)
@@ -172,12 +174,13 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=Fa
                             print(" largest_retained", largest_retained)
                             print(" score", score_after_training_net)
 
-                        logging.log(logging.INFO,
-                                    str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                                        nodes_in_layer) + ";" + str(largest_retained) + ";" + str(
-                                        smallest_not_retained) + ";" + str(model.count_params()) + ";" + str(
-                                        model.history.epoch[-1]))
-                        K.clear_session()
+                            logging.log(logging.INFO,
+                                        str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                                            nodes_in_layer) + ";" + str(largest_retained) + ";" + str(
+                                            smallest_not_retained) + ";" + str(model.count_params()) + ";" + str(
+                                            model.history.epoch[-1]) + ";" + str(model.history.history) +";"+str(score_after_training_net))
+
+                            K.clear_session()
                     else:
                         print("Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))
 
@@ -200,5 +203,8 @@ if __name__ == "__main__":
         total_num_parameters = [int(x) for x in sys.argv[1:][0].split(",")]
         runner = int(sys.argv[1:][1])
         thread = int(sys.argv[1:][2])
-        one_hot = bool(sys.argv[1:][2])
-        run_num_patterns(total_num_parameters=total_num_parameters, runner=runner, thread=thread, one_hot=one_hot)
+        one_hot = bool(sys.argv[1:][3])
+        print("one_hot", one_hot)
+        run_num_patterns(total_num_parameters=total_num_parameters,
+                         runner=runner, thread=thread,
+                         one_hot=one_hot)

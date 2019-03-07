@@ -6,7 +6,7 @@ from keras.callbacks import ReduceLROnPlateau
 from keras.models import Model
 from keras.layers import *
 from sklearn.metrics import r2_score
-
+import pandas as pd
 import logging
 import os
 import random
@@ -43,17 +43,20 @@ def generate_volume_set(sequence_length_=3000, max_count=10, total_num_patterns=
         x.append(x_temp)
         y.append(y_temp)
 
-
+    n = 1
+    if len(x) < 100:
+        n = 10
     if one_hot:
         y_temp = []
         for i in y:
             y_temp.append(pd.get_dummies(i).values.reshape(-1, ))
         y = y_temp
-        training_set = list(zip(x, y)) * total_num_patterns
-        test_set = list(zip(x, y)) * int(total_num_patterns*0.30)
+
+        training_set = list(zip(x, y))*n
+        test_set = list(zip(x, y)) *n
     else:
-        training_set = list(zip(x, y)) * total_num_patterns
-        test_set = list(zip(x, y))* int(total_num_patterns*0.30)
+        training_set = list(zip(x, y)) *n
+        test_set = list(zip(x, y)) *n
 
     random.shuffle(training_set)
     random.shuffle(test_set)
@@ -85,7 +88,8 @@ def run_experiment(max_count=2, max_elements_to_count=2, nodes_in_layer=2, nn_ty
 
     result , model= gf.train_test_neural_net_architecture(x_train, y_train,
                                        x_test, y_test,
-                                       nodes_in_layer=nodes_in_layer, nodes_in_out_layer=max_elements_to_count,
+                                       nodes_in_layer=nodes_in_layer,
+                                       nodes_in_out_layer=y_train.shape[1],
                                        nn_type=nn_type, activation_func=activation_func,
                                        verbose=1,
                                       one_hot=one_hot)
@@ -106,7 +110,7 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
     prev = 1
     steps = 0
     score_after_training_net = 0.0
-    smallest_not_retained = 30
+    smallest_not_retained = 8
     largest_retained = 0
     model = None
     while (smallest_not_retained - largest_retained) > 1:
@@ -135,9 +139,14 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
         print(" largest_retained", largest_retained)
         print(" score", score_after_training_net)
 
-    logging.log(logging.INFO, str(nn_type) + "," + str(activation_func) + "," + str(parameters) + "," + str(
-        nodes_in_layer) + "," + str(max_elements_to_count) + "," + str(max_elements_to_count)
-                + str(largest_retained) + "," + str(smallest_not_retained) + ",processing")
+        logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+            nodes_in_layer) + ";" + str(max_elements_to_count) + ";" + str(max_elements_to_count)
+                    + str(largest_retained) + ";" + str(smallest_not_retained) + ";"
+                    +str(model.history.epoch[-1])+ ";"
+                    + str(model.history.history) +";"
+                    +str(score_after_training_net) +";processing")
+        K.clear_session()
+
     return score_after_training_net, largest_retained, smallest_not_retained, model
 
 
@@ -154,7 +163,8 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=F
     if not os.path.exists(logfile):
         f = open(logfile, "w")
         f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;"
-                                    + ";largest_len_retained;smallest_len_not_retained;status;model_params;num_epochs\n")
+                        + ";largest_len_retained;smallest_len_not_retained;status;model_params;"
+                            + "num_epochs;model_score;highest_F1\n")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO, format='%(message)s')
@@ -186,7 +196,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=F
                 for activation_func in activation_functions:
                     start = 1
                     prev = 0
-                    smallest_not_retained = 10
+                    smallest_not_retained = 8
                     smallest_len_not_retained = 0
                     largest_len_retained = 0
                     largest_retained = 0
@@ -223,11 +233,12 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=F
                             print(" length to count largest_retained", largest_len_retained)
                             print(" score", score_after_training_net)
 
-                        logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                            logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
                             nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained)
                                             + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found;" \
-                                    + str(model) + ";" +str(model.history.epoch[-1]))
-                        K.clear_session()
+                                    + str(model) + ";" +str(model.history.epoch[-1])+ ";"
+                                        + str(model.history.history) +";"+str(score_after_training_net))
+                            K.clear_session()
                     else:
                         print("Already ran", str(nn_type), str(activation_func),str(parameters), str(nodes_in_layer))
 
