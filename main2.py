@@ -3,7 +3,6 @@ import random
 import sys
 import generic_functions as gf
 import num_patterns as num_pat
-import num_patterns_one_hot as num_pat_one_hot
 import length_of_sequence as length_exp
 import volume_experiment as vol_exp
 import threading
@@ -65,15 +64,15 @@ if __name__ == "__main__":
                       str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
                       + ' ' + str(runner) + ' ' + str(100) + ' ' + str(False) + '" & '
         print("starting ", command_str)
-        # os.system(command_str)
-        # time.sleep(5)
+        os.system(command_str)
+        time.sleep(5)
 
         command_str = 'bash -c "python3 length_of_sequence.py ' + \
                       str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
                       + ' ' + str(runner) + ' ' + str(100) + ' ' + str(True) + '" & '
         print("starting ", command_str)
-        # os.system(command_str)
-        # time.sleep(5)
+        os.system(command_str)
+        time.sleep(5)
 
 
 
@@ -83,15 +82,15 @@ if __name__ == "__main__":
                       str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
                       + ' ' + str(runner) + ' ' + str(100) + ' ' + str(False) + '" & '
         print("starting ", command_str)
-        # os.system(command_str)
-        # time.sleep(5)
+        os.system(command_str)
+        time.sleep(5)
 
         command_str = 'bash -c "python3 num_patterns.py ' + \
                       str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
                       + ' ' + str(runner) + ' ' + str(100) + ' ' + str(True) + '" & '
         print("starting ", command_str)
-        # os.system(command_str)
-        # time.sleep(5)
+        os.system(command_str)
+        time.sleep(5)
 
 
 
@@ -99,16 +98,16 @@ if __name__ == "__main__":
         command_str = 'bash -c "python3 volume_experiment.py ' + \
                       str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
                       + ' ' + str(runner) + ' ' + str(100) + ' ' + str(True) + '" & '
-        # print("starting ", command_str)
-        # os.system(command_str)
+        print("starting ", command_str)
+        os.system(command_str)
 
 
         command_str = 'bash -c "python3 volume_experiment.py ' + \
                       str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
-                      + ' ' + str(runner) + ' ' + str(100) + ' ' + str(False) + + '" & '
+                      + ' ' + str(runner) + ' ' + str(100) + ' ' + str(False) + '" & '
         print("starting ", command_str)
-        # os.system(command_str)
-        # time.sleep(5)
+        os.system(command_str)
+        time.sleep(5)
 
         # while True:
         #     time.sleep(10)
