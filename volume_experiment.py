@@ -196,9 +196,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=F
                 for activation_func in activation_functions:
                     start = 1
                     prev = 0
-                    smallest_not_retained = 8
-                    smallest_len_not_retained = 0
-                    largest_len_retained = 0
+                    smallest_not_retained = 10
                     largest_retained = 0
                     print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
                     if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
