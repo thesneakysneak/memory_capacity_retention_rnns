@@ -64,50 +64,50 @@ if __name__ == "__main__":
                       str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
                       + ' ' + str(runner) + ' ' + str(100) + ' ' + str(False) + '" & '
         print("starting ", command_str)
-        os.system(command_str)
-        time.sleep(5)
-
-        command_str = 'bash -c "python3 length_of_sequence.py ' + \
-                      str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
-                      + ' ' + str(runner) + ' ' + str(100) + ' ' + str(True) + '" & '
-        print("starting ", command_str)
-        os.system(command_str)
-        time.sleep(5)
-
-
-
-
-
-        command_str = 'bash -c "python3 num_patterns.py ' + \
-                      str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
-                      + ' ' + str(runner) + ' ' + str(100) + ' ' + str(False) + '" & '
-        print("starting ", command_str)
-        os.system(command_str)
-        time.sleep(5)
-
-        command_str = 'bash -c "python3 num_patterns.py ' + \
-                      str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
-                      + ' ' + str(runner) + ' ' + str(100) + ' ' + str(True) + '" & '
-        print("starting ", command_str)
-        os.system(command_str)
-        time.sleep(5)
-
-
-
-
-        command_str = 'bash -c "python3 volume_experiment.py ' + \
-                      str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
-                      + ' ' + str(runner) + ' ' + str(100) + ' ' + str(True) + '" & '
-        print("starting ", command_str)
-        os.system(command_str)
-
-
-        command_str = 'bash -c "python3 volume_experiment.py ' + \
-                      str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
-                      + ' ' + str(runner) + ' ' + str(100) + ' ' + str(False) + '" & '
-        print("starting ", command_str)
-        os.system(command_str)
-        time.sleep(5)
+        # os.system(command_str)
+        # time.sleep(5)
+        #
+        # command_str = 'bash -c "python3 length_of_sequence.py ' + \
+        #               str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
+        #               + ' ' + str(runner) + ' ' + str(100) + ' ' + str(True) + '" & '
+        # print("starting ", command_str)
+        # os.system(command_str)
+        # time.sleep(5)
+        #
+        #
+        #
+        #
+        #
+        # command_str = 'bash -c "python3 num_patterns.py ' + \
+        #               str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
+        #               + ' ' + str(runner) + ' ' + str(100) + ' ' + str(False) + '" & '
+        # print("starting ", command_str)
+        # os.system(command_str)
+        # time.sleep(5)
+        #
+        # command_str = 'bash -c "python3 num_patterns.py ' + \
+        #               str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
+        #               + ' ' + str(runner) + ' ' + str(100) + ' ' + str(True) + '" & '
+        # print("starting ", command_str)
+        # os.system(command_str)
+        # time.sleep(5)
+        #
+        #
+        #
+        #
+        # command_str = 'bash -c "python3 volume_experiment.py ' + \
+        #               str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
+        #               + ' ' + str(runner) + ' ' + str(100) + ' ' + str(True) + '" & '
+        # print("starting ", command_str)
+        # os.system(command_str)
+        #
+        #
+        # command_str = 'bash -c "python3 volume_experiment.py ' + \
+        #               str(total_num_parameters).replace("[ ", "").replace("[", "").replace("]", "").replace(" ", ",") \
+        #               + ' ' + str(runner) + ' ' + str(100) + ' ' + str(False) + '" & '
+        # print("starting ", command_str)
+        # os.system(command_str)
+        # time.sleep(5)
 
         # while True:
         #     time.sleep(10)
