@@ -199,7 +199,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=F
                     start = 1
                     prev = 0
                     smallest_num_patterns_not_retained = 10
-                    largest_num_patterns_retained = 0
+                    largest_num_patterns_retained = 1
                     print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
                     if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
                                            parameters=parameters,
@@ -210,7 +210,9 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=F
                                                                                                                                     nn_type=nn_type,
                                                                                                                                     activation_func=activation_func,
                                                                                                                                     max_elements_to_count=start,
-                                                                                                                                   one_hot=one_hot)
+                                                                                                                                   one_hot=one_hot,
+                                                                                                                                   largest_len_retained=start,
+                                                                                                                                   smallest_len_not_retained=smallest_num_patterns_not_retained)
 
                             print(" ==================================== ", score_after_training_net)
                             #
@@ -233,12 +235,12 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=F
                             print(" length to count largest_retained", largest_len_retained)
                             print(" score", score_after_training_net)
 
-                            logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                            nodes_in_layer) + ";" + str(largest_num_patterns_retained) + ";" + str(smallest_num_patterns_not_retained)
-                                            + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found;" \
-                                    + str(model) + ";" +str(model.history.epoch[-1])+ ";"
-                                        + str(model.history.history) +";"+str(score_after_training_net))
-                            K.clear_session()
+                        logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                        nodes_in_layer) + ";" + str(largest_num_patterns_retained) + ";" + str(smallest_num_patterns_not_retained)
+                                        + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found;" \
+                                + str(model) + ";" +str(model.history.epoch[-1])+ ";"
+                                    + str(model.history.history) +";"+str(score_after_training_net))
+                        K.clear_session()
                     else:
                         print("Already ran", str(nn_type), str(activation_func),str(parameters), str(nodes_in_layer))
 
