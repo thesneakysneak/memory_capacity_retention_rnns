@@ -271,13 +271,6 @@ class SimpleJordanRNNCell(SimpleRNNCell):
         # Jordan specific implementation
         self.next_layer = next_layer
 
-        self.go_backwards = None
-
-        # https://github.com/keras-team/keras/blob/e24625095a33a5c9a2d016018203938e9bb2ccbf/keras/backend/tensorflow_backend.py#L2680
-        if kwargs:
-            if "go_backwards" in kwargs.keys():
-                self.go_backwards = kwargs["go_backwards"]
-
     def build(self, input_shape):
         self.kernel = self.add_weight(shape=(input_shape[-1], self.units),
                                       name='kernel',
@@ -285,8 +278,9 @@ class SimpleJordanRNNCell(SimpleRNNCell):
                                       regularizer=self.kernel_regularizer,
                                       constraint=self.kernel_constraint)
 
-        self.output_layer_kernel = self.add_weight(shape=(self.next_layer.shape[-1].value, self.units),
-                                                       name='jordan_kernel',
+        if self.next_layer:
+            self.output_layer_kernel = self.add_weight(shape=(self.next_layer.shape[-1].value, self.units),
+                                                           name='jordan_kernel',
                                                        initializer=self.kernel_initializer,
                                                        regularizer=self.kernel_regularizer,
                                                        constraint=self.kernel_constraint)
@@ -338,16 +332,16 @@ class SimpleJordanRNNCell(SimpleRNNCell):
             prev_output *= rec_dp_mask
 
         # Jordan specific output calculation
-        # if self.next_layer != None:
-        print("Jordan activate", prev_output.shape, self.output_layer_kernel.shape, self.next_layer, keras.backend.batch_dot(self.next_layer,
-                                                                                         self.output_layer_kernel,
-                                                                                         axes=None) )
-        output = h + K.dot(prev_output, self.recurrent_kernel) + keras.backend.batch_dot(self.next_layer,
-                                                                                         self.output_layer_kernel,
-                                                                                         axes=None)  # K.dot()
-        # else:
-        #     print("Jordan not activate")
-        #     output = h + K.dot(prev_output, self.recurrent_kernel)
+        if self.next_layer != None:
+            print("Jordan activate", prev_output.shape, self.output_layer_kernel.shape, self.next_layer, keras.backend.batch_dot(self.next_layer,
+                                                                                             self.output_layer_kernel,
+                                                                                             axes=None) )
+            output = h + K.dot(prev_output, self.recurrent_kernel) + keras.backend.batch_dot(self.next_layer,
+                                                                                             self.output_layer_kernel,
+                                                                                             axes=None)  # K.dot()
+        else:
+            print("Jordan not activate")
+            output = h + K.dot(prev_output, self.recurrent_kernel)
 
         if self.activation is not None:
             output = self.activation(output)
@@ -394,9 +388,7 @@ class SimpleJordanRNNCell(SimpleRNNCell):
                       keras.constraints.serialize(self.recurrent_constraint),
                   'bias_constraint': constraints.serialize(self.bias_constraint),
                   'dropout': self.dropout,
-                  'recurrent_dropout': self.recurrent_dropout,
-                  'go_backwards' : self.go_backwards
-                  }
+                  'recurrent_dropout': self.recurrent_dropout}
         base_config = super(SimpleRNNCell, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
@@ -445,16 +437,16 @@ def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer,
 
     output_layer = keras.Input(tensor=n, name="next_jordan_val_1")
 
-    # with CustomObjectScope({'SimpleJordanRNNCell': SimpleJordanRNNCell}):
-    cells = [Bidirectional(SimpleJordanRNNCell(previous_layer.get_shape()[-1].value, next_layer=output_layer, activation=activation) , return_sequences=True) for _ in
+    cells = [SimpleJordanRNNCell(previous_layer.get_shape()[-1].value, next_layer=output_layer, activation=activation) for _ in
              range(num_nodes_in_layer)]
 
-    layer = cells
+    with CustomObjectScope({'SimpleJordanRNNCell': SimpleJordanRNNCell}):
+        layer = Bidirectional(keras.layers.RNN(cells))
     hidden_layer = layer(previous_layer)
 
     return hidden_layer, cells
 
-def build_jordan_model(architecture=[],activation="tanh", bidirectional=False):
+def build_jordan_model(architecture=[],activation="tanh"):
     input_layer = keras.Input((None, architecture[0]))
     layers = []
     cells_list = []
@@ -466,7 +458,6 @@ def build_jordan_model(architecture=[],activation="tanh", bidirectional=False):
                                                    num_nodes_in_layer=architecture[i],
                                                    num_nodes_next_layer=architecture[i+1], activation=activation)
             layers.append(layer)
-
             cells_list.append(cells)
         else:
             layer, cells = build_jordan_layer(previous_layer=next_middle_layer,
@@ -474,7 +465,6 @@ def build_jordan_model(architecture=[],activation="tanh", bidirectional=False):
                                                    num_nodes_next_layer=architecture[i+1], activation=activation)
 
             layers.append(layer)
-
             cells_list.append(cells)
 
 
@@ -488,6 +478,7 @@ def build_jordan_model(architecture=[],activation="tanh", bidirectional=False):
 
     model = Model([input_layer], output_layer)
     model.Callback_var = JordanCallback(layers=layers, cells_list=cells_list, output_layer=output_layer, model=model)
+    #TODO Test this
     return model
 
 
@@ -557,35 +548,12 @@ def test2():
 
     num_cells_in_hidden_layer = 10
 
-    #
-    # model = build_jordan_model([num_inputs, num_cells_in_hidden_layer, num_output_layer_outputs], activation="tanh")
-    #
-    # model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
-    #
-    # callbacks = [
-    #     LambdaCallback(on_epoch_end=lambda batch, logs: print(model.layers[1].cell.cells[0].get_next_layer_output())),
-    #     model.Callback_var,
-    #     ModelCheckpoint(
-    #         filepath="weights/weights-improvement-{epoch:02d}.hdf5",
-    #         monitor="val_loss", verbose=1, save_best_only=False),
-    #     ReduceLROnPlateau(monitor='loss', factor=0.2, patience=5, min_lr=0.00000001)
-    # ]
-    #
-    # model.fit(x, y, epochs=100, verbose=1, callbacks=callbacks, batch_size=10)
-    #
-    # y_predict = model.predict(x)
-    # for i in range(len(y)):
-    #     print(x[i], y_predict[i], y[i])
-    #
-
-
-    # Bidir Jordan
-    model = build_jordan_model([num_inputs, num_cells_in_hidden_layer, num_output_layer_outputs], activation="tanh", bidirectional=True)
+    model = build_jordan_model([num_inputs, num_cells_in_hidden_layer, num_output_layer_outputs], activation="tanh")
 
     model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
     callbacks = [
-        LambdaCallback(on_epoch_end=lambda batch, logs: print(model.layers[1].cell.cells[0].get_next_layer_output())),
+        # LambdaCallback(on_epoch_end=lambda batch, logs: print(model.layers[1].cell.cells[0].get_next_layer_output())),
         model.Callback_var,
         ModelCheckpoint(
             filepath="weights/weights-improvement-{epoch:02d}.hdf5",
