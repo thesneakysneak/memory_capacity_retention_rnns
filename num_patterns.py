@@ -3,6 +3,7 @@ import os
 import random
 import sys
 
+import gc
 import numpy as np
 from keras import Input, Model
 from keras.callbacks import ReduceLROnPlateau
@@ -124,12 +125,12 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=Fa
 
     num_divisible_by_all = 5040
     model = None
-    for i in range(0, 5):
+    for additional_layers in range(0, 5):
         for parameters in total_num_parameters:
             for nn_type in network_types:
                 nodes_in_layer = gf.get_nodes_in_layer(parameters, nn_type)
                 extra_layers = []
-                for n in range(0, i):
+                for n in range(0, additional_layers):
                     extra_layers.append(gf.get_nodes_in_layer(num_divisible_by_all, nn_type))
                 extra_layers.append(nodes_in_layer)
                 nodes_in_layer = extra_layers
@@ -153,7 +154,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=Fa
                                 nodes_in_out_layer=y_test.shape[1],
                                 nn_type=nn_type,
                                 activation_func=activation_func,
-                                verbose=1,
+                                verbose=0,
                                 one_hot=one_hot)
 
                             #
@@ -181,6 +182,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=Fa
                                             model.history.epoch[-1]) + ";" + str(model.history.history) +";"+str(score_after_training_net))
 
                             K.clear_session()
+                            gc.collect()
                     else:
                         print("Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))
 

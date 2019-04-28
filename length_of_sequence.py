@@ -136,7 +136,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1, one_h
                                            parameters=parameters,
                                            nodes_in_layer=str(nodes_in_layer)):
                         while (smallest_not_retained - largest_retained) > 1:
-                            x_train, y_train, x_test, y_test = generate_count_set(sequence_length_=100,
+                            x_train, y_train, x_test, y_test = generate_count_set(sequence_length_=50,
                                                                                   max_count=start,
                                                                                   total_num_patterns=100,
                                                                                   one_hot=one_hot)
@@ -147,7 +147,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1, one_h
                                 nodes_in_out_layer=y_test.shape[1],
                                 nn_type=nn_type,
                                 activation_func=activation_func,
-                                verbose=1,
+                                verbose=0,
                                 one_hot=one_hot)
 
                             #

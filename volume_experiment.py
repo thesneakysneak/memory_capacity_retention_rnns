@@ -78,7 +78,7 @@ def generate_volume_set(sequence_length_=3000, max_count=10, total_num_patterns=
 
 
 def run_experiment(max_count=2, max_elements_to_count=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0, one_hot=False):
-    sequence_length = 3000
+    sequence_length = 50
     x_train, y_train, x_test, y_test = generate_volume_set(sequence_length_=sequence_length,
                                            max_count=max_count,
                                            total_num_patterns=100,
@@ -91,13 +91,14 @@ def run_experiment(max_count=2, max_elements_to_count=2, nodes_in_layer=2, nn_ty
                                        nodes_in_layer=nodes_in_layer,
                                        nodes_in_out_layer=y_train.shape[1],
                                        nn_type=nn_type, activation_func=activation_func,
-                                       verbose=1,
+                                       verbose=0,
                                       one_hot=one_hot)
 
     return result, model
 
 
-def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_elements_to_count=1,one_hot=False):
+def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_elements_to_count=1,
+                    one_hot=False, largest_len_retained=0, smallest_len_not_retained=0):
     """
     Function searches for the maximum length that can be counted for the given number of elements that need to be counted
     :param parameters:
@@ -110,7 +111,7 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
     prev = 1
     steps = 0
     score_after_training_net = 0.0
-    smallest_not_retained = 8
+    smallest_not_retained = 10
     largest_retained = 0
     model = None
     while (smallest_not_retained - largest_retained) > 1:
@@ -139,12 +140,13 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
         print(" largest_retained", largest_retained)
         print(" score", score_after_training_net)
 
-        logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-            nodes_in_layer) + ";" + str(max_elements_to_count) + ";" + str(max_elements_to_count)
-                    + str(largest_retained) + ";" + str(smallest_not_retained) + ";"
-                    +str(model.history.epoch[-1])+ ";"
-                    + str(model.history.history) +";"
-                    +str(score_after_training_net) +";processing")
+
+        logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" +
+                    str(nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained) + ";"
+                    + str(largest_len_retained) + ";" + str(smallest_len_not_retained) +";processing;"
+                    + str(model) + ";" + str(model.history.epoch[-1]) + ";"
+                    + str(model.history.history) + ";" + str(score_after_training_net))
+
         K.clear_session()
 
     return score_after_training_net, largest_retained, smallest_not_retained, model
@@ -172,11 +174,11 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=F
     start = 2
     prev = 1
     steps = 0
-    smallest_not_retained = 3000
+    smallest_num_patterns_not_retained = 3000
     smallest_len_not_retained = 0
     largest_len_retained = 0
     max_elements_to_count = 10
-    largest_retained = 0
+    largest_num_patterns_retained = 0
     nodes_in_layer = 2
     activation_func = "sigmoid"
     nn_type = "lstm"
@@ -196,13 +198,13 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=F
                 for activation_func in activation_functions:
                     start = 1
                     prev = 0
-                    smallest_not_retained = 10
-                    largest_retained = 0
+                    smallest_num_patterns_not_retained = 10
+                    largest_num_patterns_retained = 0
                     print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
                     if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
                                            parameters=parameters,
                                            nodes_in_layer=str(nodes_in_layer)):
-                        while (smallest_not_retained - largest_retained) > 1:
+                        while (smallest_num_patterns_not_retained - largest_num_patterns_retained) > 1:
                             score_after_training_net, largest_len_retained, smallest_len_not_retained, model =  search_in_range(   nodes_in_layer=nodes_in_layer,
                                                                                                                                 parameters=parameters,
                                                                                                                                     nn_type=nn_type,
@@ -214,25 +216,25 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=F
                             #
                             if score_after_training_net > 0.98:
                                 print("   -> ", start)
-                                largest_retained = start
+                                largest_num_patterns_retained = start
                                 prev = start
                                 start *= 2
-                                if start > smallest_not_retained:
-                                    start = smallest_not_retained - 1
+                                if start > smallest_num_patterns_not_retained:
+                                    start = smallest_num_patterns_not_retained - 1
                             else:
                                 print("   <- ", start)
-                                smallest_not_retained = start
+                                smallest_num_patterns_not_retained = start
                                 start = int((start + prev) / 2)
                             print(" Current Num patterns", start)
-                            print(" diff", str((smallest_not_retained - largest_retained)))
-                            print(" max elements to count smallest_not_retained", smallest_not_retained)
-                            print(" max elements to count largest_retained", largest_retained)
+                            print(" diff", str((smallest_num_patterns_not_retained - largest_num_patterns_retained)))
+                            print(" max elements to count smallest_not_retained", smallest_num_patterns_not_retained)
+                            print(" max elements to count largest_retained", largest_num_patterns_retained)
                             print(" length to count smallest_not_retained", smallest_len_not_retained)
                             print(" length to count largest_retained", largest_len_retained)
                             print(" score", score_after_training_net)
 
                             logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                            nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained)
+                            nodes_in_layer) + ";" + str(largest_num_patterns_retained) + ";" + str(smallest_num_patterns_not_retained)
                                             + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found;" \
                                     + str(model) + ";" +str(model.history.epoch[-1])+ ";"
                                         + str(model.history.history) +";"+str(score_after_training_net))
