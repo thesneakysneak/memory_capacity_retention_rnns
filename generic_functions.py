@@ -192,8 +192,13 @@ def determine_ave_f_score(predicted, test, f_only=True):
     return fscore/len(predicted)
 
 def get_nodes_in_layer(num_parameters, nn_type):
+
     if nn_type == const.BIDIRECTIONAL_RNN:
         return int(num_parameters / 6)
+    if nn_type == const.JORDAN_RNN:
+        return int(num_parameters / 3) # will do this post experiment as it is differs based off of the output
+    if nn_type == const.BIDIRECTIONAL_JORDAN_RNN:
+        return int(num_parameters / 6) # will do this post experiment as it is differs based off of the output
     if nn_type == const.BIDIRECTIONAL_GRU:
         return int(num_parameters / 21)
     if nn_type == const.BIDIRECTIONAL_LSTM:

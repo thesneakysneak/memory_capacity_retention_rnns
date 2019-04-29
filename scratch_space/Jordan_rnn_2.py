@@ -431,7 +431,7 @@ class JordanCallback(Callback):
 
 
 
-def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer, activation="tanh"):
+def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer, activation="tanh", bidirectional=False):
     # n = tf.placeholder(tf.float32, shape=(None, num_nodes_next_layer), name="next_jordan_val")
     n = K.variable([[-1.0] * num_nodes_next_layer], name="next_jordan_val")
 
@@ -440,13 +440,16 @@ def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer,
     cells = [SimpleJordanRNNCell(previous_layer.get_shape()[-1].value, next_layer=output_layer, activation=activation) for _ in
              range(num_nodes_in_layer)]
 
-    with CustomObjectScope({'SimpleJordanRNNCell': SimpleJordanRNNCell}):
-        layer = Bidirectional(keras.layers.RNN(cells))
+    if bidirectional:
+        with CustomObjectScope({'SimpleJordanRNNCell': SimpleJordanRNNCell}):
+            layer = Bidirectional(keras.layers.RNN(cells))
+    else:
+        layer = keras.layers.RNN(cells)
     hidden_layer = layer(previous_layer)
 
     return hidden_layer, cells
 
-def build_jordan_model(architecture=[],activation="tanh"):
+def build_jordan_model(architecture=[],activation="tanh", bidirectional=False):
     input_layer = keras.Input((None, architecture[0]))
     layers = []
     cells_list = []
@@ -456,13 +459,13 @@ def build_jordan_model(architecture=[],activation="tanh"):
             # input layer
             layer, cells = build_jordan_layer(previous_layer=input_layer,
                                                    num_nodes_in_layer=architecture[i],
-                                                   num_nodes_next_layer=architecture[i+1], activation=activation)
+                                                   num_nodes_next_layer=architecture[i+1], activation=activation, bidirectional=bidirectional)
             layers.append(layer)
             cells_list.append(cells)
         else:
             layer, cells = build_jordan_layer(previous_layer=next_middle_layer,
                                                    num_nodes_in_layer=architecture[i],
-                                                   num_nodes_next_layer=architecture[i+1], activation=activation)
+                                                   num_nodes_next_layer=architecture[i+1], activation=activation, bidirectional=bidirectional)
 
             layers.append(layer)
             cells_list.append(cells)

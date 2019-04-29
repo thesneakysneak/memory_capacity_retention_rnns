@@ -90,7 +90,9 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1, one_h
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
     network_types = [const.LSTM, const.GRU, const.ELMAN_RNN,
-                     const.BIDIRECTIONAL_RNN, const.BIDIRECTIONAL_LSTM, const.BIDIRECTIONAL_GRU]  # "jordan_rnn" const.JORDAN_RNN
+                     const.BIDIRECTIONAL_RNN, const.BIDIRECTIONAL_LSTM, const.BIDIRECTIONAL_GRU
+                    , const.JORDAN_RNN, const.BIDIRECTIONAL_JORDAN_RNN
+                     ]  # "jordan_rnn" const.JORDAN_RNN
 
     logfile_location = "danny_masters"
     logfile = logfile_location + "/" + str(thread) + "_" + str(runner) + "_" + str(one_hot) + "_longest_sequence.log"
