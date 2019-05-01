@@ -400,7 +400,7 @@ class JordanCallback(Callback):
         self.model = model
     # customize your behavior
     def on_batch_end(self, batch, logs=None):
-        print("Assign", len(self.layers), len(self.cells_list))
+        # print("Assign", len(self.layers), len(self.cells_list))
         # print(K.eval(self.output_layer).reshape(-1,1,1).shape)
         # print(self.output_layer.dtype, K.eval(self.model.outputs[0]))
 
@@ -433,11 +433,12 @@ class JordanCallback(Callback):
 
 def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer, activation="tanh", bidirectional=False):
     # n = tf.placeholder(tf.float32, shape=(None, num_nodes_next_layer), name="next_jordan_val")
-    n = K.variable([[-1.0] * num_nodes_next_layer], name="next_jordan_val")
+    n = K.variable([[-1.0] * num_nodes_next_layer],)
 
-    output_layer = keras.Input(tensor=n, name="next_jordan_val_1")
+    output_layer = keras.Input(tensor=n)
 
-    cells = [SimpleJordanRNNCell(previous_layer.get_shape()[-1].value, next_layer=output_layer, activation=activation) for _ in
+    cells = [SimpleJordanRNNCell(previous_layer.get_shape()[-1].value,
+                                 next_layer=output_layer, activation=activation) for _ in
              range(num_nodes_in_layer)]
 
     if bidirectional:
@@ -459,22 +460,25 @@ def build_jordan_model(architecture=[],activation="tanh", bidirectional=False):
             # input layer
             layer, cells = build_jordan_layer(previous_layer=input_layer,
                                                    num_nodes_in_layer=architecture[i],
-                                                   num_nodes_next_layer=architecture[i+1], activation=activation, bidirectional=bidirectional)
+                                                   num_nodes_next_layer=architecture[i+1],
+                                              activation=activation, bidirectional=bidirectional)
             layers.append(layer)
             cells_list.append(cells)
         else:
             layer, cells = build_jordan_layer(previous_layer=next_middle_layer,
                                                    num_nodes_in_layer=architecture[i],
-                                                   num_nodes_next_layer=architecture[i+1], activation=activation, bidirectional=bidirectional)
+                                                   num_nodes_next_layer=architecture[i+1],
+                                              activation=activation, bidirectional=bidirectional)
 
             layers.append(layer)
             cells_list.append(cells)
 
 
     output_layer = CustomDense(architecture[-1])(layers[-1])
-    for l in range(len(layers) - 1):
-        for i in cells_list[l]:
-            K.tf.assign(i.next_layer, layers[l + 1])
+    # This is done in the build jordan layer
+    # for l in range(len(layers) - 1):
+    #     for i in cells_list[l]:
+    #         K.tf.assign(i.next_layer, layers[l + 1])
 
 
     # K.tf.assign(cells_list[-1][0].next_layer, output_layer)
@@ -489,8 +493,8 @@ def test():
     num_inputs = 1
     num_output_layer_outputs = 1
     x = [random.random() for i in range(2)]
-    y = [random.random() for i in range(2)]
-    x = y
+    y = [[random.random() , random.random()] for i in range(2)]
+
 
     x = numpy.array(x).reshape(-1, 1, 1).astype(np.float32)
     y = numpy.array(y).reshape(-1, 1).astype(np.float32)
@@ -522,9 +526,9 @@ def test():
 
     callbacks = [
         model.Callback_var,
-        ModelCheckpoint(
-            filepath="weights/weights-improvement-{epoch:02d}.hdf5",
-            monitor="val_loss", verbose=1, save_best_only=False),
+        # ModelCheckpoint(
+        #     filepath="weights/weights-improvement-{epoch:02d}.hdf5",
+        #     monitor="val_loss", verbose=1, save_best_only=False),
         ReduceLROnPlateau(monitor='loss', factor=0.5, patience=2)
     ]
 
@@ -541,26 +545,45 @@ def test2():
     # K.set_session(sess)
 
     num_inputs = 1
-    num_output_layer_outputs = 1
+    num_output_layer_outputs = 2
     x = [random.random() for i in range(100)]
-    y = [random.random() for i in range(100)]
+    y = [[random.random() , random.random()] for i in range(100)]
     # x = y
 
     x = numpy.array(x).reshape(-1, 1, 1).astype(np.float32)
-    y = numpy.array(y).reshape(-1, 1).astype(np.float32)
+    y = numpy.array(y).reshape(-1, 2).astype(np.float32)
 
     num_cells_in_hidden_layer = 10
+    #
+    # model = build_jordan_model([num_inputs, num_cells_in_hidden_layer, num_output_layer_outputs], activation="tanh")
+    #
+    # model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
+    #
+    # callbacks = [
+    #     # LambdaCallback(on_epoch_end=lambda batch, logs: print(model.layers[1].cell.cells[0].get_next_layer_output())),
+    #     model.Callback_var,
+    #     # ModelCheckpoint(
+    #     #     filepath="weights/weights-improvement-{epoch:02d}.hdf5",
+    #     #     monitor="val_loss", verbose=1, save_best_only=False),
+    #     ReduceLROnPlateau(monitor='loss', factor=0.2, patience=5, min_lr=0.00000001)
+    # ]
+    #
+    # model.fit(x, y, epochs=100, verbose=1, callbacks=callbacks, batch_size=10)
+    #
+    # y_predict = model.predict(x)
+    # for i in range(len(y)):
+    #     print(x[i], y_predict[i], y[i])
 
-    model = build_jordan_model([num_inputs, num_cells_in_hidden_layer, num_output_layer_outputs], activation="tanh")
+    model = build_jordan_model([num_inputs, 3,3,3, num_output_layer_outputs], activation="tanh", bidirectional=True)
 
     model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
     callbacks = [
         # LambdaCallback(on_epoch_end=lambda batch, logs: print(model.layers[1].cell.cells[0].get_next_layer_output())),
         model.Callback_var,
-        ModelCheckpoint(
-            filepath="weights/weights-improvement-{epoch:02d}.hdf5",
-            monitor="val_loss", verbose=1, save_best_only=False),
+        # ModelCheckpoint(
+        #     filepath="weights/weights-improvement-{epoch:02d}.hdf5",
+        #     monitor="val_loss", verbose=1, save_best_only=False),
         ReduceLROnPlateau(monitor='loss', factor=0.2, patience=5, min_lr=0.00000001)
     ]
 
@@ -572,8 +595,7 @@ def test2():
 
 
 
-
-test2()
+# test2()
 
 
 
