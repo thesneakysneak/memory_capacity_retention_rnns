@@ -484,4 +484,4 @@ def load_check_point(thread, runner, experiment):
 
     return parameters, architecture, neural_network_type
 
-test_train_nn()
+# test_train_nn()
