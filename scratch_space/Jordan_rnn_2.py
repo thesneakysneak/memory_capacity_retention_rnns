@@ -333,14 +333,14 @@ class SimpleJordanRNNCell(SimpleRNNCell):
 
         # Jordan specific output calculation
         if self.next_layer != None:
-            print("Jordan activate", prev_output.shape, self.output_layer_kernel.shape, self.next_layer, keras.backend.batch_dot(self.next_layer,
-                                                                                             self.output_layer_kernel,
-                                                                                             axes=None) )
+            # print("Jordan activate", prev_output.shape, self.output_layer_kernel.shape, self.next_layer, keras.backend.batch_dot(self.next_layer,
+            #                                                                                  self.output_layer_kernel,
+            #                                                                                  axes=None) )
             output = h + K.dot(prev_output, self.recurrent_kernel) + keras.backend.batch_dot(self.next_layer,
                                                                                              self.output_layer_kernel,
                                                                                              axes=None)  # K.dot()
         else:
-            print("Jordan not activate")
+            # print("Jordan not activate")
             output = h + K.dot(prev_output, self.recurrent_kernel)
 
         if self.activation is not None:
