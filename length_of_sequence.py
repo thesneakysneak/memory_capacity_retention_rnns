@@ -14,6 +14,8 @@ import experiment_constants as const
 import recurrent_models
 import generic_functions as gf
 import pandas as pd
+import tensorflow as tf
+
 length_of_series = 1000
 
 
@@ -89,9 +91,10 @@ def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_fun
 def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=False):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
-    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN,
+    network_types = [
+                        const.JORDAN_RNN, const.BIDIRECTIONAL_JORDAN_RNN,
+                        const.LSTM, const.GRU, const.ELMAN_RNN,
                      const.BIDIRECTIONAL_RNN, const.BIDIRECTIONAL_LSTM, const.BIDIRECTIONAL_GRU
-                    , const.JORDAN_RNN, const.BIDIRECTIONAL_JORDAN_RNN
                      ]  # "jordan_rnn" const.JORDAN_RNN
 
     logfile_location = "danny_masters"
@@ -174,7 +177,7 @@ def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1, one_h
                                         str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
                                             nodes_in_layer) + ";" + str(largest_retained) + ";" + str(
                                             smallest_not_retained) + ";" + str(model.count_params()) + ";" + str(
-                                            model.history.epoch[-1])+ ";" + str(model.history.history) +";"+str(score_after_training_net))
+                                            model.history.epoch[-1])+ ";" + str("") +";"+str(score_after_training_net))
                             K.clear_session()
                     else:
                         print("Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))

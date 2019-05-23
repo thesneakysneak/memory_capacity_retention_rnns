@@ -483,5 +483,4 @@ def load_check_point(thread, runner, experiment):
     neural_network_type = checkpoint[2]
 
     return parameters, architecture, neural_network_type
-
 # test_train_nn()

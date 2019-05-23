@@ -17,6 +17,8 @@ import generic_functions as gf
 
 from keras import backend as K
 
+
+
 def true_accuracy(y_predict, y_true):
     y_predict_unscaled = [round(x) for x in y_predict]
     return r2_score(y_predict_unscaled, y_true)
@@ -145,7 +147,7 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
                     str(nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained) + ";"
                     + str(largest_len_retained) + ";" + str(smallest_len_not_retained) +";processing;"
                     + str(model) + ";" + str(model.history.epoch[-1]) + ";"
-                    + str(model.history.history) + ";" + str(score_after_training_net))
+                    + str("") + ";" + str(score_after_training_net))
 
         K.clear_session()
 
@@ -155,8 +157,10 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
 def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=False):
     activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
                             "linear"]
-    network_types = [const.LSTM, const.GRU, const.ELMAN_RNN, const.BIDIRECTIONAL_RNN, const.BIDIRECTIONAL_LSTM,
-                     const.BIDIRECTIONAL_GRU, const.JORDAN_RNN, const.BIDIRECTIONAL_JORDAN_RNN]  # "jordan_rnn" const.JORDAN_RNN
+    network_types = [const.JORDAN_RNN, const.BIDIRECTIONAL_JORDAN_RNN,
+                    const.LSTM, const.GRU,
+                     const.ELMAN_RNN, const.BIDIRECTIONAL_RNN, const.BIDIRECTIONAL_LSTM,
+                     const.BIDIRECTIONAL_GRU]  # "jordan_rnn" const.JORDAN_RNN
 
     logfile_location = "danny_masters"
     logfile = logfile_location + "/" + str(thread) + "_" + str(runner)  + "_" + str(one_hot)+ "_volume_experiment.log"
@@ -239,7 +243,7 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=F
                         nodes_in_layer) + ";" + str(largest_num_patterns_retained) + ";" + str(smallest_num_patterns_not_retained)
                                         + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found;" \
                                 + str(model) + ";" +str(model.history.epoch[-1])+ ";"
-                                    + str(model.history.history) +";"+str(score_after_training_net))
+                                    + str("") +";"+str(score_after_training_net))
                         K.clear_session()
                     else:
                         print("Already ran", str(nn_type), str(activation_func),str(parameters), str(nodes_in_layer))
