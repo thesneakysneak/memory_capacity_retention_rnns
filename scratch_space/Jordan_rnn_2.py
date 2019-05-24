@@ -451,7 +451,7 @@ def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer,
     return hidden_layer, cells
 
 def build_jordan_model(architecture=[],activation="tanh", bidirectional=False):
-    input_layer = keras.Input((None, architecture[0]))
+    input_layer = keras.Input((architecture[0], 1))
     layers = []
     cells_list = []
     next_middle_layer = None

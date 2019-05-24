@@ -345,7 +345,7 @@ def train_test_neural_net_architecture(x_train, y_train,
     if batch_size < 1:
         batch_size = 10
     model.compile(optimizer='adam', loss='mean_squared_error')
-
+    print(model.summary())
     if nn_type in [const.BIDIRECTIONAL_JORDAN_RNN, const.JORDAN_RNN]:
         model.fit(x_train, y_train,
                   validation_split=.2,
@@ -360,6 +360,7 @@ def train_test_neural_net_architecture(x_train, y_train,
                   epochs=epocs,
                   batch_size=batch_size,
                   verbose=verbose)
+    print(model.summary)
     #
     y_predict = model.predict(x_test)
     #
