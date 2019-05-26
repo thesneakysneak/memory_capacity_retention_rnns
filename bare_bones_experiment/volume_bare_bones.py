@@ -11,7 +11,7 @@ import random
 
 from generic_functions import EarlyStopByF1OneHot
 
-length_of_series = 1000
+length_of_series = 20
 
 
 def true_accuracy(y_predict, y_true):
@@ -75,11 +75,21 @@ for p in perm:
     y_temp = []
     i = max_count
     for e in p:
-        x_temp.extend([[e]]*i)
+        x_temp.append([[e]]*i)
         if i > 1:
             i -= 1
+    random.shuffle(x_temp)
+    x_temp = [[xtt] for xt in x_temp for xtt in xt]
+    dict_element_count = {}
     for e in ordered_elements:
-        y_temp.append(x_temp.count([e]))
+        dict_element_count[e] = 0
+
+    for xt in x_temp:
+        dict_element_count[xt[0][0]] = dict_element_count[xt[0][0]] + 1
+        y_temp.append([dict_element_count[xt[0][0]]/(max_count+1)])
+    print(y_temp)
+    x_temp = [xtt for xt in x_temp for xtt in xt]
+
     x.append(x_temp)
     y.append(y_temp)
 
@@ -116,8 +126,8 @@ y_test = numpy.asarray(y_test)
 
 
 inp = Input(shape=(None, 1))
-ls = LSTM(10, activation="sigmoid")(inp)
-output = Dense(y_test.shape[1])(ls)
+ls, hs = LSTM(10, activation="sigmoid", return_sequences=True)(inp)
+output = TimeDistributed(Dense(1))(ls)
 model = Model(inputs=[inp], outputs=[output])
 
 model.compile(optimizer="adam", loss='mse' )

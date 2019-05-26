@@ -23,7 +23,7 @@ def true_accuracy(y_predict, y_true):
     y_predict_unscaled = [round(x) for x in y_predict]
     return r2_score(y_predict_unscaled, y_true)
 
-def generate_volume_set(sequence_length_=3000, max_count=10, total_num_patterns=100, total_num_to_count=10, one_hot = False):
+def generate_volume_set(sequence_length_=3000, max_count=3, total_num_patterns=100, total_num_to_count=3, one_hot = False):
     from itertools import permutations
 
     ordered_elements = [i / (total_num_to_count + 1) for i in range(1, total_num_to_count + 1)]
@@ -41,7 +41,7 @@ def generate_volume_set(sequence_length_=3000, max_count=10, total_num_patterns=
             if i > 1:
                 i -= 1
         for e in ordered_elements:
-            y_temp.append(x_temp.count([e]))
+            y_temp.append(x_temp.count([e])/(max_count+1))
         x.append(x_temp)
         y.append(y_temp)
 
