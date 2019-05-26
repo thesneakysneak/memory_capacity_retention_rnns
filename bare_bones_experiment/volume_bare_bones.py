@@ -126,7 +126,7 @@ y_test = numpy.asarray(y_test)
 
 
 inp = Input(shape=(None, 1))
-ls, hs = LSTM(10, activation="sigmoid", return_sequences=True)(inp)
+ls  = LSTM(10, activation="sigmoid", return_sequences=True)(inp)
 output = TimeDistributed(Dense(1))(ls)
 model = Model(inputs=[inp], outputs=[output])
 
@@ -140,7 +140,7 @@ model.compile(optimizer="adam", loss='mse' )
 
 # one_hot_stop = EarlyStopByF1OneHot()
 
-model.fit(x_train, y_train, validation_split=0.1, batch_size=10, epochs=1000)
+model.fit(x_train, y_train, validation_split=0.1, batch_size=10, epochs=100)
 
 y_predicted = model.predict(x_test)
 

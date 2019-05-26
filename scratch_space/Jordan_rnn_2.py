@@ -6,6 +6,7 @@ from keras import Input, Model
 from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, Callback, LambdaCallback
 from keras.layers import SimpleRNN, Dense, Concatenate, SimpleRNNCell, constraints, regularizers, initializers, \
     activations, Bidirectional
+from keras.layers import *
 import keras
 from keras.engine.base_layer import Layer
 from keras import backend as K
@@ -412,7 +413,10 @@ class JordanCallback(Callback):
         for i in self.cells_list[-1]:
             if self.model.outputs:
                 # K.set_value(i.next_layer, np.array([[0.5]]))
-                i.set_next_layer(self.output_layer)
+                if len(self.output_layer.shape) > 2:
+                    i.set_next_layer(Flatten()(self.output_layer))
+                else:
+                    i.set_next_layer(self.output_layer)
         #         i.build((None, 1))
         #     else:
         #         print("NANI")
@@ -431,7 +435,7 @@ class JordanCallback(Callback):
 
 
 
-def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer, activation="tanh", bidirectional=False):
+def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer, activation="tanh", bidirectional=False, time_distributed=False):
     # n = tf.placeholder(tf.float32, shape=(None, num_nodes_next_layer), name="next_jordan_val")
     n = K.variable([[-1.0] * num_nodes_next_layer],)
 
@@ -443,14 +447,14 @@ def build_jordan_layer(previous_layer, num_nodes_next_layer, num_nodes_in_layer,
 
     if bidirectional:
         with CustomObjectScope({'SimpleJordanRNNCell': SimpleJordanRNNCell}):
-            layer = Bidirectional(keras.layers.RNN(cells))
+            layer = Bidirectional(keras.layers.RNN(cells), return_sequences=time_distributed)
     else:
-        layer = keras.layers.RNN(cells)
+        layer = keras.layers.RNN(cells, return_sequences=time_distributed)
     hidden_layer = layer(previous_layer)
 
     return hidden_layer, cells
 
-def build_jordan_model(architecture=[],activation="tanh", bidirectional=False):
+def build_jordan_model(architecture=[],activation="tanh", bidirectional=False, time_distributed=False):
     input_layer = keras.Input((architecture[0], 1))
     layers = []
     cells_list = []
@@ -461,20 +465,24 @@ def build_jordan_model(architecture=[],activation="tanh", bidirectional=False):
             layer, cells = build_jordan_layer(previous_layer=input_layer,
                                                    num_nodes_in_layer=architecture[i],
                                                    num_nodes_next_layer=architecture[i+1],
-                                              activation=activation, bidirectional=bidirectional)
+                                              activation=activation, bidirectional=bidirectional,
+                                              time_distributed=time_distributed)
             layers.append(layer)
             cells_list.append(cells)
         else:
             layer, cells = build_jordan_layer(previous_layer=next_middle_layer,
                                                    num_nodes_in_layer=architecture[i],
                                                    num_nodes_next_layer=architecture[i+1],
-                                              activation=activation, bidirectional=bidirectional)
+                                              activation=activation, bidirectional=bidirectional,
+                                              time_distributed=time_distributed)
 
             layers.append(layer)
             cells_list.append(cells)
 
-
-    output_layer = CustomDense(architecture[-1])(layers[-1])
+    if time_distributed:
+        output_layer = TimeDistributed(CustomDense(architecture[-1]))(layers[-1])
+    else:
+        output_layer = CustomDense(architecture[-1])(layers[-1])
     # This is done in the build jordan layer
     # for l in range(len(layers) - 1):
     #     for i in cells_list[l]:

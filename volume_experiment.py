@@ -37,11 +37,21 @@ def generate_volume_set(sequence_length_=3000, max_count=3, total_num_patterns=1
         y_temp = []
         i = max_count
         for e in p:
-            x_temp.extend([[e]] * i)
+            x_temp.append([[e]] * i)
             if i > 1:
                 i -= 1
+        random.shuffle(x_temp)
+        x_temp = [[xtt] for xt in x_temp for xtt in xt]
+        dict_element_count = {}
         for e in ordered_elements:
-            y_temp.append(x_temp.count([e])/(max_count+1))
+            dict_element_count[e] = 0
+
+        for xt in x_temp:
+            dict_element_count[xt[0][0]] = dict_element_count[xt[0][0]] + 1
+            y_temp.append([dict_element_count[xt[0][0]] / (max_count + 1)])
+        print(y_temp)
+        x_temp = [xtt for xt in x_temp for xtt in xt]
+
         x.append(x_temp)
         y.append(y_temp)
 
@@ -91,7 +101,7 @@ def run_experiment(max_count=2, max_elements_to_count=2, nodes_in_layer=2, nn_ty
     result , model= gf.train_test_neural_net_architecture(x_train, y_train,
                                        x_test, y_test,
                                        nodes_in_layer=nodes_in_layer,
-                                       nodes_in_out_layer=y_train.shape[1],
+                                       nodes_in_out_layer=y_train.shape[-1],
                                        nn_type=nn_type, activation_func=activation_func,
                                        verbose=0,
                                       one_hot=one_hot)
