@@ -1,4 +1,3 @@
-
 import sys
 
 import numpy
@@ -18,12 +17,13 @@ import generic_functions as gf
 from keras import backend as K
 
 
-
 def true_accuracy(y_predict, y_true):
     y_predict_unscaled = [round(x) for x in y_predict]
     return r2_score(y_predict_unscaled, y_true)
 
-def generate_volume_set(sequence_length_=3000, max_count=3, total_num_patterns=100, total_num_to_count=3, one_hot = False):
+
+def generate_volume_set(sequence_length_=3000, max_count=3, total_num_patterns=100, total_num_to_count=3,
+                        one_hot=False):
     from itertools import permutations
 
     ordered_elements = [i / (total_num_to_count + 1) for i in range(1, total_num_to_count + 1)]
@@ -64,11 +64,11 @@ def generate_volume_set(sequence_length_=3000, max_count=3, total_num_patterns=1
             y_temp.append(pd.get_dummies(i).values.reshape(-1, ))
         y = y_temp
 
-        training_set = list(zip(x, y))*n
-        test_set = list(zip(x, y)) *n
+        training_set = list(zip(x, y)) * n
+        test_set = list(zip(x, y)) * n
     else:
-        training_set = list(zip(x, y)) *n
-        test_set = list(zip(x, y)) *n
+        training_set = list(zip(x, y)) * n
+        test_set = list(zip(x, y)) * n
 
     random.shuffle(training_set)
     random.shuffle(test_set)
@@ -89,28 +89,32 @@ def generate_volume_set(sequence_length_=3000, max_count=3, total_num_patterns=1
     return x_train, y_train, x_test, y_test
 
 
-def run_experiment(max_count=2, max_elements_to_count=2, nodes_in_layer=2, nn_type="lstm", activation_func="sigmoid", verbose=0, one_hot=False):
+def run_experiment(max_count=2,
+                   max_elements_to_count=2, nodes_in_layer=2, nn_type="lstm",
+                   activation_func="sigmoid",
+                   optimizer="",
+                   verbose=0, one_hot=False):
     sequence_length = 50
     x_train, y_train, x_test, y_test = generate_volume_set(sequence_length_=sequence_length,
-                                           max_count=max_count,
-                                           total_num_patterns=100,
-                                           total_num_to_count=max_elements_to_count,
-                                                       one_hot=one_hot)  # generate_sets(50)
+                                                           max_count=max_count,
+                                                           total_num_patterns=100,
+                                                           total_num_to_count=max_elements_to_count,
+                                                           one_hot=one_hot)  # generate_sets(50)
 
-
-    result , model= gf.train_test_neural_net_architecture(x_train, y_train,
-                                       x_test, y_test,
-                                       nodes_in_layer=nodes_in_layer,
-                                       nodes_in_out_layer=y_train.shape[-1],
-                                       nn_type=nn_type, activation_func=activation_func,
-                                       verbose=0,
-                                      one_hot=one_hot)
+    result, model = gf.train_test_neural_net_architecture(x_train, y_train,
+                                                          x_test, y_test,
+                                                          nodes_in_layer=nodes_in_layer,
+                                                          nodes_in_out_layer=y_train.shape[-1],
+                                                          nn_type=nn_type, activation_func=activation_func,
+                                                          verbose=verbose,
+                                                          optimizer=optimizer,
+                                                          one_hot=one_hot)
 
     return result, model
 
 
 def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_elements_to_count=1,
-                    one_hot=False, largest_len_retained=0, smallest_len_not_retained=0):
+                    one_hot=False, largest_len_retained=0, smallest_len_not_retained=0, optimizer=""):
     """
     Function searches for the maximum length that can be counted for the given number of elements that need to be counted
     :param parameters:
@@ -128,10 +132,11 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
     model = None
     while (smallest_not_retained - largest_retained) > 1:
         score_after_training_net, model = run_experiment(max_count=start,
-                                                  max_elements_to_count=max_elements_to_count,
-                                                  nodes_in_layer=nodes_in_layer,
-                                                  nn_type=nn_type,
-                                                  activation_func=activation_func,
+                                                         max_elements_to_count=max_elements_to_count,
+                                                         nodes_in_layer=nodes_in_layer,
+                                                         nn_type=nn_type,
+                                                         activation_func=activation_func,
+                                                         optimizer=optimizer,
                                                          one_hot=one_hot)
         print("Score", score_after_training_net)
         #
@@ -152,12 +157,11 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
         print(" largest_retained", largest_retained)
         print(" score", score_after_training_net)
 
-
         logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" +
                     str(nodes_in_layer) + ";" + str(largest_retained) + ";" + str(smallest_not_retained) + ";"
-                    + str(largest_len_retained) + ";" + str(smallest_len_not_retained) +";processing;"
+                    + str(largest_len_retained) + ";" + str(smallest_len_not_retained) + ";processing;"
                     + str(model) + ";" + str(model.history.epoch[-1]) + ";"
-                    + str("") + ";" + str(score_after_training_net))
+                    + str("") + ";" + str(score_after_training_net) + ";" + optimizer)
 
         K.clear_session()
 
@@ -165,22 +169,22 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
 
 
 def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=False):
-    activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
-                            "linear"]
+    activation_functions = ["elu", "selu", "tanh", "sigmoid", "hard_sigmoid", "relu", "linear", "LeakyReLU"]
+
     network_types = [const.JORDAN_RNN, const.BIDIRECTIONAL_JORDAN_RNN,
-                    const.LSTM, const.GRU,
+                     const.LSTM, const.GRU,
                      const.ELMAN_RNN, const.BIDIRECTIONAL_RNN, const.BIDIRECTIONAL_LSTM,
                      const.BIDIRECTIONAL_GRU]  # "jordan_rnn" const.JORDAN_RNN
 
     logfile_location = "danny_masters"
-    logfile = logfile_location + "/" + str(thread) + "_" + str(runner)  + "_" + str(one_hot)+ "_volume_experiment.log"
+    logfile = logfile_location + "/" + str(thread) + "_" + str(runner) + "_" + str(one_hot) + "_volume_experiment.log"
     logfile = os.path.abspath(logfile)
     print(logfile)
     if not os.path.exists(logfile):
         f = open(logfile, "w")
         f.write("nn_type;activation_func;parameters;nodes_in_layer;largest_retained;smallest_not_retained;"
-                        + ";largest_len_retained;smallest_len_not_retained;status;model_params;"
-                            + "num_epochs;model_score;highest_F1\n")
+                + ";largest_len_retained;smallest_len_not_retained;status;model_params;"
+                + "num_epochs;model_score;highest_F1;optimizer\n")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO, format='%(message)s')
@@ -210,53 +214,67 @@ def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=F
                 extra_layers.append(nodes_in_layer)
                 nodes_in_layer = extra_layers
                 for activation_func in activation_functions:
-                    start = 1
-                    prev = 0
-                    smallest_num_patterns_not_retained = 10
-                    largest_num_patterns_retained = 1
-                    print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func", activation_func)
-                    if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
-                                           parameters=parameters,
-                                           nodes_in_layer=str(nodes_in_layer)):
-                        while (smallest_num_patterns_not_retained - largest_num_patterns_retained) > 1:
-                            score_after_training_net, largest_len_retained, smallest_len_not_retained, model =  search_in_range(   nodes_in_layer=nodes_in_layer,
-                                                                                                                                parameters=parameters,
-                                                                                                                                    nn_type=nn_type,
-                                                                                                                                    activation_func=activation_func,
-                                                                                                                                    max_elements_to_count=start,
-                                                                                                                                   one_hot=one_hot,
-                                                                                                                                   largest_len_retained=start,
-                                                                                                                                   smallest_len_not_retained=smallest_num_patterns_not_retained)
+                    for optimizer in const.LIST_OF_OPTIMIZERS:
 
-                            print(" ==================================== ", score_after_training_net)
-                            #
-                            if score_after_training_net > 0.98:
-                                print("   -> ", start)
-                                largest_num_patterns_retained = start
-                                prev = start
-                                start *= 2
-                                if start > smallest_num_patterns_not_retained:
-                                    start = smallest_num_patterns_not_retained - 1
-                            else:
-                                print("   <- ", start)
-                                smallest_num_patterns_not_retained = start
-                                start = int((start + prev) / 2)
-                            print(" Current Num patterns", start)
-                            print(" diff", str((smallest_num_patterns_not_retained - largest_num_patterns_retained)))
-                            print(" max elements to count smallest_not_retained", smallest_num_patterns_not_retained)
-                            print(" max elements to count largest_retained", largest_num_patterns_retained)
-                            print(" length to count smallest_not_retained", smallest_len_not_retained)
-                            print(" length to count largest_retained", largest_len_retained)
-                            print(" score", score_after_training_net)
+                        start = 1
+                        prev = 0
+                        smallest_num_patterns_not_retained = 10
+                        largest_num_patterns_retained = 1
+                        print("Thread", thread, "parameters", parameters, "nn_type", nn_type, "activation_func",
+                              activation_func)
+                        if not gf.log_contains(log_name=logfile, nn_type=nn_type,
+                                               activation_func=activation_func,
+                                               parameters=parameters,
+                                               nodes_in_layer=str(nodes_in_layer),
+                                               optimizer=optimizer):
+                            while (smallest_num_patterns_not_retained - largest_num_patterns_retained) > 1:
+                                score_after_training_net, largest_len_retained, smallest_len_not_retained, model = search_in_range(
+                                    nodes_in_layer=nodes_in_layer,
+                                    parameters=parameters,
+                                    nn_type=nn_type,
+                                    activation_func=activation_func,
+                                    max_elements_to_count=start,
+                                    one_hot=one_hot,
+                                    largest_len_retained=start,
+                                    smallest_len_not_retained=smallest_num_patterns_not_retained,
+                                    optimizer=optimizer)
 
-                        logging.log(logging.INFO, str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                        nodes_in_layer) + ";" + str(largest_num_patterns_retained) + ";" + str(smallest_num_patterns_not_retained)
-                                        + ";" + str(largest_len_retained) + ";" + str(smallest_len_not_retained)+ ";found;" \
-                                + str(model) + ";" +str(model.history.epoch[-1])+ ";"
-                                    + str("") +";"+str(score_after_training_net))
-                        K.clear_session()
-                    else:
-                        print("Already ran", str(nn_type), str(activation_func),str(parameters), str(nodes_in_layer))
+                                print(" ==================================== ", score_after_training_net)
+                                #
+                                if score_after_training_net > 0.98:
+                                    print("   -> ", start)
+                                    largest_num_patterns_retained = start
+                                    prev = start
+                                    start *= 2
+                                    if start > smallest_num_patterns_not_retained:
+                                        start = smallest_num_patterns_not_retained - 1
+                                else:
+                                    print("   <- ", start)
+                                    smallest_num_patterns_not_retained = start
+                                    start = int((start + prev) / 2)
+                                print(" Current Num patterns", start)
+                                print(
+                                " diff", str((smallest_num_patterns_not_retained - largest_num_patterns_retained)))
+                                print(
+                                " max elements to count smallest_not_retained", smallest_num_patterns_not_retained)
+                                print(" max elements to count largest_retained", largest_num_patterns_retained)
+                                print(" length to count smallest_not_retained", smallest_len_not_retained)
+                                print(" length to count largest_retained", largest_len_retained)
+                                print(" score", score_after_training_net)
+
+                            logging.log(logging.INFO,
+                                        str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                                            nodes_in_layer) + ";" + str(largest_num_patterns_retained) + ";" + str(
+                                            smallest_num_patterns_not_retained)
+                                        + ";" + str(largest_len_retained) + ";" + str(
+                                            smallest_len_not_retained) + ";found;" \
+                                        + str(model) + ";" + str(model.history.epoch[-1]) + ";"
+                                        + str("") + ";" + str(score_after_training_net) + ";" + optimizer)
+                            K.clear_session()
+                        else:
+                            print(
+                            "Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))
+
 
 def sample():
     x, y = generate_volume_set(sequence_length_=300, max_count=20, total_num_patterns=100, total_num_to_count=10)
@@ -297,11 +315,6 @@ if __name__ == "__main__":
             one_hot = False
         else:
             one_hot = True
-        print("one_hot", one_hot,  sys.argv[1:][3])
+        print("one_hot", one_hot, sys.argv[1:][3])
         run_volume_experiment(total_num_parameters=total_num_parameters,
                               runner=runner, thread=thread, one_hot=one_hot)
-
-
-
-
-

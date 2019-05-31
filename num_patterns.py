@@ -95,8 +95,13 @@ def generate_sets(num_patterns, one_hot=False):
 
 
 def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=False):
-    activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
-                            "linear"]
+    if one_hot:
+        activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid",
+                                "relu",
+                                "linear", "LeakyReLU"]
+    else:
+        activation_functions = ["elu", "selu", "tanh", "sigmoid", "hard_sigmoid", "relu", "linear", "LeakyReLU"]
+
     network_types = [const.JORDAN_RNN, const.BIDIRECTIONAL_JORDAN_RNN,
                      const.LSTM, const.GRU, const.ELMAN_RNN,
                      const.BIDIRECTIONAL_RNN, const.BIDIRECTIONAL_LSTM,
@@ -112,7 +117,7 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=Fa
         f.write(
             "nn_type;activation_func;parameters;nodes_in_layer;"
             +"largest_retained;smallest_not_retained;model_params;"
-            +"num_epochs;model_score;highest_F1\n")
+            +"num_epochs;model_score;highest_F1;optimizer\n")
         f.close()
 
     logging.basicConfig(filename=logfile, level=logging.INFO)
@@ -138,56 +143,60 @@ def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=Fa
                 extra_layers.append(nodes_in_layer)
                 nodes_in_layer = extra_layers
                 for activation_func in activation_functions:
-                    start = 5
-                    prev = 0
-                    smallest_not_retained = 30
-                    largest_retained = 0
-                    print("Thread", thread, "nodes_in_layer", nodes_in_layer, "parameters", parameters, "nn_type",
-                          nn_type, "activation_func", activation_func)
-                    if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
-                                           parameters=parameters,
-                                           nodes_in_layer=str(nodes_in_layer)):
+                    for optimizer in const.LIST_OF_OPTIMIZERS:
+                        start = 5
+                        prev = 0
+                        smallest_not_retained = 30
+                        largest_retained = 0
+                        print("Thread", thread, "nodes_in_layer", nodes_in_layer, "parameters", parameters, "nn_type",
+                              nn_type, "activation_func", activation_func, "optimizer", str(optimizer))
+                        if not gf.log_contains(log_name=logfile, nn_type=nn_type, activation_func=activation_func,
+                                               parameters=parameters,
+                                               nodes_in_layer=str(nodes_in_layer),
+                                               optimizer=str(optimizer)):
 
-                        while (smallest_not_retained - largest_retained) > 1:
-                            x_train, y_train, x_test, y_test = generate_sets(start, one_hot=one_hot)
-                            score_after_training_net, model = gf.train_test_neural_net_architecture(
-                                x_train, y_train,
-                                x_test, y_test,
-                                nodes_in_layer=nodes_in_layer,
-                                nodes_in_out_layer=y_test.shape[1],
-                                nn_type=nn_type,
-                                activation_func=activation_func,
-                                verbose=0,
-                                one_hot=one_hot)
+                            while (smallest_not_retained - largest_retained) > 1:
+                                x_train, y_train, x_test, y_test = generate_sets(start, one_hot=one_hot)
+                                score_after_training_net, model = gf.train_test_neural_net_architecture(
+                                    x_train, y_train,
+                                    x_test, y_test,
+                                    nodes_in_layer=nodes_in_layer,
+                                    nodes_in_out_layer=y_test.shape[1],
+                                    nn_type=nn_type,
+                                    activation_func=activation_func,
+                                    optimizer=optimizer,
+                                    verbose=0,
+                                    one_hot=one_hot)
 
-                            #
-                            if score_after_training_net > 0.98:
-                                print("   -> ", start)
-                                largest_retained = start
-                                prev = start
-                                start *= 2
-                                if start > smallest_not_retained:
-                                    start = smallest_not_retained - 1
-                            else:
-                                print("   <- ", start)
-                                smallest_not_retained = start
-                                start = int((start + prev) / 2)
-                            print(" Current Num patterns", start)
-                            print(" diff", str((smallest_not_retained - largest_retained)))
-                            print(" smallest_not_retained", smallest_not_retained)
-                            print(" largest_retained", largest_retained)
-                            print(" score", score_after_training_net)
+                                #
+                                if score_after_training_net > 0.98:
+                                    print("   -> ", start)
+                                    largest_retained = start
+                                    prev = start
+                                    start *= 2
+                                    if start > smallest_not_retained:
+                                        start = smallest_not_retained - 1
+                                else:
+                                    print("   <- ", start)
+                                    smallest_not_retained = start
+                                    start = int((start + prev) / 2)
+                                print(" Current Num patterns", start)
+                                print(" diff", str((smallest_not_retained - largest_retained)))
+                                print(" smallest_not_retained", smallest_not_retained)
+                                print(" largest_retained", largest_retained)
+                                print(" score", score_after_training_net)
 
-                            logging.log(logging.INFO,
-                                        str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
-                                            nodes_in_layer) + ";" + str(largest_retained) + ";" + str(
-                                            smallest_not_retained) + ";" + str(model.count_params()) + ";" + str(
-                                            model.history.epoch[-1]) + ";" + str("") +";"+str(score_after_training_net))
+                                logging.log(logging.INFO,
+                                            str(nn_type) + ";" + str(activation_func) + ";" + str(parameters) + ";" + str(
+                                                nodes_in_layer) + ";" + str(largest_retained) + ";" + str(
+                                                smallest_not_retained) + ";" + str(model.count_params()) + ";" + str(
+                                                model.history.epoch[-1]) + ";" + str("") +
+                                            ";"+str(score_after_training_net) + ";" + str(optimizer))
 
-                            K.clear_session()
-                            gc.collect()
-                    else:
-                        print("Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))
+                                K.clear_session()
+                                gc.collect()
+                        else:
+                            print("Already ran", str(nn_type), str(activation_func), str(parameters), str(nodes_in_layer))
 
 
 # if __name__ == "__main__":

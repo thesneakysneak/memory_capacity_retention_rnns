@@ -1,5 +1,5 @@
 
-
+# Networks
 LSTM="lstm"
 ELMAN_RNN="elman"
 JORDAN_RNN="jordan"
@@ -8,3 +8,13 @@ BIDIRECTIONAL_RNN="bidirelman"
 BIDIRECTIONAL_LSTM="bidirlstm"
 BIDIRECTIONAL_GRU="bidirgru"
 BIDIRECTIONAL_JORDAN_RNN="bidirjordan"
+
+
+# OPTIMIZERS
+SGD = "SGD"
+NESTEROV = "Nesterov"
+RPROP = "RPROP"
+ADAM = "Adam"
+LIST_OF_OPTIMIZERS = [ADAM, SGD, NESTEROV, RPROP]
+
+
