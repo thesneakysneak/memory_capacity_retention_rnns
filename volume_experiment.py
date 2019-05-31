@@ -169,7 +169,7 @@ def search_in_range(nodes_in_layer, parameters, nn_type, activation_func, max_el
 
 
 def run_volume_experiment(total_num_parameters=[], runner=1, thread=1, one_hot=False):
-    activation_functions = ["elu", "selu", "tanh", "sigmoid", "hard_sigmoid", "relu", "linear", "LeakyReLU"]
+    activation_functions = ["elu", "selu", "tanh", "sigmoid", "hard_sigmoid", "relu", "linear"]
 
     network_types = [const.JORDAN_RNN, const.BIDIRECTIONAL_JORDAN_RNN,
                      const.LSTM, const.GRU,
