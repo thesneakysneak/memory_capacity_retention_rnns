@@ -96,11 +96,11 @@ def generate_sets(num_patterns, one_hot=False):
 
 def run_num_patterns(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=False):
     if one_hot:
-        activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid",
+        activation_functions = ["LeakyReLU", "softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid",
                                 "relu",
-                                "linear", "LeakyReLU"]
+                                "linear"]
     else:
-        activation_functions = ["elu", "selu", "tanh", "sigmoid", "hard_sigmoid", "relu", "linear", "LeakyReLU"]
+        activation_functions = ["LeakyReLU", "elu", "selu", "tanh", "sigmoid", "hard_sigmoid", "relu", "linear"]
 
     network_types = [const.JORDAN_RNN, const.BIDIRECTIONAL_JORDAN_RNN,
                      const.LSTM, const.GRU, const.ELMAN_RNN,

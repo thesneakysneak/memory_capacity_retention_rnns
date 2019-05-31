@@ -90,10 +90,10 @@ def run_experiment(max_count=2, nodes_in_layer=2, nn_type="lstm", activation_fun
 
 def run_length_experiment(total_num_parameters=[1, 2], runner=1, thread=1, one_hot=False):
     if one_hot:
-        activation_functions = ["softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
-                                "linear", "LeakyReLU"]
+        activation_functions = ["LeakyReLU", "softmax", "elu", "selu", "softplus", "softsign", "tanh", "sigmoid", "hard_sigmoid", "relu",
+                                "linear", ]
     else:
-        activation_functions = ["elu", "selu", "tanh", "sigmoid", "hard_sigmoid", "relu", "linear", "LeakyReLU"]
+        activation_functions = [ "LeakyReLU", "elu", "selu", "tanh", "sigmoid", "hard_sigmoid", "relu", "linear"]
     network_types = [const.LSTM,
                         const.JORDAN_RNN, const.BIDIRECTIONAL_JORDAN_RNN,
                         const.GRU, const.ELMAN_RNN,
